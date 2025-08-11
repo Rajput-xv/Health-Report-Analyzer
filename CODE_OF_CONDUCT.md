@@ -90,7 +90,7 @@ The following are examples of unacceptable behaviour and may result in removal f
 If you witness or experience unacceptable behaviour or a data/privacy incident, you can report it via one of these channels:
 
 * Open a private issue titled `SECURITY` or `CONFIDENTIAL` and add the label `triage/security`. (Maintainers will restrict visibility.)
-* Email the project security contact: `security@health-report-analyzer.example`.
+* Email the project security contact: ``.
 
 When reporting:
 
@@ -105,7 +105,7 @@ Enforcement steps may include:
 
 ## Security Disclosure Process
 
-1. If you find a bug that could expose sensitive information or compromise safety, contact the security email above.
+1. If you find a bug that could expose sensitive information or compromise safety, contact the security email yash44365@gmail.com .
 2. Provide reproducible steps, affected versions, and a suggested fix if you can safely provide it.
 3. Maintainers will acknowledge receipt within a reasonable timeframe and coordinate remediation.
 
@@ -134,5 +134,3 @@ Description: [What happened? Steps to reproduce?]
 Evidence: [logs, links to PR/issue/commit hashes — avoid PHI]
 Suggested action: [what you think should happen]
 ```
-
-If you want, I can also generate a `CONTRIBUTING.md` that complements this Code of Conduct with step-by-step contribution rules, PR templates, and issue templates.
