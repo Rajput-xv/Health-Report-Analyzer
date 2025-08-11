@@ -55,10 +55,12 @@ const TrendChart = ({ data, reportId }) => {
       <div className="trend-header">
         <h3>📈 Trend Analysis</h3>
         <div className="parameter-selector">
-          <label>Select Parameter:</label>
+          <label htmlFor="param-select" style={{ marginRight: '0.5rem' }}>Select Parameter:</label>
           <select 
+            id="param-select"
             value={selectedParameter} 
             onChange={(e) => setSelectedParameter(e.target.value)}
+            style={{ padding: '0.3rem 0.6rem', borderRadius: '4px' }}
           >
             {Object.keys(data).map(param => (
               <option key={param} value={param}>{param}</option>
@@ -84,33 +86,63 @@ const TrendChart = ({ data, reportId }) => {
 
           <div className="trend-chart">
             <div className="chart-area">
-              <div className="chart-header">
-                <span>6-Month Trend</span>
-                <span className="chart-unit">({currentTrend.unit})</span>
+              <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <span>📅 6-Month Trend</span>
+                <span className="chart-unit" style={{ fontWeight: '600', color: '#555' }}>({currentTrend.unit})</span>
               </div>
-              
-              <div className="chart-points">
-                {currentTrend.data.map((point, index) => (
-                  <div key={index} className="chart-point-container">
-                    <div 
-                      className={`chart-point ${getStatusClass(point.status)}`}
-                      title={`${point.value} ${currentTrend.unit} - ${point.status}`}
-                    >
-                      <div className="point-value">{point.value}</div>
+
+              <div className="chart-points" style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
+                {currentTrend.data.map((point, index) => {
+                  const statusClass = getStatusClass(point.status);
+                  let bgColor = '#d1e7dd'; // default normal: greenish
+                  let textColor = '#0f5132';
+
+                  if (point.status === 'HIGH') {
+                    bgColor = '#f8d7da'; // reddish background
+                    textColor = '#842029';
+                  } else if (point.status === 'LOW') {
+                    bgColor = '#cff4fc'; // light blue background
+                    textColor = '#055160';
+                  } else if (point.status === 'UNKNOWN') {
+                    bgColor = '#fff3cd'; // yellow background
+                    textColor = '#664d03';
+                  }
+
+                  return (
+                    <div key={index} className="chart-point-container" style={{ textAlign: 'center', minWidth: 40 }}>
+                      <div
+                        className={`chart-point ${statusClass}`}
+                        title={`${point.value} ${currentTrend.unit} - ${point.status}`}
+                        style={{
+                          backgroundColor: bgColor,
+                          color: textColor,
+                          borderRadius: '50%',
+                          width: 36,
+                          height: 36,
+                          lineHeight: '36px',
+                          fontWeight: '700',
+                          cursor: 'default',
+                          boxShadow: '0 0 5px rgba(0,0,0,0.1)'
+                        }}
+                      >
+                        <div className="point-value">{point.value}</div>
+                      </div>
+                      <div className="point-date" style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                        {formatDate(point.date)}
+                      </div>
                     </div>
-                    <div className="point-date">{formatDate(point.date)}</div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
-              
-              <div className="chart-line">
-                <svg width="100%" height="4">
-                  <line 
-                    x1="0%" 
-                    y1="2" 
-                    x2="100%" 
-                    y2="2" 
-                    stroke="#e0e0e0" 
+
+              <div className="chart-line" style={{ marginTop: 16 }}>
+                <svg width="100%" height="4" aria-hidden="true" focusable="false">
+                  <line
+                    x1="0%"
+                    y1="2"
+                    x2="100%"
+                    y2="2"
+                    stroke="#e0e0e0"
                     strokeWidth="2"
                     strokeDasharray="5,5"
                   />
@@ -119,28 +151,77 @@ const TrendChart = ({ data, reportId }) => {
             </div>
           </div>
 
-          <div className="trend-insights">
+          <div className="trend-insights" style={{ marginTop: 24 }}>
             <h4>🔍 Insights & Recommendations</h4>
-            <div className="insights-list">
+            <div className="insights-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {currentTrend.insights && currentTrend.insights.length > 0 ? (
-                currentTrend.insights.map((insight, index) => (
-                  <div key={index} className={`insight-card ${getInsightClass(insight.type)}`}>
-                    <span className="insight-icon">{getInsightIcon(insight.type)}</span>
-                    <span className="insight-message">{insight.message}</span>
-                  </div>
-                ))
+                currentTrend.insights.map((insight, index) => {
+                  let bgColor = '#e7f3fe'; // info blue default
+                  let icon = 'ℹ️';
+
+                  if (insight.type === 'warning') {
+                    bgColor = '#fff4e5'; // amber background
+                    icon = '⚠️';
+                  } else if (insight.type === 'critical') {
+                    bgColor = '#f8d7da'; // red/pink background
+                    icon = '❗';
+                  } else if (insight.type === 'success') {
+                    bgColor = '#d1e7dd'; // green background
+                    icon = '✅';
+                  }
+
+                  return (
+                    <div
+                      key={index}
+                      className={`insight-card insight-${insight.type}`}
+                      style={{
+                        backgroundColor: bgColor,
+                        padding: '10px 14px',
+                        borderRadius: 6,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 8,
+                        color: '#333',
+                        boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+                      }}
+                    >
+                      <span className="insight-icon" aria-label={`${insight.type} icon`} role="img" style={{ fontSize: 20 }}>
+                        {icon}
+                      </span>
+                      <span className="insight-message">{insight.message}</span>
+                    </div>
+                  );
+                })
               ) : (
-                <div className="insight-card insight-info">
-                  <span className="insight-icon">📋</span>
+                <div
+                  className="insight-card insight-info"
+                  style={{
+                    backgroundColor: '#e7f3fe',
+                    padding: '10px 14px',
+                    borderRadius: 6,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 8,
+                    color: '#333',
+                    boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
+                  }}
+                >
+                  <span className="insight-icon" role="img" aria-label="info icon" style={{ fontSize: 20 }}>
+                    📋
+                  </span>
                   <span className="insight-message">No specific insights available for this parameter.</span>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="trend-disclaimer">
-            <p>⚠️ <strong>Disclaimer:</strong> Trend data includes simulated historical values for demonstration purposes. 
-            Always consult with healthcare professionals for medical advice.</p>
+          <div
+            className="trend-disclaimer"
+            style={{ marginTop: 24, fontSize: 12, color: '#7a7a7a', fontStyle: 'italic' }}
+          >
+            <p>
+              ⚠️ <strong>Disclaimer:</strong> Trend data includes simulated historical values for demonstration purposes. Always consult with healthcare professionals for medical advice.
+            </p>
           </div>
         </div>
       )}
