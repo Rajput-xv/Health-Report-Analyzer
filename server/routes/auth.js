@@ -144,7 +144,8 @@ router.post("/forgot-password", async (req, res) => {
     user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    const resetURL = `http://localhost:3000/reset-password/${resetToken}`;
+    const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
+
 
     // Send email
     const transporter = nodemailer.createTransport({
