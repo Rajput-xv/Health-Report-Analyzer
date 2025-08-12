@@ -156,25 +156,27 @@ return (
           </select>
         </div>
 
-        <button 
-          className={`btn-trends ${showTrends ? 'active' : ''}`}
-          onClick={handleToggleTrends}
-          aria-pressed={showTrends}
-          aria-label={showTrends ? 'Hide Trends' : 'Show Trends'}
-          style={{
-            backgroundColor: showTrends ? '#2563eb' : '#3b82f6',
-            color: '#fff',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: 6,
-            cursor: 'pointer',
-            fontWeight: '600',
-            boxShadow: showTrends ? '0 0 8px #2563eb' : 'none',
-            transition: 'background-color 0.3s ease'
-          }}
-        >
-          {showTrends ? '📈 Hide Trends' : '📊 Show Trends'}
-        </button>
+         <button
+    className="btn-trends"
+    style={{
+      width: '100%',
+      backgroundColor: showTrends ? '#2563eb' : '#3b82f6',
+      color: '#fff',
+      border: 'none',
+      padding: '8px',
+      borderRadius: 6,
+      cursor: 'pointer',
+      fontWeight: '600',
+      boxShadow: showTrends ? '0 0 8px #2563eb' : 'none',
+      transition: 'background-color 0.3s ease',
+      marginTop: '1rem',
+    }}
+    onClick={handleToggleTrends}
+    aria-pressed={showTrends}
+    aria-label={showTrends ? 'Hide Trends' : 'Show Trends'}
+  >
+    {showTrends ? '📈 Hide Trends' : '📊 Show Trends'}
+  </button>
       </div>
     </div>
 
