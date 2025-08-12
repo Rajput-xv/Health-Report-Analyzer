@@ -21,6 +21,8 @@
     "concurrently": "^8.2.2"
   },
   "dependencies": {
-    "fuzzy-search": "^3.2.1"
+    "all": "^0.0.0",
+    "fuzzy-search": "^3.2.1",
+    "nodemailer": "^7.0.5"
   }
 }

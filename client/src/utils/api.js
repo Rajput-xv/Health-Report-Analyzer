@@ -88,9 +88,9 @@ export const uploadFile = async (file, onProgress) => {
     return response.data;
   } catch (error) {
     console.error('Upload error details:', error.response?.data);
-    const errorMessage = 
-      error.response?.data?.error || 
-      error.response?.data?.details || 
+    const errorMessage =
+      error.response?.data?.error ||
+      error.response?.data?.details ||
       'Failed to upload file';
     throw new Error(errorMessage);
   }
@@ -139,5 +139,29 @@ export const healthCheck = async () => {
     return response.data;
   } catch (error) {
     throw new Error('API health check failed');
+  }
+};
+
+// Forgot password - request reset link
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.error || 'Failed to send reset link'
+    );
+  }
+};
+
+// Reset password using token
+export const resetPassword = async (token, password) => {
+  try {
+    const response = await api.post(`/auth/reset-password/${token}`, { password });
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.error || 'Failed to reset password'
+    );
   }
 };
