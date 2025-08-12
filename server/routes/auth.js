@@ -144,10 +144,16 @@ router.post("/forgot-password", async (req, res) => {
     user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
+    // FRONTEND_URL should be set in your .env file (not committed) to your frontend URL
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
 
     // Send email
+    // These email config variables should be set in your .env file (not committed):
+    // EMAIL_HOST=smtp.gmail.com
+    // EMAIL_PORT=587
+    // EMAIL_USER=your-email@gmail.com
+    // EMAIL_PASS=your-google-app-password (use Google App Passwords, not your main password)
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
