@@ -1,0 +1,189 @@
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FileText, Shield, Zap, TrendingUp, Clock } from 'lucide-react';
+import '../styles/landing.css'
+
+export default function LandingPage() {
+  const navigate = useNavigate();
+
+  const handleLoginClick = () => {
+    navigate('/login');
+  };
+
+  const handleGetStartedClick = () => {
+    navigate('/login');
+  };
+
+  return (
+    <div className="landing-container">
+      {/* Header */}
+      <header className="landing-header">
+        <div className="landing-header-content">
+          <div className="landing-logo">
+            <FileText className="landing-logo-icon" />
+            <h1 className="landing-logo-text">Health Report Analyzer</h1>
+          </div>
+          <button className="landing-login-button" onClick={handleLoginClick}>
+            Login
+          </button>
+        </div>
+      </header>
+
+      {/* Hero Section */}
+      <section className="landing-hero-section">
+        <div className="landing-hero-content">
+          <h1 className="landing-hero-title">
+            Analyze Your Health Reports
+            <span className="landing-hero-subtitle">with Advanced Technology</span>
+          </h1>
+          <p className="landing-hero-description">
+            Upload your medical reports and get instant, comprehensive analysis with personalized insights. Our advanced
+            technology helps you understand your health data like never before.
+          </p>
+          <div className="landing-hero-button-container">
+            <button className="landing-primary-button" onClick={handleGetStartedClick}>
+              Get Started Free
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="landing-features-section">
+        <div className="landing-section-header">
+          <h2 className="landing-section-title">Why Choose Health Report Analyzer?</h2>
+          <p className="landing-section-description">
+            Transform complex medical data into clear, actionable insights with our cutting-edge platform
+          </p>
+        </div>
+
+        <div className="landing-features-grid">
+          <div className="landing-feature-card">
+            <div className="landing-feature-header">
+              <div className="landing-feature-icon landing-zap">
+                <Zap className="landing-icon landing-zap" />
+              </div>
+              <h3 className="landing-feature-title">Instant Analysis</h3>
+            </div>
+            <p className="landing-feature-description">
+              Get comprehensive analysis of your health reports in seconds using advanced OCR technology.
+            </p>
+          </div>
+
+          <div className="landing-feature-card">
+            <div className="landing-feature-header">
+              <div className="landing-feature-icon landing-shield">
+                <Shield className="landing-icon landing-shield" />
+              </div>
+              <h3 className="landing-feature-title">Secure & Private</h3>
+            </div>
+            <p className="landing-feature-description">
+              Your health data is encrypted and protected with enterprise-grade security. We never store your reports.
+            </p>
+          </div>
+
+          <div className="landing-feature-card">
+            <div className="landing-feature-header">
+              <div className="landing-feature-icon landing-trending-up">
+                <TrendingUp className="landing-icon landing-trending-up" />
+              </div>
+              <h3 className="landing-feature-title">Trend Tracking</h3>
+            </div>
+            <p className="landing-feature-description">
+              Monitor your health metrics over time and identify important trends in your medical data.
+            </p>
+          </div>
+
+          <div className="landing-feature-card">
+            <div className="landing-feature-header">
+              <div className="landing-feature-icon landing-file-text">
+                <FileText className="landing-icon landing-file-text" />
+              </div>
+              <h3 className="landing-feature-title">Multiple Formats</h3>
+            </div>
+            <p className="landing-feature-description">
+              Support for various report formats including PNG, JPEG, JPG images and scanned documents.
+            </p>
+          </div>
+
+          <div className="landing-feature-card">
+            <div className="landing-feature-header">
+              <div className="landing-feature-icon landing-clock">
+                <Clock className="landing-icon landing-clock" />
+              </div>
+              <h3 className="landing-feature-title">24/7 Available</h3>
+            </div>
+            <p className="landing-feature-description">
+              Access your health insights anytime, anywhere with our cloud-based platform.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="landing-how-it-works-section">
+        <div className="landing-section-header">
+          <h2 className="landing-section-title">How It Works</h2>
+          <p className="landing-section-description">Get insights from your health reports in three simple steps</p>
+        </div>
+
+        <div className="landing-steps-grid">
+          <div className="landing-step">
+            <div className="landing-step-number">
+              <span className="landing-step-number-text">1</span>
+            </div>
+            <h3 className="landing-step-title">Upload Report</h3>
+            <p className="landing-step-description">
+              Simply drag and drop your health report or take a photo with your device
+            </p>
+          </div>
+
+          <div className="landing-step">
+            <div className="landing-step-number">
+              <span className="landing-step-number-text">2</span>
+            </div>
+            <h3 className="landing-step-title">Smart Analysis</h3>
+            <p className="landing-step-description">
+              Our advanced technology processes and analyzes your report data in real-time
+            </p>
+          </div>
+
+          <div className="landing-step">
+            <div className="landing-step-number">
+              <span className="landing-step-number-text">3</span>
+            </div>
+            <h3 className="landing-step-title">Get Insights</h3>
+            <p className="landing-step-description">Receive detailed analysis with explanations and recommendations</p>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="landing-cta-section">
+        <div className="landing-cta-card">
+          <h2 className="landing-cta-title">Ready to Understand Your Health Better?</h2>
+          <p className="landing-cta-description">
+            Join thousands of users who trust Health Report Analyzer for their medical insights. Start your journey to
+            better health understanding today.
+          </p>
+          <div className="landing-cta-button-container">
+            <button className="landing-primary-button" onClick={handleGetStartedClick}>
+              Start Free Analysis
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="landing-footer">
+        <div className="landing-footer-content">
+          <div className="landing-footer-text">
+            <p className="landing-footer-copyright">
+              © 2024 Health Report Analyzer. Empowering better health decisions through technology.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

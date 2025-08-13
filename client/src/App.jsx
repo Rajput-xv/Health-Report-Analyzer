@@ -8,6 +8,7 @@ import TrendChart from './components/TrendChart';
 import LoadingSpinner from './components/LoadingSpinner';
 import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
+import LandingPage from './components/LandingPage';
 import { getCurrentUser } from './utils/api';
 import './styles/App.css';
 
@@ -152,9 +153,17 @@ function App() {
     <Router>
       <div className="app">
         <Routes>
-          {/* Public routes */}
+          {/* Landing page - default route for non-authenticated users */}
           <Route 
             path="/" 
+            element={
+              user ? <Navigate to="/dashboard" /> : <LandingPage />
+            } 
+          />
+          
+          {/* Auth form route */}
+          <Route 
+            path="/login" 
             element={
               user ? <Navigate to="/dashboard" /> : (
                 <>
@@ -171,11 +180,6 @@ function App() {
                 </>
               )
             } 
-          />
-          
-          <Route 
-            path="/login" 
-            element={user ? <Navigate to="/dashboard" /> : <Navigate to="/" />} 
           />
           
           <Route 
