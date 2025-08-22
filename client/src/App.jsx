@@ -1,5 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import AuthForm from './components/AuthForm';
 import UserProfile from './components/UserProfile';
 import FileUpload from './components/FileUpload';
@@ -14,8 +17,6 @@ import { getCurrentUser } from './utils/api';
 import './styles/App.css';
 import FAQ from "./components/FAQ";
 
-
-
 // Dashboard Component - Main authenticated app
 function Dashboard({ user, setUser }) {
   const [reportData, setReportData] = useState(null);
@@ -24,15 +25,19 @@ function Dashboard({ user, setUser }) {
   const [error, setError] = useState(null);
 
   const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
     setUser(null);
     setReportData(null);
     setTrendData(null);
     setError(null);
+    toast.success("Successfully logged out. See you again!");
   };
 
   const handleFileProcessed = (data) => {
     setReportData(data);
     setError(null);
+    toast.success("Report processed successfully!");
   };
 
   const handleTrendData = (trends) => {
@@ -43,6 +48,7 @@ function Dashboard({ user, setUser }) {
     setError(errorMessage);
     setReportData(null);
     setTrendData(null);
+    toast.error(errorMessage);
   };
 
   const handleReset = () => {
@@ -126,11 +132,14 @@ function App() {
       if (token && userData) {
         try {
           await getCurrentUser();
-          setUser(JSON.parse(userData));
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          toast.info(`Welcome back, ${parsedUser.firstName}!`);
         } catch (error) {
           // Clear invalid session data
           localStorage.removeItem('token');
           localStorage.removeItem('user');
+          toast.error("Session expired. Please log in again.");
         }
       }
       setAuthLoading(false);
@@ -237,6 +246,20 @@ function App() {
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
+
+        {/* Toast Container */}
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </div>
     </Router>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { login, register } from "../utils/api";
+import { toast } from 'react-toastify';
 
 const AuthForm = ({ onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
@@ -30,6 +31,7 @@ const AuthForm = ({ onLogin }) => {
     if (!isLogin && formData.password !== formData.confirmPassword) {
       setError("Passwords do not match");
       setLoading(false);
+      toast.error("Passwords do not match");
       return;
     }
 
@@ -52,12 +54,24 @@ const AuthForm = ({ onLogin }) => {
       if (data.success) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
+        
+        // Success toasts
+        if (isLogin) {
+          toast.success(`Welcome back, ${data.user.firstName}!`);
+        } else {
+          toast.success(`Account created successfully! Welcome, ${data.user.firstName}!`);
+        }
+        
         onLogin(data.user, data.token);
       } else {
-        setError(data.error || "Authentication failed");
+        const errorMessage = data.error || "Authentication failed";
+        setError(errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
-      setError(error.message || "Network error. Please try again.");
+      const errorMessage = error.message || "Network error. Please try again.";
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -73,6 +87,8 @@ const AuthForm = ({ onLogin }) => {
       firstName: "",
       lastName: "",
     });
+    
+  
   };
 
   return (
