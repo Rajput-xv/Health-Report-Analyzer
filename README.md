@@ -1,5 +1,7 @@
 # 🩺 Health Report Analyzer
 
+[You can take a look at this project at](health-report-analyzer.vercel.app)
+
 > **Upload your lab reports (PDF/image) and get your health data automatically extracted into organized tables with trend analysis. No more manual data entry!**
 
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
