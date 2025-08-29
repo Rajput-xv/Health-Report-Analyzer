@@ -192,7 +192,24 @@ function App() {
                     <p>Secure platform to analyze your health reports with AI insights</p>
                   </header>
                   <main className="app-main">
-                    <AuthForm onLogin={handleLogin} />
+                    <AuthForm onLogin={handleLogin} isLogin={true} />
+                  </main>
+                  <Footer />
+                </>
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              user ? <Navigate to="/dashboard" /> : (
+                <>
+                  <header className="app-header">
+                    <h1>🏥 Health Report Analyzer</h1>
+                    <p>Secure platform to analyze your health reports with AI insights</p>
+                  </header>
+                  <main className="app-main">
+                    <AuthForm onLogin={handleLogin} isLogin={false} />
                   </main>
                   <Footer />
                 </>

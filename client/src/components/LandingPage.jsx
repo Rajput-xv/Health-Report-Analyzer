@@ -6,14 +6,12 @@ import '../styles/landing.css'
 export default function LandingPage({ user }) {
   const navigate = useNavigate();
 
-  const handleLoginClick = () => {
-    // If user is already logged in, go to dashboard
-    // If not logged in, go to login page
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      navigate('/login');
-    }
+  const handleSignInClick = () => {
+    navigate('/login');
+  };
+
+  const handleSignUpClick = () => {
+    navigate('/signup');
   };
 
   const handleGetStartedClick = () => {
@@ -35,9 +33,14 @@ export default function LandingPage({ user }) {
             <FileText className="landing-logo-icon" />
             <h1 className="landing-logo-text">Health Report Analyzer</h1>
           </div>
-          <button className="landing-login-button" onClick={handleLoginClick}>
-            {user ? `Welcome, ${user.firstName}` : "Login"}
-          </button>
+          <div className="landing-header-buttons">
+            <button className="landing-signin-button" onClick={handleSignInClick}>
+              Sign In
+            </button>
+            <button className="landing-signup-button" onClick={handleSignUpClick}>
+              Sign Up
+            </button>
+          </div>
         </div>
       </header>
 

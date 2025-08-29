@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { login, register } from "../utils/api";
 import { toast } from 'react-toastify';
@@ -46,8 +46,8 @@ const validatePassword = (password) => {
   return strongRegex.test(password);
 };
 
-const AuthForm = ({ onLogin }) => {
-  const [isLogin, setIsLogin] = useState(true);
+const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
+  const [isLogin, setIsLogin] = useState(isLoginProp);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -61,6 +61,10 @@ const AuthForm = ({ onLogin }) => {
   // State for password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  useEffect(() => {
+    setIsLogin(isLoginProp);
+  }, [isLoginProp]);
 
   const handleChange = (e) => {
     setFormData({

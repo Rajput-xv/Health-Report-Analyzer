@@ -46,7 +46,13 @@
   margin: 0;
 }
 
-.landing-login-button {
+.landing-header-buttons {
+  display: flex;
+  gap: 1rem;
+}
+
+.landing-signin-button,
+.landing-signup-button {
   background: rgba(255, 255, 255, 0.2);
   color: white;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -58,7 +64,8 @@
   backdrop-filter: blur(10px);
 }
 
-.landing-login-button:hover {
+.landing-signin-button:hover,
+.landing-signup-button:hover {
   background: rgba(255, 255, 255, 0.3);
   border-color: rgba(255, 255, 255, 0.5);
   transform: translateY(-2px);
