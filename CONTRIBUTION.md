@@ -45,6 +45,10 @@ git push origin feature/your-feature-name
 
 • Test your changes before submitting.
 
+• For UI related changes, make sure to add **images with previous & new title** in the PR description. 
+ 
+• The **issue should be properly mentioned** in the PR.  
+
 💡 Tips for First-Timers
 
 • New to open source? Start small — fix a typo or improve docs.
