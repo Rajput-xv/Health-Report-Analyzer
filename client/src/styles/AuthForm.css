@@ -172,3 +172,23 @@
     color: #4b5563;
     font-size: 0.875rem;
 }
+.password-checklist {
+  list-style: none;
+  padding: 0;
+  margin-top: 8px;
+  font-size: 0.9rem;
+}
+
+.password-checklist li {
+  margin: 4px 0;
+  transition: color 0.3s ease;
+}
+
+.password-checklist .valid {
+  color: green;
+  font-weight: 600;
+}
+
+.password-checklist .invalid {
+  color: red;
+}
