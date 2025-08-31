@@ -65,7 +65,10 @@ function Dashboard({ user, setUser }) {
             <h1>🏥 Health Report Analyzer</h1>
             <p>Welcome back, {user.firstName}! Upload your lab report and get instant insights.</p>
           </div>
-          <UserProfile user={user} onLogout={handleLogout} />
+          <div className="header-actions">
+            <Link to="/" className="btn-home">🏠 Go to Home</Link>
+            <UserProfile user={user} onLogout={handleLogout} />
+          </div>
         </div>
       </header>
 
@@ -128,7 +131,7 @@ function App() {
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       const userData = localStorage.getItem('user');
-     
+
       if (token && userData) {
         try {
           await getCurrentUser();
@@ -180,7 +183,7 @@ function App() {
               )
             }
           />
-         
+
           {/* Auth form route */}
           <Route
             path="/login"
@@ -215,7 +218,7 @@ function App() {
                 </>
               )
             }
-          />                  
+          />
           <Route
             path="/forgot-password"
             element={
@@ -233,7 +236,7 @@ function App() {
               )
             }
           />
-         
+
           <Route
             path="/reset-password/:token"
             element={
