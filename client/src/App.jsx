@@ -13,6 +13,7 @@ import ForgotPassword from './components/ForgotPassword';
 import ResetPassword from './components/ResetPassword';
 import LandingPage from './components/LandingPage';
 import Footer from './components/Footer';
+import ContactUs from './components/ContactUs';
 import { getCurrentUser } from './utils/api';
 import './styles/App.css';
 import FAQ from "./components/FAQ";
@@ -65,7 +66,15 @@ function Dashboard({ user, setUser }) {
             <h1>🏥 Health Report Analyzer</h1>
             <p>Welcome back, {user.firstName}! Upload your lab report and get instant insights.</p>
           </div>
-          <UserProfile user={user} onLogout={handleLogout} />
+          <div className="header-actions">
+            <button 
+              onClick={() => window.location.href = '/contact'} 
+              className="btn-contact-us"
+            >
+              📞 Contact Us
+            </button>
+            <UserProfile user={user} onLogout={handleLogout} />
+          </div>
         </div>
       </header>
 
@@ -122,6 +131,14 @@ function Dashboard({ user, setUser }) {
 function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
+
+  // Handle user logout
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+    toast.success("Successfully logged out. See you again!");
+  };
 
   // Check for existing user session when app loads
   useEffect(() => {
@@ -257,6 +274,38 @@ function App() {
             path="/dashboard"
             element={
               user ? <Dashboard user={user} setUser={setUser} /> : <Navigate to="/" />
+            }
+          />
+
+          {/* Contact Us route */}
+          <Route
+            path="/contact"
+            element={
+              user ? (
+                <>
+                  <header className="app-header">
+                    <div className="header-content">
+                      <div className="header-text">
+                        <h1>🏥 Health Report Analyzer</h1>
+                        <p>Contact Us</p>
+                      </div>
+                      <div className="header-actions">
+                        <button 
+                          onClick={() => window.location.href = '/dashboard'} 
+                          className="btn-back-dashboard"
+                        >
+                          ← Back to Dashboard
+                        </button>
+                        <UserProfile user={user} onLogout={handleLogout} />
+                      </div>
+                    </div>
+                  </header>
+                  <main className="app-main">
+                    <ContactUs />
+                  </main>
+                  <Footer />
+                </>
+              ) : <Navigate to="/" />
             }
           />
 

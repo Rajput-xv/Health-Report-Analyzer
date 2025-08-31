@@ -165,3 +165,15 @@ export const resetPassword = async (token, password) => {
     );
   }
 };
+
+// Submit contact form
+export const submitContact = async (contactData) => {
+  try {
+    const response = await api.post('/contact/submit', contactData);
+    return response.data;
+  } catch (error) {
+    throw new Error(
+      error.response?.data?.error || 'Failed to send message'
+    );
+  }
+};
