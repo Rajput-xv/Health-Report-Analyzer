@@ -16,6 +16,8 @@ import Footer from './components/Footer';
 import { getCurrentUser } from './utils/api';
 import './styles/App.css';
 import FAQ from "./components/FAQ";
+import { Link } from "react-router-dom";
+
 
 // Dashboard Component - Main authenticated app
 function Dashboard({ user, setUser }) {
