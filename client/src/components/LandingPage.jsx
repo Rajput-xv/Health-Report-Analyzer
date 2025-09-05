@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FileText, Shield, Zap, TrendingUp, Clock, LogOut } from 'lucide-react';
+import { FileText, Shield, Zap, TrendingUp, Clock, LogOut, ArrowRight, Heart, Star } from 'lucide-react';
 import { toast } from 'react-toastify';
 import '../styles/landing.css'
 
@@ -203,16 +203,49 @@ export default function LandingPage({ user, setUser }) {
 
       {/* CTA Section */}
       <section className="landing-cta-section">
+        <div className="landing-cta-background">
+          <div className="landing-cta-particles"></div>
+        </div>
         <div className="landing-cta-card">
-          <h2 className="landing-cta-title">Ready to Understand Your Health Better?</h2>
+          <div className="landing-cta-icon-container">
+            <Heart className="landing-cta-icon" />
+            <div className="landing-cta-icon-glow"></div>
+          </div>
+          <h2 className="landing-cta-title">
+            Ready to Understand Your Health Better?
+            <span className="landing-cta-title-accent">Transform Your Medical Data</span>
+          </h2>
           <p className="landing-cta-description">
-            Join thousands of users who trust Health Report Analyzer for their medical insights. Start your journey to
-            better health understanding today.
+            Join thousands of users who trust Health Report Analyzer for their medical insights. 
+            <br />
+            <span className="landing-cta-highlight">Start your journey to better health understanding today.</span>
           </p>
+          <div className="landing-cta-stats">
+            <div className="landing-cta-stat">
+              <Star className="landing-cta-stat-icon" />
+              <span className="landing-cta-stat-number">4.9/5</span>
+              <span className="landing-cta-stat-label">User Rating</span>
+            </div>
+            <div className="landing-cta-stat">
+              <Heart className="landing-cta-stat-icon" />
+              <span className="landing-cta-stat-number">10K+</span>
+              <span className="landing-cta-stat-label">Happy Users</span>
+            </div>
+            <div className="landing-cta-stat">
+              <Zap className="landing-cta-stat-icon" />
+              <span className="landing-cta-stat-number">99.9%</span>
+              <span className="landing-cta-stat-label">Uptime</span>
+            </div>
+          </div>
           <div className="landing-cta-button-container">
-            <button className="landing-primary-button" onClick={handleGetStartedClick}>
-              {user ? "Continue to Dashboard" : "Start Free Analysis"}
+            <button className="landing-cta-button" onClick={handleGetStartedClick}>
+              <span className="landing-cta-button-text">
+                {user ? "Continue to Dashboard" : "Start Free Analysis"}
+              </span>
+              <ArrowRight className="landing-cta-button-icon" />
+              <div className="landing-cta-button-glow"></div>
             </button>
+            <p className="landing-cta-note">✨ No credit card required • Free forever</p>
           </div>
         </div>
       </section>

@@ -3,7 +3,9 @@ const mongoose = require('mongoose');
 // Connect to MongoDB database
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    // Use a default MongoDB URI if not provided
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/health-analyzer';
+    const conn = await mongoose.connect(mongoUri);
 
     console.log('MongoDB connected successfully');
 
@@ -25,7 +27,8 @@ const connectDB = async () => {
 
   } catch (error) {
     console.error('Database connection failed:', error.message);
-    process.exit(1);
+    console.log('Continuing without database connection...');
+    // Don't exit the process, let the server run without database
   }
 };
 
