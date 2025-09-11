@@ -894,32 +894,77 @@
   gap: 1rem;
 }
 
+/* ---------- Dashboard Buttons ---------- */
 .btn-home, .btn-contact {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  background: linear-gradient(45deg, #667eea, #764ba2);
+  background: rgba(255, 255, 255, 0.12);
   color: white;
-  text-decoration: none;
-  border-radius: 0.5rem;
-  font-weight: 500;
+  border: 2px solid transparent;
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px; /* pill shape */
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+  backdrop-filter: blur(12px);
+  
+  /* Gradient border trick */
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), 
+                    linear-gradient(135deg, #6EE7F9, #A855F7, #F472B6);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+  
+  /* Shadows for depth */
+  box-shadow: 
+    0 2px 6px rgba(0,0,0,0.15),
+    inset 0 1px 3px rgba(255,255,255,0.15);
 }
 
+/* Animated gradient text */
+.btn-home span, .btn-contact span {
+  background: linear-gradient(90deg, #6EE7F9, #A855F7, #F472B6);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: gradientShift 3s ease infinite;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Hover effect with glow & lift */
 .btn-home:hover, .btn-contact:hover {
-  background: linear-gradient(45deg, #5a6fd8, #6a42a0);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px) scale(1.03) rotateZ(0.5deg);
+  box-shadow: 
+    0 6px 16px rgba(168, 85, 247, 0.6),
+    0 0 20px rgba(110, 231, 249, 0.6),
+    0 0 30px rgba(245, 158, 11, 0.4),
+    inset 0 1px 3px rgba(255,255,255,0.15);
 }
 
-.btn-contact {
+/* Active/click effect */
+.btn-home:active, .btn-contact:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+
+
+
+/* .btn-contact {
   background: linear-gradient(45deg, #667eea, #764ba2);
 }
 
 .btn-contact:hover {
   background: linear-gradient(45deg, #5a6fd8, #6a42a0);
-}
+} */
 
 .auth-loading {
   display: flex;

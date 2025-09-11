@@ -48,32 +48,64 @@
 
 .landing-header-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 1.2rem;
 }
 
+.landing-contact-button,
 .landing-signin-button,
 .landing-signup-button,
-.landing-logout-button {
-  background: rgba(255, 255, 255, 0.2);
+.landing-logout-button { 
+  background: rgba(255, 255, 255, 0.12);
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.5rem 1.5rem;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+  border: 2px solid transparent;
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px; /* pill shape */
+  font-weight: 600;
+  font-size: 0.95rem; 
+  letter-spacing: 0.5px; 
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  gap: 0.6rem; 
+  transition: all 0.3s ease; 
+  backdrop-filter: blur(12px); /* Gradient border trick */ 
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), linear-gradient(135deg, #6EE7F9, #A855F7, #F472B6); 
+  background-origin: border-box; 
+  background-clip: padding-box, border-box; /* Shadows for depth */ 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 3px rgba(255,255,255,0.15); 
+} 
 
-.landing-signin-button:hover,
-.landing-signup-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+.landing-contact-button span, 
+.landing-signin-button span, 
+.landing-signup-button span, 
+.landing-logout-button span { 
+  background: linear-gradient(90deg, #6EE7F9, #A855F7, #F472B6); 
+  background-clip: text; 
+  -webkit-background-clip: text; 
+  color: transparent; 
+  animation: gradientShift 3s ease infinite; 
+} 
+
+@keyframes gradientShift { 
+  0% { background-position: 0% 50%; } 
+  50% { background-position: 100% 50%; } 
+  100% { background-position: 0% 50%; } 
+} 
+
+.landing-contact-button:hover, 
+.landing-signin-button:hover, 
+.landing-signup-button:hover { 
+  background: rgba(255, 255, 255, 0.2); 
+  transform: translateY(-3px) scale(1.03) rotateZ(0.5deg); 
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.6), 0 0 20px rgba(110, 231, 249, 0.6), 0 0 30px rgba(245, 158, 11, 0.4), inset 0 1px 3px rgba(255,255,255,0.15); 
+} 
+  
+  .landing-contact-button:active, 
+  .landing-signin-button:active, 
+  .landing-signup-button:active, 
+  .landing-logout-button:active { 
+    transform: translateY(0) scale(0.97); 
+    box-shadow: 0 3px 8px rgba(0,0,0,0.25); 
 }
 
 .landing-logout-button {
@@ -146,27 +178,10 @@
   box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
 }
 
-.landing-contact-button {
-  background: rgba(255, 255, 255, 0.15);
-  color: white;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  border-radius: 0.75rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
-}
-
 .landing-primary-button:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
   background: linear-gradient(45deg, #5a6fd8, #6a42a0);
-}
-
-.landing-contact-button:hover {
-  transform: translateY(-3px);
-  background: rgba(255, 255, 255, 0.25);
-  border-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.3);
 }
 
 /* Features Section */

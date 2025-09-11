@@ -69,8 +69,8 @@ function Dashboard({ user, setUser }) {
             <p>Welcome back, {user.firstName}! Upload your lab report and get instant insights.</p>
           </div>
           <div className="header-actions">
-            <Link to="/" className="btn-home">🏠 Go to Home</Link>
-            <Link to="/contact" className="btn-contact">📧 Contact Us</Link>
+            <Link to="/" className="btn-home">Go to Home</Link>
+            <Link to="/contact" className="btn-contact">Contact Us</Link>
             <UserProfile user={user} onLogout={handleLogout} />
           </div>
         </div>
