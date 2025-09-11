@@ -259,7 +259,21 @@
 /* How It Works Section */
 .landing-how-it-works-section {
   padding: 4rem 0;
+  /* background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%); */
   background: rgba(255, 255, 255, 0.03);
+  text-align: center;
+}
+
+.landing-section-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.landing-section-description {
+  color: rgba(255, 255, 255, 0.85);
+  margin-bottom: 3rem;
 }
 
 .landing-steps-grid {
@@ -267,12 +281,23 @@
   margin: 0 auto;
   padding: 0 2rem;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
 }
 
 .landing-step {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1rem;
+  padding: 2rem;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover Animation */
+.landing-step:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
 }
 
 .landing-step-number {
@@ -284,7 +309,7 @@
   align-items: center;
   justify-content: center;
   margin: 0 auto 1.5rem;
-  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+  box-shadow: 0 4px 15px rgba(255, 215, 0, 0.5);
 }
 
 .landing-step-number-text {
@@ -294,16 +319,41 @@
 }
 
 .landing-step-title {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: bold;
-  color: white;
-  margin-bottom: 1rem;
+  color: #fff;
+  margin-bottom: 0.8rem;
 }
 
 .landing-step-description {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.85);
   line-height: 1.6;
 }
+
+/* Entry Animation */
+.card-animate {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+.card-animate:nth-child(1) {
+  animation-delay: 0.2s;
+}
+.card-animate:nth-child(2) {
+  animation-delay: 0.4s;
+}
+.card-animate:nth-child(3) {
+  animation-delay: 0.6s;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 /* CTA Section */
 .landing-cta-section {

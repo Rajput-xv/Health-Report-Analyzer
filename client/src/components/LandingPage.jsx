@@ -201,6 +201,8 @@ export default function LandingPage({ user, setUser }) {
         </div>
       </section>
 
+
+
       {/* CTA Section */}
       <section className="landing-cta-section">
         <div className="landing-cta-card">
