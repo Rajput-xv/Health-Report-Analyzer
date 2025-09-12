@@ -225,17 +225,17 @@ function App() {
             element={
               user ? <Navigate to="/dashboard" /> : (
                 <>
-                  <header className="app-header">
-                    <div className="header-content">
-                      <div className="header-text">
-                        <h1>🏥 Health Report Analyzer</h1>
-                        <p>Secure platform to analyze your health reports with AI insights</p>
-                      </div>
-                      <div className="header-actions">
-                        <Link to="/" className="btn-home">🏠 Back to Home</Link>
-                      </div>
-                    </div>
-                  </header>
+              <header className="landing-header">
+  <div className="header-content">
+   <div className="header-text">
+  <h1>🏥 Health Report Analyzer</h1>
+  <p>Secure platform to analyze your health reports with AI insights</p>
+</div>
+    <div className="header-actions">
+      <Link to="/" className="landing-contact-button">🏠 Back to Home</Link>
+    </div>
+  </div>
+</header>
                   <main className="app-main">
                     <AuthForm onLogin={handleLogin} isLogin={false} />
                   </main>

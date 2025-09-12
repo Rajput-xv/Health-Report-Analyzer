@@ -876,18 +876,30 @@
 /* Header with Auth */
 .header-content {
   display: flex;
-  justify-content: space-between;
+  justify-content: space-between; /* text center-ish, button right */
   align-items: center;
+  width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  width: 100%;
-  padding: 0 1rem;
+  padding: 0 2rem;
+  position: relative;
 }
 
 .header-text {
-  flex: 1;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
 }
-
+.header-text::after {
+  content: "";
+  display: block;
+  width: 620px; /* length of the gradient line */
+  height: 4px;  /* thickness */
+  margin: 10px auto 0; /* spacing from text */
+  border-radius: 2px;
+  background: linear-gradient(90deg, #6EE7F9, #A855F7, #F472B6); /* gradient colors */
+}
 .header-actions {
   display: flex;
   align-items: center;
