@@ -1,4 +1,5 @@
-
+import BackToTopButton from "./components/BackToTopButton";
+import "./styles/BackToTopButton.css";
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
@@ -345,6 +346,9 @@ function App() {
           pauseOnHover
           theme="light"
         />
+
+        {/* Back to Top button (visible on all pages) */}
+        <BackToTopButton />
       </div>
     </Router>
   );
