@@ -39,6 +39,7 @@ export default function LandingPage({ user, setUser }) {
         <div className="landing-header-content">
           <div className="landing-logo">
             <FileText className="landing-logo-icon" />
+            {/* <img src="/Health%20Report%20Analyzer%20Logo.png" alt="Logo" className="logo-img" /> */}
             <h1 className="landing-logo-text">Health Report Analyzer</h1>
           </div>
           <div className="landing-header-buttons">
@@ -46,7 +47,11 @@ export default function LandingPage({ user, setUser }) {
               <>
                 <button className="landing-signin-button" onClick={() => navigate('/dashboard')}>Return to Dashboard</button>
                 <button className="landing-contact-button" onClick={() => navigate('/contact')}>Contact Us</button>
-                <button className="landing-logout-button" onClick={handleLogout}><LogOut size={16} className="landing-logout-icon" />Logout</button>
+                <div className="dashboard-profile">
+                  <button onClick={handleLogout} className="btn-logout">
+                    <LogOut size={16} /> Logout
+                  </button>
+                </div>
               </>
             ) : (
               <>

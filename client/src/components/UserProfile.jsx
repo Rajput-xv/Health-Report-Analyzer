@@ -8,13 +8,11 @@ const UserProfile = ({ user, onLogout }) => {
   };
 
   return (
-    <div className="user-profile">
-      <div className="user-info">
-        <span className="user-avatar">👤</span>
-        <div className="user-details">
-          <span className="user-name">{user.firstName} {user.lastName}</span>
-          <span className="user-email">{user.email}</span>
-        </div>
+    <div className="dashboard-profile">
+      <div className="user-avatar">👤</div>
+      <div className="user-details">
+        <span className="user-name">{user.firstName} {user.lastName}</span>
+        <span className="user-email">{user.email}</span>
       </div>
       <button onClick={handleLogout} className="btn-logout">
         Logout

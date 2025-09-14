@@ -45,6 +45,11 @@ p {
   color: #718096;
 }
 
+/* Links */
+a, a:visited, a:hover, a:active {
+  text-decoration: none;
+}
+
 /* Buttons */
 button {
   border: none;
