@@ -1,4 +1,4 @@
-/* Landing Page Styles */
+Landing Page Styles
 .landing-container {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -688,4 +688,101 @@
     padding: 0.4rem 1rem;
     font-size: 0.8rem;
   }
+}
+
+
+/* Overlay popup — improved version */
+.overlay-popup {
+  position: fixed;
+  top: 80px; /* ⬅ shifted down */
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  pointer-events: none;
+}
+
+.overlay-card {
+  pointer-events: auto;
+  width: 420px;  /* ⬅ bigger width */
+  max-width: calc(100vw - 48px);
+  background: #fff;  /* ⬅ solid white */
+  color: #333;
+  padding: 24px; /* ⬅ more spacing */
+  border-radius: 18px; /* smoother corners */
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+  transform-origin: top right;
+  animation: popupIn 280ms cubic-bezier(.2,.9,.2,1);
+}
+
+/* Header */
+.overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.overlay-icon {
+  color: #ef4444; /* red icon */
+}
+.overlay-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #111;
+}
+
+/* Body */
+.overlay-body {
+  display: flex;
+  flex-direction: column; /* ⬅ stacked instead of side-by-side */
+  gap: 16px;
+}
+.overlay-text {
+  font-size: 15px;
+  color: #444;
+  line-height: 1.4;
+}
+.overlay-subtext {
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Actions */
+.overlay-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+.btn-confirm, .btn-cancel {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .2s ease;
+}
+
+/* Confirm button */
+.btn-confirm {
+  background: #ef4444; /* red */
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 12px rgba(239,68,68,0.3);
+}
+.btn-confirm:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+}
+
+/* Cancel button */
+.btn-cancel {
+  background: #f3f4f6;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+.btn-cancel:hover {
+  background: #e5e7eb;
 }
