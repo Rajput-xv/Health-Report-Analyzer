@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { FaChevronDown } from "react-icons/fa";
 import "../styles/FAQ.css";
 
 const faqEntries = [
@@ -32,20 +33,30 @@ const faqEntries = [
 const FAQ = () => {
   const [openIndex, setOpenIndex] = useState(null);
 
-  const toggle = (index) =>
+  const toggle = (index) => {
     setOpenIndex(openIndex === index ? null : index);
+  };
 
   return (
     <section className="faq-container">
-      <h2><center>Frequently Asked Questions</center></h2>
+      <h2>Frequently Asked Questions</h2>
       {faqEntries.map((item, idx) => (
         <div
           key={idx}
           className={`faq-item ${openIndex === idx ? "open" : ""}`}
-          onClick={() => toggle(idx)}
         >
-          <h4>{item.question}</h4>
-          {openIndex === idx && <p>{item.answer}</p>}
+          <div
+            className="faq-question"
+            onClick={() => toggle(idx)}
+          >
+            <h4>{item.question}</h4>
+            <FaChevronDown
+              className={`arrow ${openIndex === idx ? "rotate" : ""}`}
+            />
+          </div>
+          <div className={`faq-answer ${openIndex === idx ? "show" : ""}`}>
+            <p>{item.answer}</p>
+          </div>
         </div>
       ))}
     </section>

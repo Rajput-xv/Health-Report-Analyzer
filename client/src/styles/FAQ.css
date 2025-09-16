@@ -1,57 +1,86 @@
 .faq-container { 
   width: 100%;
-  margin: 1rem auto;
+  margin: 2rem auto;
   padding: 30px;
   text-align: center;
 }
 
 .faq-container h2 {
   color: white;
-  font-size:xx-large;
-  margin-bottom: 18px;
+  font-size: 2rem;
+  margin-bottom: 25px;
   font-weight: bold;
-  padding-bottom: 1rem;
 }
 
 .faq-item {
   background: #fff;
-  padding: 15px 20px;
-  margin: 12px auto;
+  margin: 14px auto;
   border-radius: 12px;
   box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  cursor: pointer;
   transition: all 0.3s ease-in-out;
   text-align: left;
-
-  /* 🔥 medium card size */
-  width: 80%;         /* reduce width */
-  min-height: 60px;  /* reduce height */
-  max-width: 600px;   /* keeps it medium */
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
+  width: 80%;
+  max-width: 700px;
+  overflow: hidden;
 }
 
 .faq-item:hover {
-  transform: scale(1.02);
-  box-shadow: 0px 6px 12px rgba(0,0,0,0.15);
+  transform: scale(1.01);
+  box-shadow: 0px 6px 14px rgba(0,0,0,0.15);
 }
 
-.faq-item h4 {
-  margin-bottom: 0rem;
-  color:black;
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  cursor: pointer;
+}
+
+.faq-question h4 {
+  margin: 0;
+  color: #333;
   font-size: 18px;
   font-weight: bold;
 }
 
-.faq-item p {
-  margin-top: 10px;
+.faq-question .arrow {
+  transition: transform 0.2s ease, color 0.2s ease;
   font-size: 16px;
-  color:black;
-  line-height: 1.5;
+  color: #007bff;   /* 🔵 Blue arrow */
 }
 
-.faq-item.open {
-  border-left: 5px solid #e63946;
-  background: #fff9f9;
+.faq-question .arrow.rotate {
+  transform: rotate(180deg);
+  color: #0056b3;   /* darker blue on open */
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  padding: 0 22px;
+  background: #f9f9ff;
+  border-left: 4px solid transparent;
+  transition: max-height 0.2s ease, padding 0.2s ease, border-left 0.2s ease;
+}
+
+.faq-answer p {
+  margin: 15px 0;
+  font-size: 16px;
+  color: #444;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.1s ease, transform 0.1s ease;  /* 👈 fast fade */
+}
+
+.faq-answer.show {
+  max-height: 400px;
+  padding: 15px 22px;
+  border-left: 4px solid #007bff;
+}
+
+.faq-answer.show p {
+  opacity: 1;
+  transform: translateY(-2);  /* 👈 smooth fade-in */
 }
