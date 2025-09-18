@@ -19,8 +19,8 @@ import { getCurrentUser } from './utils/api';
 import './styles/App.css';
 import FAQ from "./components/FAQ";
 import { Link } from "react-router-dom";
-import { FileText } from 'lucide-react';
 import DarkModeToggle from './components/DarkModeToggle';
+import { FileText, Menu, X, LogOut } from 'lucide-react';
 
 
 // Dashboard Component - Main authenticated app
@@ -29,6 +29,7 @@ function Dashboard({ user, setUser }) {
   const [trendData, setTrendData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -38,6 +39,7 @@ function Dashboard({ user, setUser }) {
     setTrendData(null);
     setError(null);
     toast.success("Successfully logged out. See you again!");
+    setMenuOpen(false);
   };
 
   const handleFileProcessed = (data) => {
@@ -73,12 +75,33 @@ function Dashboard({ user, setUser }) {
             <h1 className="landing-logo-text">Health Report Analyzer</h1>
           </div>
           <div className="nav-button user-section">
-            <Link to="/" className="btn-home">Home</Link>
-            <Link to="/contact" className="btn-contact">Contact Us</Link>
+            <Link to="/" className="btn-pill">Home</Link>
+            <Link to="/contact" className="btn-pill">Contact Us</Link>
+          {/* </div> */}
+          {/* <div className="user-section"> */}
             <UserProfile className="user-section" user={user} onLogout={handleLogout} />
             <DarkModeToggle />
           </div>
-        </div>
+
+          {/* Mobile Nav */}
+          <div className="mobile-nav">
+            <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+          </div>
+
+           {/* Mobile Menu Dropdown */}
+        {menuOpen && (
+          <div className="mobile-menu">
+            <div className="mobile-user-profile">
+              <UserProfile user={user} onLogout={handleLogout} />
+            </div>
+            <Link to="/" className="btn-pill" onClick={() => setMenuOpen(false)}>Home</Link>
+            <Link to="/contact" className="btn-pill" onClick={() => setMenuOpen(false)}>Contact Us</Link>
+          </div>
+          )}
+        {/* </div> */}
       </header>
 
       <main className="app-main">

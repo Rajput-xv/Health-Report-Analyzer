@@ -310,3 +310,106 @@ button:hover {
 .dark-mode .Toastify__progress-bar--default {
   background: #6366f1;
 }
+.mobile-nav,
+.mobile-menu {
+  display: none;
+}
+
+/* Mobile navbar */
+@media (max-width: 768px) {
+  .nav-button {
+    display: none !important;
+  }
+
+  .mobile-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .hamburger-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: white;
+  }
+
+  .mobile-menu {
+    position: absolute;
+    top: 100%;   /* drop right below header */
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* translucent overlay style */
+    backdrop-filter: blur(6px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 0 0 12px 12px;
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+a.btn-pill,
+button.btn-pill {
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  border: 2px solid transparent;
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px; /* pill shape */
+  font-weight: 600;
+  font-size: 0.95rem; 
+  letter-spacing: 0.5px; 
+  cursor: pointer; 
+  display: flex; 
+  justify-content: center;
+  align-items: center; 
+  gap: 0.6rem; 
+  transition: all 0.3s ease; 
+  backdrop-filter: blur(12px); /* Gradient border trick */ 
+  background-image: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), linear-gradient(135deg, #6EE7F9, #A855F7, #F472B6); 
+  background-origin: border-box; 
+  background-clip: padding-box, border-box; /* Shadows for depth */ 
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15), inset 0 1px 3px rgba(255,255,255,0.15); 
+}
+
+a.btn-pill:hover,
+button.btn-pill:hover {
+  background: rgba(255, 255, 255, 0.2); 
+  transform: translateY(-3px) scale(1.03) rotateZ(0.5deg); 
+  box-shadow: 0 6px 16px rgba(168, 85, 247, 0.6), 0 0 20px rgba(110, 231, 249, 0.6), 0 0 30px rgba(245, 158, 11, 0.4), inset 0 1px 3px rgba(255,255,255,0.15); 
+}
+
+a.btn-pill:active,
+button.btn-pill:active {
+  transform: translateY(0) scale(0.97); 
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
+}
+
+@keyframes gradientShift { 
+  0% { background-position: 0% 50%; } 
+  50% { background-position: 100% 50%; } 
+  100% { background-position: 0% 50%; } 
+} 
+
+.btn-logout {
+  background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), linear-gradient(135deg, #6EE7F9, #A855F7, #F472B6);
+  color: white;
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.6),
+              0 0 20px rgba(244, 63, 94, 0.6);
+}
+
