@@ -1352,3 +1352,113 @@
     padding: 0.4rem 1rem;
   }
 }
+
+/* ----- Dark Mode: Dashboard surfaces ----- */
+.dark-mode .welcome-dashboard-message h2 { color: #e5e7eb; }
+.dark-mode .welcome-dashboard-message p  { color: #cbd5e1; }
+
+.dark-mode .btn-home,
+.dark-mode .btn-contact {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #e5e7eb;
+}
+.dark-mode .btn-home:hover,
+.dark-mode .btn-contact:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dark-mode .app-footer {
+  background: rgba(17, 24, 39, 0.8);
+  border-top-color: rgba(255, 255, 255, 0.06);
+}
+.dark-mode .app-footer p { color: #9ca3af; }
+
+/* Upload area and cards */
+.dark-mode .file-upload-area,
+.dark-mode .loading-container,
+.dark-mode .results-header,
+.dark-mode .report-table-container,
+.dark-mode .trend-chart-container,
+.dark-mode .trend-summary,
+.dark-mode .chart-area,
+.dark-mode .auth-card,
+.dark-mode .upload-tips {
+  background: #0b1220;
+  color: #e5e7eb;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+}
+
+.dark-mode .file-upload-area { border-color: #334155; }
+.dark-mode .file-upload-area:hover { background: #0f172a; }
+.dark-mode .file-upload-area h3 { color: #e5e7eb; }
+.dark-mode .file-upload-area p,
+.dark-mode .file-types { color: #94a3b8; }
+
+.dark-mode .table-header,
+.dark-mode .trend-header,
+.dark-mode .chart-area { border-color: #1f2937; }
+
+.dark-mode .summary-card { background: #0f172a; border-left-color: #6366f1; }
+.dark-mode .summary-card.abnormal { background: #1f2937; border-left-color: #f59e0b; }
+.dark-mode .summary-number { color: #e5e7eb; }
+.dark-mode .summary-label { color: #9ca3af; }
+
+.dark-mode .parameter-card { background: #0f172a; border-left-color: #334155; }
+.dark-mode .parameter-name { color: #e5e7eb; }
+.dark-mode .parameter-value .value { color: #e5e7eb; }
+.dark-mode .parameter-value .unit,
+.dark-mode .parameter-range { color: #9ca3af; }
+
+.dark-mode .trend-header h3 { color: #e5e7eb; }
+.dark-mode .trend-text { color: #cbd5e1; }
+.dark-mode .trend-range { color: #9ca3af; }
+
+.dark-mode .chart-header { color: #e5e7eb; }
+.dark-mode .chart-unit { color: #9ca3af; }
+.dark-mode .chart-area { background: #0b1220; border-color: #111827; }
+
+.dark-mode .insight-success { background: rgba(16, 185, 129, 0.08); color: #a7f3d0; }
+.dark-mode .insight-warning { background: rgba(245, 158, 11, 0.08); color: #fde68a; }
+.dark-mode .insight-caution { background: rgba(251, 146, 60, 0.08); color: #fed7aa; }
+.dark-mode .insight-info { background: rgba(59, 130, 246, 0.08); color: #bfdbfe; }
+
+.dark-mode .trend-disclaimer { background: #1f2937; border-color: #374151; }
+.dark-mode .trend-disclaimer p { color: #eab308; }
+
+.dark-mode .error-banner {
+  background: rgba(239, 68, 68, 0.15);
+  border-color: rgba(248, 113, 113, 0.25);
+  color: #fecaca;
+}
+
+/* Auth */
+.dark-mode .auth-header h2 { color: #e5e7eb; }
+.dark-mode .auth-header p { color: #9ca3af; }
+.dark-mode .form-group label { color: #cbd5e1; }
+.dark-mode .form-group input { background: #0b1220; border-color: #1f2937; color: #e5e7eb; }
+.dark-mode .form-hint { color: #94a3b8; }
+
+/* Progress bars */
+.dark-mode .progress-bar { background: #111827; }
+.dark-mode .progress-fill { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+
+/* App header width + alignment */
+.app-header {
+  width: 100%;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+}
+
+.header-actions { margin-left: auto; }
+
+/* Dark mode app-header visuals */
+.dark-mode .app-header {
+  background: rgba(17, 24, 39, 0.55);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}

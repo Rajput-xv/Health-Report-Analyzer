@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FileText, LogOut } from 'lucide-react';
 import { toast } from 'react-toastify';
 import UserProfile from './UserProfile';
+import DarkModeToggle from './DarkModeToggle';
 import '../styles/landing.css';
 
 const Header = ({ user, setUser, isDashboard = false }) => {
@@ -36,6 +37,7 @@ const Header = ({ user, setUser, isDashboard = false }) => {
             <Link to="/" className="btn-home">Home</Link>
             <Link to="/contact" className="btn-contact">Contact Us</Link>
             {user && <UserProfile className="user-section" user={user} onLogout={handleLogout} />}
+            <DarkModeToggle />
           </div>
         ) : (
           <div className="landing-header-buttons">
