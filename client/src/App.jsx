@@ -85,7 +85,6 @@ function Dashboard({ user, setUser }) {
 
           {/* Mobile Nav */}
           <div className="mobile-nav">
-            <UserProfile className="user-section" user={user} showLogout={false} />
             <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)}>
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
@@ -95,11 +94,11 @@ function Dashboard({ user, setUser }) {
            {/* Mobile Menu Dropdown */}
         {menuOpen && (
           <div className="mobile-menu">
+            <div className="mobile-user-profile">
+              <UserProfile user={user} onLogout={handleLogout} />
+            </div>
             <Link to="/" className="btn-pill" onClick={() => setMenuOpen(false)}>Home</Link>
             <Link to="/contact" className="btn-pill" onClick={() => setMenuOpen(false)}>Contact Us</Link>
-            {/* <button className="btn-logout" onClick={handleLogout}>
-              <LogOut size={16} className="landing-logout-icon" /> Logout
-            </button> */}
           </div>
           )}
         {/* </div> */}

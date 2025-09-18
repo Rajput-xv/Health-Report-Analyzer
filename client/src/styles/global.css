@@ -363,6 +363,7 @@ button.btn-pill {
   letter-spacing: 0.5px; 
   cursor: pointer; 
   display: flex; 
+  justify-content: center;
   align-items: center; 
   gap: 0.6rem; 
   transition: all 0.3s ease; 
@@ -391,3 +392,24 @@ button.btn-pill:active {
   50% { background-position: 100% 50%; } 
   100% { background-position: 0% 50%; } 
 } 
+
+.btn-logout {
+  background: linear-gradient(rgba(255,255,255,0.1), rgba(255,255,255,0.1)), linear-gradient(135deg, #6EE7F9, #A855F7, #F472B6);
+  color: white;
+  padding: 0.6rem 1.6rem;
+  border-radius: 999px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-logout:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 6px 16px rgba(236, 72, 153, 0.6),
+              0 0 20px rgba(244, 63, 94, 0.6);
+}
+
