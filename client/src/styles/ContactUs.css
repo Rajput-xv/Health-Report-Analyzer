@@ -1,40 +1,68 @@
+/* Contact Page Wrapper with site theme */
+.contact-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  padding: 2rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .contact-container {
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 0 auto;
   padding: 2rem;
-  background-color: #ffffff;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .contact-form-wrapper {
   width: 100%;
 }
 
-.contact-form-wrapper h2 {
+.contact-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.contact-header h2 {
   color: #2c3e50;
   margin-bottom: 0.5rem;
-  font-size: 1.8rem;
-}
-
-.contact-form-wrapper p {
-  color: #7f8c8d;
-  margin-bottom: 2rem;
-}
-
-.form-notice {
-  background-color: #d4edda;
-  border: 1px solid #c3e6cb;
-  border-radius: 5px;
-  padding: 1rem;
-  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   text-align: center;
 }
 
+.contact-header p {
+  color: #6c757d;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.form-notice {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+  border: 1px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  backdrop-filter: blur(8px);
+}
+
 .form-notice p {
-  color: #155724;
+  color: #4c5c96;
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1rem;
+  font-weight: 500;
 }
 
 .contact-form {
@@ -52,50 +80,61 @@
 
 .form-group label {
   font-weight: 600;
-  color: #34495e;
-  font-size: 0.9rem;
+  color: #4c5c96;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  display: block;
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 0.8rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 5px;
+  padding: 1rem;
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  border-radius: 12px;
   font-size: 1rem;
-  transition: border-color 0.3s;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: #3498db;
+  border-color: #667eea;
   outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: rgba(255, 255, 255, 0.95);
 }
 
 .form-group input:disabled {
-  background-color: #f5f5f5;
+  background: rgba(245, 245, 245, 0.8);
   cursor: not-allowed;
+  border-color: rgba(102, 126, 234, 0.1);
 }
 
 .submit-btn {
-  background-color: #3498db;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 5px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
   margin-top: 1rem;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .submit-btn:hover {
-  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .submit-btn:disabled {
-  background-color: #95a5a6;
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Success Container Styles */
@@ -107,16 +146,29 @@
 .success-icon {
   font-size: 4rem;
   margin-bottom: 1rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
 }
 
 .success-container h2 {
-  color: #27ae60;
+  background: linear-gradient(135deg, #27ae60, #2ecc71);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
   margin-bottom: 1rem;
+  font-size: 2rem;
+  font-weight: 700;
 }
 
 .success-container p {
-  color: #7f8c8d;
+  color: #6c757d;
   margin-bottom: 2rem;
+  font-size: 1.1rem;
 }
 
 .success-details {
@@ -150,19 +202,21 @@
 }
 
 .btn-send-another {
-  background-color: #3498db;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
-  border-radius: 5px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
   font-size: 1rem;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
 .btn-send-another:hover {
-  background-color: #2980b9;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
 .btn-view-alternatives {
@@ -182,9 +236,18 @@
 }
 
 @media (max-width: 768px) {
+  .contact-page {
+    padding: 1rem 0;
+  }
+  
   .contact-container {
     padding: 1.5rem;
     margin: 1rem;
+    border-radius: 16px;
+  }
+  
+  .contact-header h2 {
+    font-size: 2rem;
   }
   
   .success-actions {

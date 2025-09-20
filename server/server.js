@@ -31,7 +31,19 @@ app.use('/api/reports', require('./routes/reports'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  res.json({ message: 'Health Report Analyzer API is running!' });
+  const mongoose = require('mongoose');
+  const dbConnected = mongoose.connection.readyState === 1;
+  
+  res.json({ 
+    message: 'Health Report Analyzer API is running!',
+    database: dbConnected ? 'Connected' : 'Disconnected',
+    features: {
+      fileUpload: true,
+      ocr: true,
+      authentication: dbConnected,
+      reportSaving: dbConnected
+    }
+  });
 });
 
 app.listen(PORT, () => {

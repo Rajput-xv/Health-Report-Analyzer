@@ -4,8 +4,14 @@ const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const mongoose = require('mongoose');
 
 const router = express.Router();
+
+// Check if database is connected
+const isDatabaseConnected = () => {
+  return mongoose.connection.readyState === 1;
+};
 
 const generateToken = (userId) => {
   return jwt.sign(
@@ -22,6 +28,15 @@ const generateToken = (userId) => {
 // Register new user
 router.post('/register', async (req, res) => {
   try {
+    // Check if database is connected
+    if (!isDatabaseConnected()) {
+      return res.status(503).json({
+        error: 'Database is not available. Registration requires database connection. Please set up MongoDB to use authentication features.',
+        dbStatus: 'disconnected',
+        suggestion: 'You can still use the file upload and OCR features without registration.'
+      });
+    }
+
     const { email, password, confirm_password, firstName, lastName } = req.body;
 
     // Validation
@@ -84,6 +99,15 @@ router.post('/register', async (req, res) => {
 // Login user
 router.post('/login', async (req, res) => {
   try {
+    // Check if database is connected
+    if (!isDatabaseConnected()) {
+      return res.status(503).json({
+        error: 'Database is not available. Login requires database connection. Please set up MongoDB to use authentication features.',
+        dbStatus: 'disconnected',
+        suggestion: 'You can still use the file upload and OCR features without login.'
+      });
+    }
+
     const { email, password } = req.body;
     // Validation
     if (!email || !password) {
