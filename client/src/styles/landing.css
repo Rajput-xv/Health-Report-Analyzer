@@ -845,3 +845,128 @@ Landing Page Styles
   background: #e5e7eb;
 }
 
+/* ----- DARK MODE UPGRADE ----- */
+.dark-mode .landing-container {
+  background: radial-gradient(circle at top left, #0f172a 0%, #1e293b 40%, #0f172a 100%);
+  color: #e5e7eb;
+}
+
+/* Navbar */
+.dark-mode .landing-header {
+  background: rgba(15, 23, 42, 0.75);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(14px);
+}
+.dark-mode .landing-logo-text {
+  color: #f8fafc;
+  text-shadow: 0 0 10px rgba(147, 197, 253, 0.6);
+}
+
+/* ✅ UPDATED hover for navbar buttons */
+.dark-mode .landing-header-buttons .landing-contact-button,
+.dark-mode .landing-header-buttons .landing-signin-button,
+.dark-mode .landing-header-buttons .landing-signup-button,
+.dark-mode .landing-header-buttons .landing-logout-button {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+}
+
+/* ✨ New hover style: subtle neon-blue glow */
+.dark-mode .landing-header-buttons button:hover {
+  background: rgba(56, 189, 248, 0.25);           /* soft blue tint */
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.6),
+              0 0 20px rgba(129, 140, 248, 0.4);  /* outer glow */
+  transform: translateY(-2px) scale(1.03);
+}
+
+/* Hero section */
+.dark-mode .landing-hero-title {
+  color: #f9fafb;
+  text-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+}
+.dark-mode .landing-hero-subtitle {
+  background: linear-gradient(90deg, #38bdf8, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.dark-mode .landing-hero-description {
+  color: rgba(203, 213, 225, 0.95);
+}
+
+/* Buttons */
+.dark-mode .landing-primary-button {
+  background: linear-gradient(90deg, #38bdf8 0%, #818cf8 50%, #a78bfa 100%);
+  color: #0f172a;
+  box-shadow: 0 6px 20px rgba(129, 140, 248, 0.5);
+}
+.dark-mode .landing-primary-button:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 10px 28px rgba(129, 140, 248, 0.7);
+}
+
+/* Feature / Card styling */
+.dark-mode .landing-features-section,
+.dark-mode .landing-how-it-works-section,
+.dark-mode .landing-cta-section {
+  background: rgba(15, 23, 42, 0.4);
+}
+
+.dark-mode .landing-feature-card,
+.dark-mode .landing-cta-card,
+.dark-mode .landing-step {
+  background: rgba(30, 41, 59, 0.85);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.dark-mode .landing-feature-card:hover,
+.dark-mode .landing-step:hover,
+.dark-mode .landing-cta-card:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 15px 35px rgba(129, 140, 248, 0.5);
+}
+
+.dark-mode .landing-feature-title,
+.dark-mode .landing-section-title,
+.dark-mode .landing-cta-title {
+  color: #f9fafb;
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.4);
+}
+.dark-mode .landing-feature-description,
+.dark-mode .landing-section-description,
+.dark-mode .landing-step-description,
+.dark-mode .landing-cta-description {
+  color: #cbd5e1;
+}
+
+/* Step number highlight */
+.dark-mode .landing-step-number {
+  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  box-shadow: 0 4px 15px rgba(56, 189, 248, 0.6);
+}
+.dark-mode .landing-step-number-text {
+  color: #0f172a;
+}
+
+/* Footer */
+.dark-mode .landing-footer {
+  background: rgba(15, 23, 42, 0.9);
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+.dark-mode .landing-footer-copyright {
+  color: #94a3b8;
+}
+
+/* Overlay popup */
+.dark-mode .overlay-card {
+  background: rgba(30, 41, 59, 0.95);
+  color: #f1f5f9;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+}
+.dark-mode .overlay-title { color: #f8fafc; }
+.dark-mode .overlay-text { color: #e2e8f0; }
+.dark-mode .overlay-subtext { color: #a1a1aa; }
