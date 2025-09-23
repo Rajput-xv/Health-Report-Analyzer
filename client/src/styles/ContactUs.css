@@ -1,6 +1,20 @@
+.contact-page {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6a11cb, #2575fc) !important;
+  padding: 2rem;
+  transition: background 0.4s ease-in-out;
+}
+
+.contact-page.dark {
+  background: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
+}
+
 .contact-container {
   max-width: 800px;
-  margin: 2rem auto;
+  margin: 0 auto;
   padding: 2rem;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -73,23 +87,34 @@
   color: #ddd;
 }
 
+/* ✅ Inputs / Textareas fixed */
 .form-group input,
 .form-group textarea {
   padding: 0.8rem;
-  border: 1px solid #e0e0e0;
   border-radius: 5px;
   font-size: 1rem;
   transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+  color: inherit !important;
+  background-color: inherit !important;
 }
 
+/* Light mode */
+.contact-container .form-group input,
+.contact-container .form-group textarea {
+  background-color: #fff !important;
+  color: #2c3e50 !important;
+  border: 1px solid #e0e0e0;
+}
+
+/* Dark mode */
 .contact-container.dark .form-group input,
 .contact-container.dark .form-group textarea {
-  background-color: #2e2e2e;
-  border-color: #555;
-  color: #f5f5f5;
+  background-color: #2e2e2e !important;
+  color: #f5f5f5 !important;
+  border: 1px solid #555;
 }
 
-/* ✅ Fix placeholder colors */
+/* ✅ Placeholder colors */
 .form-group input::placeholder,
 .form-group textarea::placeholder {
   color: #999;
