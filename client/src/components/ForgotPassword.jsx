@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { forgotPassword } from "../utils/api";
 
 const ForgotPassword = () => {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -14,12 +16,10 @@ const ForgotPassword = () => {
 
     try {
       await forgotPassword(email);
-      setMessage(
-        "If an account with that email exists, a reset link has been sent."
-      );
+      setMessage(t('forgot_password_form.reset_sent_message'));
     } catch (error) {
       console.error("Forgot password error:", error);
-      setMessage(error.message || "An error occurred while sending the reset link");
+      setMessage(error.message || t('forgot_password_form.error_sending'));
     } finally {
       setLoading(false);
     }
@@ -29,19 +29,19 @@ const ForgotPassword = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Forgot Password</h2>
-          <p>Enter your email to receive a reset link</p>
+          <h2>{t('auth.forgot_password')}</h2>
+          <p>{t('forgot_password_form.description')}</p>
         </div>
 
         {message && (
-          <div className={message.includes("sent") ? "auth-message" : "auth-error"}>
-            {message.includes("sent") ? "✅" : "❌"} {message}
+          <div className={message.includes(t('forgot_password_form.reset_sent_message')) ? "auth-message" : "auth-error"}>
+            {message.includes(t('forgot_password_form.reset_sent_message')) ? "✅" : "❌"} {message}
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="email">Email Address</label>
+            <label htmlFor="email">{t('auth.email')}</label>
             <input
               type="email"
               id="email"
@@ -49,7 +49,7 @@ const ForgotPassword = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              placeholder="Enter your email"
+              placeholder={t('auth_form.email_placeholder')}
             />
           </div>
 
@@ -61,26 +61,26 @@ const ForgotPassword = () => {
             {loading ? (
               <span>
                 <span className="spinner-small"></span>
-                Sending...
+                {t('forgot_password_form.sending')}
               </span>
             ) : (
-              "Send Reset Link"
+              t('forgot_password_form.send_reset_link')
             )}
           </button>
         </form>
 
         <div className="auth-toggle">
           <p>
-            Remember your password?{" "}
+            {t('common.remember_password')}{" "}
             <Link to="/login" className="btn-toggle" style={{ textDecoration: "none" }}>
-              Sign in
+              {t('auth.sign_in_here')}
             </Link>
           </p>
         </div>
 
         <div className="auth-demo">
           <p className="demo-notice">
-            🔒 <strong>Secure Reset:</strong> If your email exists in our system, you'll receive a secure password reset link.
+            🔒 <strong>{t('forgot_password_form.secure_reset')}:</strong> {t('forgot_password_form.secure_reset_desc')}
           </p>
         </div>
       </div>

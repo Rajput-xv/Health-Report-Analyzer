@@ -1,16 +1,15 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FileText, LogOut } from 'lucide-react';
-import { toast } from 'react-toastify';
-import UserProfile from './UserProfile';
-import DarkModeToggle from './DarkModeToggle';
-import '../styles/landing.css';
+import { FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header = ({ user, setUser, isDashboard = false }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSignInClick = () => {
-    navigate('/login');
+    navigate('/signin');
   };
 
   const handleSignUpClick = () => {
@@ -18,10 +17,9 @@ const Header = ({ user, setUser, isDashboard = false }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    // Add your logout logic here
     setUser(null);
-    toast.success("Successfully logged out. See you again!");
+    navigate('/');
   };
 
   return (
@@ -29,33 +27,38 @@ const Header = ({ user, setUser, isDashboard = false }) => {
       <div className="landing-header-content">
         <div className="landing-logo">
           <FileText className="landing-logo-icon" />
-         <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-  </Link>
+          <Link to="/" className="landing-logo-text">{t('nav.home')}</Link>
         </div>
-        
+
         {isDashboard ? (
           <div className="nav-button user-section">
-            <Link to="/" className="btn-home">Home</Link>
-            <Link to="/contact" className="btn-contact">Contact Us</Link>
-            {user && <UserProfile className="user-section" user={user} onLogout={handleLogout} />}
-            <DarkModeToggle />
+            <Link to="/" className="btn-home">{t('nav.home')}</Link>
+            <Link to="/contact" className="btn-contact">{t('nav.contact')}</Link>
+            <div className="language-switcher-wrapper">
+              <LanguageSwitcher />
+            </div>
+            {user && (
+              <button className="btn-logout" onClick={handleLogout}>
+                {t('auth.logout')}
+              </button>
+            )}
           </div>
         ) : (
           <div className="landing-header-buttons">
-            {user ? (
+            <div className="language-switcher-wrapper">
+              <LanguageSwitcher />
+            </div>
+            {!user && (
               <>
-                <button className="landing-signin-button" onClick={() => navigate('/dashboard')}>Return to Dashboard</button>
-                <button className="landing-contact-button" onClick={() => navigate('/contact')}>Contact Us</button>
-                <button className="landing-logout-button" onClick={handleLogout}>
-                  <LogOut size={16} className="landing-logout-icon" />Logout
+                <button className="landing-signin-button" onClick={handleSignInClick}>
+                  {t('auth.login')}
                 </button>
-              </>
-            ) : (
-              <>
-                <button className="landing-signin-button" onClick={handleSignInClick}>Sign In</button>
-                <button className="landing-contact-button" onClick={() => navigate('/contact')}>Contact Us</button>
-                <button className="landing-signup-button" onClick={handleSignUpClick}>Sign Up</button>
+                <button className="landing-contact-button" onClick={() => navigate('/contact')}>
+                  {t('nav.contact')}
+                </button>
+                <button className="landing-signup-button" onClick={handleSignUpClick}>
+                  {t('auth.signup')}
+                </button>
               </>
             )}
           </div>

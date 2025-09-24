@@ -3,7 +3,7 @@ import { useLoading } from "../context/LoadingContext";
 import "../styles/global.css"; // ensure this is imported
 
 const LoadingSpinner = () => {
-  const { loading } = useLoading();
+  const { isLoading: loading } = useLoading();
 
   return (
     <div className={`global-loading-overlay ${loading ? "show" : ""}`}>

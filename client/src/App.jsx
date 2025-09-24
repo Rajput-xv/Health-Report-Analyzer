@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useTranslation } from 'react-i18next';
 import AuthForm from "./components/AuthForm";
 import UserProfile from "./components/UserProfile";
 import FileUpload from "./components/FileUpload";
@@ -21,6 +22,7 @@ import ResetPassword from "./components/ResetPassword";
 import LandingPage from "./components/LandingPage";
 import Footer from "./components/Footer";
 import ContactUs from "./components/ContactUs";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 import { getCurrentUser } from "./utils/api";
 import "./styles/App.css";
 import FAQ from "./components/FAQ";
@@ -30,6 +32,7 @@ import { useLoading } from "./context/LoadingContext.jsx";
 
 // Dashboard Component - Main authenticated app
 function Dashboard({ user, setUser }) {
+  const { t } = useTranslation();
   const [reportData, setReportData] = useState(null);
   const [trendData, setTrendData] = useState(null);
   const [error, setError] = useState(null);
@@ -44,13 +47,13 @@ function Dashboard({ user, setUser }) {
     setReportData(null);
     setTrendData(null);
     setError(null);
-    toast.success("Successfully logged out. See you again!");
+    toast.success(t('toast.logout_success'));
   };
 
   const handleFileProcessed = (data) => {
     setReportData(data);
     setError(null);
-    toast.success("Report processed successfully!");
+    toast.success(t('toast.upload_success'));
   };
 
   const handleTrendData = (trends) => {
@@ -61,7 +64,7 @@ function Dashboard({ user, setUser }) {
     setError(errorMessage);
     setReportData(null);
     setTrendData(null);
-    toast.error(errorMessage);
+    toast.error(t('toast.upload_error'));
   };
 
   const handleReset = () => {
@@ -78,21 +81,25 @@ function Dashboard({ user, setUser }) {
         </div>
       )}
 
-      <header className="landing-header">
+      <header className="landing-header app-header">
         <div className="landing-header-content">
           {/* Logo clickable & keyboard accessible */}
           <div className="landing-logo">
             <Link
               to="/"
-              aria-label="Go to Home"
+              aria-label={t('nav.home')}
               tabIndex={0}
             >
               <FileText className="landing-logo-icon" />
             </Link>
             <Link to="/" className="landing-logo-text">
-              Health Report Analyzer
+              {t('app.title')}
             </Link>
-            <button className="hamburger-btn" onClick={() => setMenuOpen(!menuOpen)}>
+            <button 
+              className="hamburger-btn" 
+              onClick={() => setMenuOpen(!menuOpen)}
+              aria-label="Toggle menu"
+            >
               {menuOpen ? <X size={24} /> : <Menu size={24} />}
             </button>
           </div>
@@ -101,19 +108,23 @@ function Dashboard({ user, setUser }) {
             <Link
               to="/"
               className="btn-home"
-              aria-label="Go to Home"
+              aria-label={t('nav.home')}
               tabIndex={0}
             >
-              Home
+              {t('nav.home')}
             </Link>
             <Link
               to="/contact"
               className="btn-contact"
-              aria-label="Go to Contact Page"
+              aria-label={t('nav.contact')}
               tabIndex={0}
             >
-              Contact Us
+              {t('nav.contact')}
             </Link>
+
+            <div className="language-switcher-wrapper">
+              <LanguageSwitcher />
+            </div>
 
             <UserProfile
               className="user-section"
@@ -131,8 +142,8 @@ function Dashboard({ user, setUser }) {
       <main className="app-main">
         {!reportData && !loading && !error && (
           <div className="welcome-dashboard-message">
-            <h2>Welcome back, {user.firstName}!</h2>
-            <p>Upload your lab report and get instant insights.</p>
+            <h2>{t('app.welcome')}, {user.firstName}!</h2>
+            <p>{t('dashboard.upload_first')}</p>
           </div>
         )}
 
@@ -143,9 +154,9 @@ function Dashboard({ user, setUser }) {
               onClick={handleReset}
               className="btn-retry"
               tabIndex={0}
-              aria-label="Retry Upload"
+              aria-label={t('app.try_again')}
             >
-              Try Again
+              {t('app.try_again')}
             </button>
           </div>
         )}
@@ -160,14 +171,14 @@ function Dashboard({ user, setUser }) {
         {reportData && (
           <div className="results-section">
             <div className="results-header">
-              <h2>📊 Analysis Results</h2>
+              <h2>📊 {t('reports.analysis_complete')}</h2>
               <button
                 onClick={handleReset}
                 className="btn-new-upload"
                 tabIndex={0}
-                aria-label="Upload New Report"
+                aria-label={t('dashboard.upload_report')}
               >
-                Upload New Report
+                {t('dashboard.upload_report')}
               </button>
             </div>
 
@@ -187,6 +198,7 @@ function Dashboard({ user, setUser }) {
 }
 
 function App() {
+  const { t, i18n } = useTranslation();
   const { loading } = useLoading();
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -201,18 +213,40 @@ function App() {
           await getCurrentUser();
           const parsedUser = JSON.parse(userData);
           setUser(parsedUser);
-          toast.info(`Welcome back, ${parsedUser.firstName}!`);
+          toast.info(t('toast.login_success', { name: parsedUser.firstName }));
         } catch (error) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          toast.error("Session expired. Please log in again.");
+          toast.error(t('toast.logout_success'));
         }
       }
       setAuthLoading(false);
     };
 
     checkAuth();
-  }, []);
+  }, [t]);
+
+  // Set document language attribute for accessibility and SEO
+  useEffect(() => {
+    document.documentElement.lang = i18n.language || 'en';
+    document.title = t('app.title');
+  }, [i18n.language, t]);
+
+  // Listen for language changes and update document language
+  useEffect(() => {
+    const handleLanguageChange = (lng) => {
+      document.documentElement.lang = lng;
+      document.title = t('app.title');
+      // Update page direction for RTL languages (if needed in future)
+      document.documentElement.dir = lng === 'ar' || lng === 'he' ? 'rtl' : 'ltr';
+    };
+
+    i18n.on('languageChanged', handleLanguageChange);
+    
+    return () => {
+      i18n.off('languageChanged', handleLanguageChange);
+    };
+  }, [i18n, t]);
 
   const handleLogin = (userData, token) => {
     setUser(userData);
@@ -223,6 +257,7 @@ function App() {
       <div className="app">
         <div className="global-loading-overlay">
           <LoadingSpinner />
+          <p>{t('app.loading')}</p>
         </div>
       </div>
     );
@@ -261,22 +296,22 @@ function App() {
                   <header className="app-header">
                     <div className="header-content">
                       <div className="header-text">
-                         <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-</Link>
-                        <p>
-                          Secure platform to analyze your health reports with AI
-                          insights
-                        </p>
+                        <Link to="/" className="landing-logo-text">
+                          {t('app.title')}
+                        </Link>
+                        <p>{t('app.subtitle')}</p>
                       </div>
                       <div className="header-actions">
+                        <div className="language-switcher-wrapper">
+                          <LanguageSwitcher />
+                        </div>
                         <Link
                           to="/"
                           className="btn-home"
                           tabIndex={0}
-                          aria-label="Back to Home"
+                          aria-label={t('nav.home')}
                         >
-                          Back to Home
+                          {t('nav.home')}
                         </Link>
                       </div>
                     </div>
@@ -301,22 +336,22 @@ function App() {
                   <header className="app-header">
                     <div className="header-content">
                       <div className="header-text">
-                          <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-</Link>
-                        <p>
-                          Secure platform to analyze your health reports with AI
-                          insights
-                        </p>
+                        <Link to="/" className="landing-logo-text">
+                          {t('app.title')}
+                        </Link>
+                        <p>{t('app.subtitle')}</p>
                       </div>
                       <div className="header-actions">
+                        <div className="language-switcher-wrapper">
+                          <LanguageSwitcher />
+                        </div>
                         <Link
                           to="/"
                           className="btn-home"
                           tabIndex={0}
-                          aria-label="Back to Home"
+                          aria-label={t('nav.home')}
                         >
-                          Back to Home
+                          {t('nav.home')}
                         </Link>
                       </div>
                     </div>
@@ -341,19 +376,22 @@ function App() {
                   <header className="app-header">
                     <div className="header-content">
                       <div className="header-text">
-                          <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-</Link>
-                        <p>Reset your password</p>
+                        <Link to="/" className="landing-logo-text">
+                          {t('app.title')}
+                        </Link>
+                        <p>{t('auth.forgot_password')}</p>
                       </div>
                       <div className="header-actions">
+                        <div className="language-switcher-wrapper">
+                          <LanguageSwitcher />
+                        </div>
                         <Link
                           to="/"
                           className="btn-home"
                           tabIndex={0}
-                          aria-label="Back to Home"
+                          aria-label={t('nav.home')}
                         >
-                          Back to Home
+                          {t('nav.home')}
                         </Link>
                       </div>
                     </div>
@@ -378,19 +416,22 @@ function App() {
                   <header className="app-header">
                     <div className="header-content">
                       <div className="header-text">
-                           <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-</Link>
-                        <p>Enter your new password</p>
+                        <Link to="/" className="landing-logo-text">
+                          {t('app.title')}
+                        </Link>
+                        <p>{t('auth.confirm_password')}</p>
                       </div>
                       <div className="header-actions">
+                        <div className="language-switcher-wrapper">
+                          <LanguageSwitcher />
+                        </div>
                         <Link
                           to="/"
                           className="btn-home"
                           tabIndex={0}
-                          aria-label="Back to Home"
+                          aria-label={t('nav.home')}
                         >
-                          Back to Home
+                          {t('nav.home')}
                         </Link>
                       </div>
                     </div>
@@ -413,19 +454,22 @@ function App() {
                   <header className="app-header">
                     <div className="header-content">
                       <div className="header-text">
-                          <Link to="/" className="landing-logo-text">
-    Health Report Analyzer
-</Link>
-                        <p>We'd love to hear from you!</p>
+                        <Link to="/" className="landing-logo-text">
+                          {t('app.title')}
+                        </Link>
+                        <p>{t('contact.subtitle')}</p>
                       </div>
                       <div className="header-actions">
+                        <div className="language-switcher-wrapper">
+                          <LanguageSwitcher />
+                        </div>
                         <Link
                           to="/dashboard"
                           className="btn-home"
                           tabIndex={0}
-                          aria-label="Back to Dashboard"
+                          aria-label={t('nav.return_to_dashboard')}
                         >
-                          Back to Dashboard
+                          {t('nav.return_to_dashboard')}
                         </Link>
                       </div>
                     </div>
@@ -463,7 +507,7 @@ function App() {
           hideProgressBar={false}
           newestOnTop={false}
           closeOnClick
-          rtl={false}
+          rtl={i18n.language === 'ar' || i18n.language === 'he'}
           pauseOnFocusLoss
           draggable
           pauseOnHover

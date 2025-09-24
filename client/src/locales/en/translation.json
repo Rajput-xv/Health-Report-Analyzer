@@ -1,0 +1,187 @@
+{
+  "nav": {
+    "home": "Home",
+    "contact": "Contact Us",
+    "dashboard": "Dashboard",
+    "return_to_dashboard": "Return to Dashboard"
+  },
+  "auth": {
+    "login": "Sign In",
+    "signup": "Sign Up",
+    "logout": "Logout",
+    "signin_title": "Welcome Back",
+    "signup_title": "Create Account",
+    "email": "Email Address",
+    "password": "Password",
+    "confirm_password": "Confirm Password",
+    "remember_me": "Remember me",
+    "forgot_password": "Forgot Password?",
+    "no_account": "Don't have an account?",
+    "have_account": "Already have an account?",
+    "sign_up_here": "Sign up here",
+    "sign_in_here": "Sign in here",
+    "reset_password": "Reset Password",
+    "new_password": "New Password",
+    "password_reset_success": "Password reset successful! You can now log in."
+  },
+  "app": {
+    "title": "Health Report Analyzer",
+    "subtitle": "with Advanced Technology",
+    "welcome": "Welcome",
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "try_again": "Try Again"
+  },
+  "homepage": {
+    "hero_title": "Analyze Your Health Reports",
+    "hero_subtitle": "Upload your medical reports and get instant, comprehensive analysis with personalized insights. Our advanced technology helps you understand your health data like never before.",
+    "get_started": "Get Started",
+    "learn_more": "Learn More",
+    "features_title": "Why Choose Our Platform?",
+    "feature_1_title": "Instant Analysis",
+    "feature_1_desc": "Get comprehensive analysis of your health reports in seconds using advanced OCR technology.",
+    "feature_2_title": "Secure & Private",
+    "feature_2_desc": "Your health data is encrypted and protected with enterprise-grade security. We never store your reports.",
+    "feature_3_title": "Multiple Formats",
+    "feature_3_desc": "Support for various report formats including PNG, JPEG, JPG images and scanned documents.",
+    "available_247": "24/7 Available",
+    "available_247_desc": "Access your health insights anytime, anywhere with our cloud-based platform",
+    "trend_tracking": "Trend Tracking",
+    "trend_tracking_desc": "Monitor your health metrics over time and identify important trends in your medical data",
+    "how_it_works": "How It Works",
+    "how_it_works_desc": "Get insights from your health reports in three simple steps",
+    "step_1_title": "Upload Report",
+    "step_1_desc": "Simply drag and drop your health report or take a photo with your device",
+    "step_2_title": "Smart Analysis", 
+    "step_2_desc": "Our advanced technology processes and analyzes your report data in real-time",
+    "step_3_title": "Get Insights",
+    "step_3_desc": "Receive detailed analysis with explanations and recommendations",
+    "cta_title": "Ready to Understand Your Health Better?",
+    "cta_desc": "Join thousands of users who trust Health Report Analyzer for their medical insights. Start your journey to better health understanding today.",
+    "continue_dashboard": "Continue to Dashboard",
+    "start_free": "Start Free Analysis",
+    "platform_desc": "Transform complex medical data into clear, actionable insights with our cutting-edge platform"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "upload_report": "Upload New Report",
+    "recent_reports": "Recent Reports",
+    "no_reports": "No reports uploaded yet",
+    "upload_first": "Upload your first medical report to get started"
+  },
+  "reports": {
+    "upload_title": "Upload Medical Report",
+    "drag_drop": "Drag and drop your medical report here",
+    "or": "or",
+    "browse_files": "Browse Files",
+    "supported_formats": "Supported formats: PDF, JPG, PNG, JPEG",
+    "analyzing": "Analyzing your report...",
+    "analysis_complete": "Analysis Complete",
+    "download_report": "Download Report"
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Get in touch with our team",
+    "name": "Full Name",
+    "email": "Email Address",
+    "subject": "Subject",
+    "message": "Message",
+    "send": "Send Message",
+    "success": "Message sent successfully!",
+    "error": "Failed to send message. Please try again.",
+    "form_notice": "Working Email Service: Your message will be sent directly to our team via email.",
+    "send_another": "Send Another Message",
+    "sending": "Sending...",
+    "feedback_question": "Have questions or feedback? We'd love to hear from you!"
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "q1": "How does the AI analyze my medical report?",
+    "a1": "The AI processes your uploaded medical report to extract key data and summarize findings in easy-to-understand language.",
+    "q2": "Is my data secure?",
+    "a2": "Yes, all uploads are encrypted during transfer and not stored on our server. Your privacy is our top priority.",
+    "q3": "What file formats are supported?",
+    "a3": "You can upload PDF, JPEG, or PNG files up to 10 MB in size.",
+    "q4": "How long does analysis take?",
+    "a4": "Typically under 15 seconds, depending on report size.",
+    "q5": "Is a doctor's consultation included?",
+    "a5": "No. The tool provides AI-powered summaries only; for any medical advice, consult a professional."
+  },
+  "footer": {
+    "copyright": "© 2024 Health Report Analyzer. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "about": "About Us",
+    "support": "Support"
+  },
+  "toast": {
+    "logout_success": "Successfully logged out. See you again!",
+    "login_success": "Welcome back!",
+    "signup_success": "Account created successfully!",
+    "upload_success": "Report uploaded successfully",
+    "upload_error": "Failed to upload report",
+    "analysis_success": "Report analyzed successfully",
+    "analysis_error": "Failed to analyze report"
+  },
+  "language": {
+    "select": "Select Language",
+    "english": "English",
+    "hindi": "Hindi"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "confirm": "Confirm",
+    "yes": "Yes",
+    "no": "No",
+    "back_home": "Back to Home",
+    "remember_password": "Remember your password?"
+  },
+  "validation": {
+    "passwords_no_match": "Passwords do not match.",
+    "password_min_length": "Password must be at least 6 characters",
+    "confirm_password_placeholder": "Confirm your new password",
+    "new_password_placeholder": "Enter your new password"
+  },
+  "auth_form": {
+    "first_name": "First Name",
+    "last_name": "Last Name",
+    "first_name_placeholder": "Enter your first name",
+    "last_name_placeholder": "Enter your last name",
+    "email_placeholder": "Enter your email",
+    "password_placeholder": "Enter your password",
+    "signin_description": "Sign in to access your health reports",
+    "signup_description": "Join us to start analyzing your health reports",
+    "signing_in": "Signing In...",
+    "creating_account": "Creating Account...",
+    "create_one": "Create one",
+    "sign_in": "Sign in",
+    "secure_platform": "Secure Platform",
+    "secure_description": "Your data is securely stored in our cloud database with industry-standard encryption and authentication.",
+    "password_requirements": {
+      "length": "At least 8 characters",
+      "upper": "Contains uppercase letter",
+      "lower": "Contains lowercase letter", 
+      "number": "Contains number",
+      "special": "Contains special character"
+    }
+  },
+  "forgot_password_form": {
+    "description": "Enter your email to receive a reset link",
+    "send_reset_link": "Send Reset Link",
+    "sending": "Sending...",
+    "secure_reset": "Secure Reset",
+    "secure_reset_desc": "If your email exists in our system, you'll receive a secure password reset link.",
+    "reset_sent_message": "If an account with that email exists, a reset link has been sent.",
+    "error_sending": "An error occurred while sending the reset link"
+  },
+
+  
+  "footer": {
+    "copyright": "© 2024 Health Report Analyzer. Empowering better health decisions through technology.",
+    "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals."
+}
+}

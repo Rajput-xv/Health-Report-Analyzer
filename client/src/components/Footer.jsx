@@ -1,11 +1,14 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/App.css';
 
 const Footer = () => {
+  const { t } = useTranslation();
+
   return (
     <footer className="app-footer">
-      <p>© 2024 Health Report Analyzer. Empowering better health decisions through technology.</p>
-      <p>⚠️ This tool is for informational purposes only. Always consult with healthcare professionals.</p>
+      <p>{t('footer.copyright')}</p>
+      <p>{t('footer.disclaimer')}</p>
     </footer>
   );
 };

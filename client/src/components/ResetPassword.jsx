@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useTranslation } from 'react-i18next';
 import { resetPassword } from "../utils/api";
 
 const ResetPassword = () => {
+  const { t } = useTranslation();
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState("");
@@ -16,14 +18,14 @@ const ResetPassword = () => {
     setMessage("");
 
     if (password !== confirmPassword) {
-      setMessage("Passwords do not match.");
+      setMessage(t('validation.passwords_no_match'));
       return;
     }
 
     setLoading(true);
     try {
       await resetPassword(token, password);
-      setMessage("Password reset successful! You can now log in.");
+      setMessage(t('auth.password_reset_success'));
       setSuccess(true);
       // Redirect to login after 3 seconds
       setTimeout(() => {
@@ -40,7 +42,7 @@ const ResetPassword = () => {
     <div className="auth-container">
       <div className="auth-card">
         <div className="auth-header">
-          <h2>Reset Password</h2>
+          <h2>{t('auth.reset_password')}</h2>
           <p>Enter your new password below</p>
         </div>
 
@@ -57,7 +59,7 @@ const ResetPassword = () => {
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">
-            <label htmlFor="password">New Password</label>
+            <label htmlFor="password">{t('auth.new_password')}</label>
             <input
               type="password"
               id="password"
@@ -65,16 +67,16 @@ const ResetPassword = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              placeholder="Enter your new password"
+              placeholder={t('validation.new_password_placeholder')}
               minLength={6}
             />
             <small className="form-hint">
-              Password must be at least 6 characters
+              {t('validation.password_min_length')}
             </small>
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+            <label htmlFor="confirmPassword">{t('auth.confirm_password')}</label>
             <input
               type="password"
               id="confirmPassword"
@@ -82,7 +84,7 @@ const ResetPassword = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
-              placeholder="Confirm your new password"
+              placeholder={t('validation.confirm_password_placeholder')}
               minLength={6}
             />
           </div>
@@ -98,7 +100,7 @@ const ResetPassword = () => {
                 Resetting...
               </span>
             ) : (
-              "Reset Password"
+              t('auth.reset_password')
             )}
           </button>
         </form>
@@ -106,15 +108,14 @@ const ResetPassword = () => {
         {!success && (
           <div className="auth-toggle">
             <p>
-              Remember your password?{" "}
+              {t('common.remember_password')}{" "}
               <Link to="/login" className="btn-toggle" style={{ textDecoration: "none" }}>
-                Sign in
+                {t('auth.sign_in_here')}
               </Link>
             </p>
             <p>
-              
               <Link to="/" className="btn-toggle" style={{ textDecoration: "none" }}>
-                Back to Home
+                {t('common.back_home')}
               </Link>
             </p>
           </div>
