@@ -26,7 +26,7 @@
   transition: all 0.3s ease;
   min-width: 120px;
   color: white;
-  /* backdrop-filter: blur(8px); */
+  backdrop-filter: blur(8px);
 }
 
 .language-select:hover {
@@ -51,7 +51,6 @@
   display: flex;
   align-items: center;
 }
-
 
 /* Dark mode language switcher */
 .dark-mode .language-select {
@@ -94,52 +93,6 @@
     padding: 4px 6px;
   }
 }
-.language-switcher-wrapper {
-  position: relative;
-  display: inline-block; /* ensure width wraps the button */
-}
-
-.language-dropdown {
-  position: absolute;
-  top: 100%;      /* right below the button */
-  left: 0;        /* align left edge with button */
-  width: 100%;    /* match the button width */
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 8px;
-  padding: 4px 0;
-  display: flex;
-  flex-direction: column;
-  z-index: 50;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.language-dropdown button {
-  background: transparent;
-  border: none;
-  color: white;
-  padding: 10px 16px;
-  text-align: left;
-  cursor: pointer;
-  font-weight: 500;
-  width: 100%; /* make each option fill the dropdown */
-}
-
-.language-dropdown button:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transition: background 0.2s;
-}
-
-/* Dark mode */
-.dark-mode .language-dropdown {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.dark-mode .language-dropdown button {
-  color: #e5e7eb;
-}
-
-
-
 
 /* Integration with existing header styles */
 .landing-header-buttons .language-switcher-wrapper {

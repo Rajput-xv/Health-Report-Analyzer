@@ -1,65 +1,49 @@
-import React, { useState } from "react";
-import { useTranslation } from "react-i18next";
-import { ChevronDown, Globe } from "lucide-react";
+import React from 'react';
+import { useTranslation } from 'react-i18next';
+import { Globe } from 'lucide-react';
 
 const languages = [
-  { code: "en", label: "English", flag: "🇺🇸" },
-  { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
+  { code: 'en', label: 'English', flag: '🇺🇸' },
+  { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' }
 ];
 
-export default function LanguageSwitcher() {
+export default function LanguageSwitcher({ value, className = '' }) {
   const { i18n } = useTranslation();
-  const [open, setOpen] = useState(false);
 
   const getCurrent = () => {
-    const langFromI18n = i18n.language ? i18n.language.split("-")[0] : "en";
-    return langFromI18n || "en";
+    // prefer provided prop, otherwise use i18n.language and normalize
+    const langFromI18n = i18n.language ? i18n.language.split('-')[0] : 'en';
+    return value || langFromI18n || 'en';
   };
 
-  const handleChange = (lng) => {
+  const handleChange = (e) => {
+    const lng = e.target.value;
     i18n.changeLanguage(lng);
-    try {
-      localStorage.setItem("i18nextLng", lng);
-    } catch (err) {
-      console.warn("Could not save language preference:", err);
+    try { 
+      localStorage.setItem('i18nextLng', lng); 
+    } catch (err) { 
+      console.warn('Could not save language preference:', err);
     }
-    setOpen(false);
   };
 
   const current = getCurrent();
-  const currentLanguage =
-    languages.find((lang) => lang.code === current) || languages[0];
+  const currentLanguage = languages.find(lang => lang.code === current) || languages[0];
 
   return (
-    <div className="language-switcher-wrapper">
-      {/* Trigger Button */}
-      <button
-        className="landing-signin-button language-trigger"
-        onClick={() => setOpen((prev) => !prev)}
+    <div className={`language-switcher ${className}`}>
+      {/* <Globe className="language-icon" size={16} /> */}
+      <select
+        value={current}
+        onChange={handleChange}
+        aria-label="Select language"
+        className="language-select"
       >
-        <Globe size={16} className="mr-2" />
-        {currentLanguage.flag} {currentLanguage.label}
-        <ChevronDown
-          size={16}
-          className={`ml-2 transition-transform ${
-            open ? "rotate-180" : "rotate-0"
-          }`}
-        />
-      </button>
-
-      {/* Dropdown */}
-      {open && (
-  <div className="language-dropdown">
-    {languages.map((lang) => (
-      <button
-        key={lang.code}
-        onClick={() => handleChange(lang.code)}
-      >
-        {lang.flag} {lang.label}
-      </button>
-    ))}
-  </div>
-)}
+        {languages.map((lang) => (
+          <option key={lang.code} value={lang.code}>
+            {lang.flag} {lang.label}
+          </option>
+        ))}
+      </select>
     </div>
   );
 }
