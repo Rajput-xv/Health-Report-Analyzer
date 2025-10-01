@@ -2,6 +2,8 @@
 import { LogOut } from "lucide-react"; 
 import React, { useState } from 'react';
 import '../styles/landing.css'
+import { FaUser } from "react-icons/fa";
+
 const UserProfile = ({ user, onLogout }) => {
   const [showDialog, setShowDialog] = useState(false);
   const handleLogout = () => {
@@ -12,7 +14,7 @@ const UserProfile = ({ user, onLogout }) => {
 
   return (
     <div className="dashboard-profile">
-      <div className="user-avatar">👤</div>
+      <div className="user-avatar"><FaUser style={{ color: "white"}} /></div>
       <div className="user-details">
         <span className="user-name">{user.firstName} {user.lastName}</span>
         <span className="user-email">{user.email}</span>

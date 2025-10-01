@@ -94,7 +94,7 @@ function Dashboard({ user, setUser }) {
             >
               <FileText className="landing-logo-icon" />
             </Link>
-            <Link to="/" className="landing-logo-text">
+            <Link to="/" className="landing-logo-text" style={{ paddingBottom: '0.5rem' }}>
               {t('app.title')}
             </Link>
             <button 
