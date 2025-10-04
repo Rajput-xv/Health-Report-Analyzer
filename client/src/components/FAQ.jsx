@@ -36,9 +36,9 @@ const FAQ = () => {
 
   return (
     <section className="faq-container">
-      <h2 data-aos="fade-up" data-aos-duration="740">{t('faq.title')}</h2>
+      <h2 >{t('faq.title')}</h2>
       {faqEntries.map((item, idx) => (
-        <div data-aos="fade-right" data-aos-duration="740"
+        <div
           key={idx}
           className={`faq-item ${openIndex === idx ? "open" : ""}`}
         >

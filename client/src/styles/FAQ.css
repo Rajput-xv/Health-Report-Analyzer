@@ -74,10 +74,11 @@
   transition: opacity 0.1s ease, transform 0.1s ease;  /* 👈 fast fade */
 }
 
+
+
 .faq-answer.show {
   max-height: 400px;
   padding: 15px 22px;
-  border-left: 4px solid #007bff;
 }
 
 .faq-answer.show p {
