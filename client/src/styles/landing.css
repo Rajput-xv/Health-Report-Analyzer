@@ -142,12 +142,15 @@
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .landing-logo-icon {
   width: 2rem;
   height: 2rem;
   color: white;
+  flex-shrink: 0;
 }
 
 .landing-logo-text {
@@ -156,6 +159,11 @@
   color: white;
   margin: 0;
   text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .landing-logo-text:hover {
