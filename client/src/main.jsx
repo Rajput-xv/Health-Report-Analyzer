@@ -10,7 +10,37 @@ import './i18n';
 import AOS from 'aos';
 import 'aos/dist/aos.css';
 
+// Import Lenis for smooth scrolling
+import Lenis from 'lenis';
+import 'lenis/dist/lenis.css';
+
 import { LoadingProvider } from './context/LoadingContext.jsx';
+
+// Initialize Lenis smooth scrolling
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+  orientation: 'vertical',
+  gestureOrientation: 'vertical',
+  smoothWheel: true,
+  wheelMultiplier: 1,
+  smoothTouch: false,
+  touchMultiplier: 2,
+  infinite: false,
+});
+
+// Request animation frame for Lenis
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+
+requestAnimationFrame(raf);
+
+// Integrate Lenis with AOS
+lenis.on('scroll', () => {
+  AOS.refresh();
+});
 
 // Initialize AOS with optimized settings
 AOS.init({

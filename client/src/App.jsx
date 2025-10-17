@@ -31,7 +31,7 @@ import FAQ from "./components/FAQ";
 import { FileText, Menu, X, LogOut } from "lucide-react";
 import DarkModeToggle from "./components/DarkModeToggle";
 import { useLoading } from "./context/LoadingContext.jsx";
-import { ReportsList, ReportDetail } from "./components/ReportList"; // Add this import
+import { ReportsList, ReportDetail } from "./components/ReportList";
 
 function Dashboard({ user, setUser }) {
   const { t } = useTranslation();
@@ -241,6 +241,136 @@ function Dashboard({ user, setUser }) {
   );
 }
 
+// Contact Page Component with mobile navigation
+function ContactPage({ user, setUser }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    toast.success(t('toast.logout_success'));
+    navigate('/');
+  };
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
+
+  return (
+    <>
+      <header className="landing-header app-header">
+        <div className="landing-header-content">
+          <div className="landing-logo">
+            <Link to="/" aria-label={t('nav.home')} tabIndex={0}>
+              <FileText className="landing-logo-icon" />
+            </Link>
+            <Link to="/" className="landing-logo-text" style={{ paddingBottom: '0.5rem' }}>
+              {t('app.title')}
+            </Link>
+          </div>
+
+          {/* Desktop Navigation */}
+          <div className="nav-button user-section desktop-nav">
+            <Link to="/" className="btn-home" aria-label={t('nav.home')} tabIndex={0}>
+              {t('nav.home')}
+            </Link>
+            <Link to="/contact" className="btn-contact" aria-label={t('nav.contact')} tabIndex={0}>
+              {t('nav.contact')}
+            </Link>
+
+            <div className="language-switcher-wrapper">
+              <LanguageSwitcher />
+            </div>
+
+            <UserProfile
+              className="user-section"
+              user={user}
+              onLogout={handleLogout}
+              aria-label="User Profile and Logout"
+              tabIndex={0}
+            />
+
+            <DarkModeToggle aria-label="Toggle Dark Mode" tabIndex={0} />
+          </div>
+
+          {/* Mobile Hamburger Button */}
+          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
+            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
+              <div className="mobile-menu-header">
+                <span className="mobile-menu-title">{t('app.title')}</span>
+                <button className="mobile-menu-close" onClick={closeMobileMenu}>
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="mobile-menu-content">
+                <div className="mobile-menu-item">
+                  <LanguageSwitcher />
+                </div>
+
+                <button
+                  className="mobile-menu-btn"
+                  onClick={() => {
+                    navigate('/');
+                    closeMobileMenu();
+                  }}
+                >
+                  {t('nav.home')}
+                </button>
+
+                <button
+                  className="mobile-menu-btn"
+                  onClick={() => {
+                    navigate('/contact');
+                    closeMobileMenu();
+                  }}
+                >
+                  {t('nav.contact')}
+                </button>
+
+                <button
+                  className="mobile-menu-btn mobile-logout-btn"
+                  onClick={() => {
+                    handleLogout();
+                    closeMobileMenu();
+                  }}
+                >
+                  <LogOut size={16} />
+                  {t('auth.logout')}
+                </button>
+
+                <div className="mobile-menu-item">
+                  <DarkModeToggle />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+
+      <main className="app-main">
+        <ContactUs user={user} />
+      </main>
+
+      <Footer />
+    </>
+  );
+}
+
 // RouteChangeTracker component to refresh animations on route changes
 function RouteChangeTracker() {
   const location = useLocation();
@@ -354,6 +484,7 @@ function App() {
             element={
               <>
                 <LandingPage user={user} setUser={setUser} />
+                <Stats />
                 <FAQ />
                 <Footer />
               </>
@@ -433,67 +564,13 @@ function App() {
               )
             }
           />
+
           {/* Contact Us route */}
           <Route
             path="/contact"
             element={
               user ? (
-                <>
-                  <header className="app-header">
-                    <div className="header-content">
-                      <div className="header-text">
-                        <h1>🏥 Health Report Analyzer</h1>
-                        <p>We'd love to hear from you!</p>
-                      </div>
-                      <div className="header-actions">
-                        <Link to="/dashboard" className="btn-home">🏠 Back to Dashboard</Link>
-                      </div>
-                    </div>
-                  </header>
-                  <main className="app-main">
-                    <ContactUs user={user} />
-                  </main>
-                  <Footer />
-                </>
-              ) : <Navigate to="/login" />
-            }
-          />
-
-          {/* Contact */}
-          <Route
-            path="/contact"
-            element={
-              user ? (
-                <>
-                  <header className="auth-header">
-                    <div className="auth-header-content">
-                      <div className="auth-logo">
-                        <FileText className="auth-logo-icon" />
-                        <Link to="/" className="auth-logo-text">
-                          {t('app.title')}
-                        </Link>
-                      </div>
-                      <div className="auth-header-buttons">
-                        <div className="language-switcher-wrapper">
-                          <LanguageSwitcher />
-                        </div>
-                        <Link
-                          to="/dashboard"
-                          className="auth-home-button"
-                          tabIndex={0}
-                          aria-label={t('nav.return_to_dashboard')}
-                        >
-                          {t('nav.return_to_dashboard')}
-                        </Link>
-                        <DarkModeToggle />
-                      </div>
-                    </div>
-                  </header>
-                  <main className="app-main">
-                    <ContactUs user={user} />
-                  </main>
-                  <Footer />
-                </>
+                <ContactPage user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/login" />
               )
