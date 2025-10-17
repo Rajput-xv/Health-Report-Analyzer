@@ -9,6 +9,7 @@
     "build": "echo 'No build step needed for server'"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcryptjs": "^2.4.3",
     "compromise": "^14.14.4",
     "cors": "^2.8.5",
