@@ -11,14 +11,12 @@ import {
   useLocation
 } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
-import AOS from 'aos';
 import { refreshAnimations, checkPerformance } from './utils/animationUtils';
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from 'react-i18next';
 import AuthForm from "./components/AuthForm";
 import UserProfile from "./components/UserProfile";
 import FileUpload from "./components/FileUpload";
-import ReportTable from "./components/ReportTable";
 import TrendChart from "./components/TrendChart";
 import LoadingSpinner from "./components/LoadingSpinner";
 import ForgotPassword from "./components/ForgotPassword";
@@ -33,14 +31,13 @@ import FAQ from "./components/FAQ";
 import { FileText, Menu, X, LogOut } from "lucide-react";
 import DarkModeToggle from "./components/DarkModeToggle";
 import { useLoading } from "./context/LoadingContext.jsx";
+import { ReportsList, ReportDetail } from "./components/ReportList"; // Add this import
 
-
-
-// Dashboard Component - Main authenticated app
 function Dashboard({ user, setUser }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [reportData, setReportData] = useState(null);
+  const [uploadedReportId, setUploadedReportId] = useState(null);
+  const [viewingReportId, setViewingReportId] = useState(null);
   const [trendData, setTrendData] = useState(null);
   const [error, setError] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -51,7 +48,8 @@ function Dashboard({ user, setUser }) {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     setUser(null);
-    setReportData(null);
+    setUploadedReportId(null);
+    setViewingReportId(null);
     setTrendData(null);
     setError(null);
     toast.success(t('toast.logout_success'));
@@ -66,7 +64,8 @@ function Dashboard({ user, setUser }) {
   };
 
   const handleFileProcessed = (data) => {
-    setReportData(data);
+    setUploadedReportId(data.reportId || data._id);
+    setViewingReportId(data.reportId || data._id);
     setError(null);
     toast.success(t('toast.upload_success'));
   };
@@ -77,13 +76,15 @@ function Dashboard({ user, setUser }) {
 
   const handleError = (errorMessage) => {
     setError(errorMessage);
-    setReportData(null);
+    setUploadedReportId(null);
+    setViewingReportId(null);
     setTrendData(null);
     toast.error(t('toast.upload_error'));
   };
 
   const handleReset = () => {
-    setReportData(null);
+    setUploadedReportId(null);
+    setViewingReportId(null);
     setTrendData(null);
     setError(null);
   };
@@ -107,7 +108,6 @@ function Dashboard({ user, setUser }) {
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="nav-button user-section desktop-nav">
             <Link to="/" className="btn-home" aria-label={t('nav.home')} tabIndex={0}>
               {t('nav.home')}
@@ -131,13 +131,11 @@ function Dashboard({ user, setUser }) {
             <DarkModeToggle aria-label="Toggle Dark Mode" tabIndex={0} />
           </div>
 
-          {/* Mobile Hamburger Button */}
           <button className="mobile-menu-button" onClick={toggleMobileMenu}>
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
 
-        {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
           <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
             <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
@@ -147,13 +145,13 @@ function Dashboard({ user, setUser }) {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="mobile-menu-content">
                 <div className="mobile-menu-item">
                   <LanguageSwitcher />
                 </div>
-                
-                <button 
+
+                <button
                   className="mobile-menu-btn"
                   onClick={() => {
                     navigate('/');
@@ -163,7 +161,7 @@ function Dashboard({ user, setUser }) {
                   {t('nav.home')}
                 </button>
 
-                <button 
+                <button
                   className="mobile-menu-btn"
                   onClick={() => {
                     navigate('/contact');
@@ -173,7 +171,7 @@ function Dashboard({ user, setUser }) {
                   {t('nav.contact')}
                 </button>
 
-                <button 
+                <button
                   className="mobile-menu-btn mobile-logout-btn"
                   onClick={() => {
                     handleLogout();
@@ -183,7 +181,7 @@ function Dashboard({ user, setUser }) {
                   <LogOut size={16} />
                   {t('auth.logout')}
                 </button>
-                
+
                 <div className="mobile-menu-item">
                   <DarkModeToggle />
                 </div>
@@ -194,62 +192,46 @@ function Dashboard({ user, setUser }) {
       </header>
 
       <main className="app-main">
-        {!reportData && !loading && !error && (
-          <div className="welcome-dashboard-message" data-aos="fade-down">
-            <h2 data-aos="slide-up-fade" data-aos-delay="100" className="animated-pulse">{t('app.welcome')}, {user.firstName}!</h2>
-            <p data-aos="slide-up-fade" data-aos-delay="300">{t('dashboard.upload_first')}</p>
-          </div>
-        )}
-
         {error && (
-          <div className="error-banner" data-aos="fade-in">
+          <div className="error-banner">
             <span>{error}</span>
-            <button
-              onClick={handleReset}
-              className="btn-retry"
-              tabIndex={0}
-              aria-label={t('app.try_again')}
-            >
+            <button onClick={handleReset} className="btn-retry" tabIndex={0}>
               {t('app.try_again')}
             </button>
           </div>
         )}
 
-        {!reportData && !loading && (
-          <FileUpload
-            onFileProcessed={handleFileProcessed}
-            onError={handleError}
-            data-aos="fade-up"
-            data-aos-delay="500"
-          />
+        {/* Viewing a specific report */}
+        {viewingReportId && (
+          <div>
+            <ReportDetail
+              reportId={viewingReportId}
+              onBack={handleReset}
+            />
+          </div>
         )}
 
-        {reportData && (
-          <div className="results-section" data-aos="fade-up">
-            <div className="results-header" data-aos="fade-down" data-aos-delay="100">
-              <h2>📊 {t('reports.analysis_complete')}</h2>
-              <button
-                onClick={handleReset}
-                className="btn-new-upload"
-                tabIndex={0}
-                aria-label={t('dashboard.upload_report')}
-                data-aos="zoom-in" 
-                data-aos-delay="300"
-              >
-                {t('dashboard.upload_report')}
-              </button>
-            </div>
-
-            <ReportTable data={reportData} onTrendData={handleTrendData} data-aos="fade-up" data-aos-delay="400" />
-
-            {trendData && (
-              <TrendChart data={trendData} reportId={reportData.reportId} data-aos="fade-up" data-aos-delay="600" />
+        {/* Viewing reports list */}
+        {!viewingReportId && !uploadedReportId && (
+          <>
+            {!loading && (
+              <div className="welcome-dashboard-message">
+                <h2>{t('app.welcome')}, {user.firstName}!</h2>
+                <p>{t('dashboard.upload_first')}</p>
+              </div>
             )}
-          </div>
+
+            <FileUpload
+              onFileProcessed={handleFileProcessed}
+              onError={handleError}
+            />
+
+            <ReportsList onSelectReport={setViewingReportId} />
+          </>
         )}
       </main>
 
-      <div data-aos="fade-up" data-aos-delay="200">
+      <div>
         <FAQ />
       </div>
       <div>
@@ -262,11 +244,11 @@ function Dashboard({ user, setUser }) {
 // RouteChangeTracker component to refresh animations on route changes
 function RouteChangeTracker() {
   const location = useLocation();
-  
+
   useEffect(() => {
     refreshAnimations();
   }, [location]);
-  
+
   return null;
 }
 
@@ -280,18 +262,18 @@ function App() {
   useEffect(() => {
     // Check for low-performance devices and disable animations if needed
     checkPerformance();
-    
+
     // Refresh animations on window resize with debounce for performance
     const handleResize = () => {
       refreshAnimations();
     };
-    
+
     window.addEventListener('resize', handleResize);
     window.addEventListener('orientationchange', handleResize);
-    
+
     // Initial refresh
     refreshAnimations();
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
       window.removeEventListener('orientationchange', handleResize);
@@ -339,7 +321,7 @@ function App() {
     };
 
     i18n.on('languageChanged', handleLanguageChange);
-    
+
     return () => {
       i18n.off('languageChanged', handleLanguageChange);
     };
@@ -377,7 +359,7 @@ function App() {
               </>
             }
           />
-        
+
           {/* Landing page - default route for non-authenticated users */}
           <Route
             path="/home"

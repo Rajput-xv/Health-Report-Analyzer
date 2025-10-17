@@ -27,9 +27,9 @@ router.get('/:id', authMiddleware, async (req, res) => {
       _id: req.params.id,
       userId: req.user.id
     })
-    .select('-extractedText')
-    .lean();
-    
+      .select('-extractedText')
+      .lean();
+
     if (!report) {
       return res.status(404).json({ error: 'Report not found' });
     }
@@ -48,14 +48,14 @@ router.get('/:id/trends', authMiddleware, async (req, res) => {
       _id: req.params.id,
       userId: req.user.id
     }).lean();
-    
+
     if (!currentReport) {
       return res.status(404).json({ error: 'Report not found' });
     }
 
     // Generate trend data with dummy historical data
     const trendData = generateTrendData(currentReport.healthParameters);
-    
+
     res.json(trendData);
   } catch (error) {
     console.error('Failed to generate trend data');
@@ -70,14 +70,14 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       _id: req.params.id,
       userId: req.user.id
     });
-    
+
     if (!report) {
       return res.status(404).json({ error: 'Report not found' });
     }
 
-    res.json({ 
-      success: true, 
-      message: 'Report deleted successfully' 
+    res.json({
+      success: true,
+      message: 'Report deleted successfully'
     });
   } catch (error) {
     console.error('Failed to delete report');
