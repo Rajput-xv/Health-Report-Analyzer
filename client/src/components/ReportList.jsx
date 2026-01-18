@@ -317,15 +317,29 @@ export const ReportDetail = ({ reportId, onBack }) => {
                                         </div>
                                     </div>
 
-                                    <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold', color: getStatusColor(param.status) }}>
-                                        {param.value} {param.unit}
-                                    </div>
+                                    {/* Display value based on parameterType */}
+                                    {param.parameterType === 'numeric' || (!param.parameterType && typeof param.value === 'number' && param.value !== 0) ? (
+                                        <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold', color: getStatusColor(param.status) }}>
+                                            {param.value} {param.unit}
+                                        </div>
+                                    ) : param.textValue ? (
+                                        <div style={{ marginBottom: '8px', fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                                            {param.textValue}
+                                        </div>
+                                    ) : (
+                                        <div style={{ marginBottom: '8px', fontSize: '16px', fontWeight: 'bold', color: getStatusColor(param.status) }}>
+                                            {param.value} {param.unit}
+                                        </div>
+                                    )}
 
-                                    <div style={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}>
-                                        Normal: {param.normalRange}
-                                    </div>
+                                    {param.normalRange && param.normalRange !== 'N/A' && (
+                                        <div style={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}>
+                                            Normal: {param.normalRange}
+                                        </div>
+                                    )}
 
-                                    {param.textValue && (
+                                    {/* Show textValue as additional note for numeric params if present */}
+                                    {param.parameterType === 'numeric' && param.textValue && (
                                         <div style={{ color: '#4b5563', fontSize: '12px', marginTop: '8px', fontStyle: 'italic' }}>
                                             {param.textValue}
                                         </div>

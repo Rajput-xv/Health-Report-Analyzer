@@ -164,7 +164,8 @@ function generateBasicInsights(healthParameters) {
             value: p.value,
             normalRange: p.normalRange,
             severity: 'Unknown',
-            concern: `${p.name} is ${p.status.toLowerCase()}`
+            concern: `${p.name} is ${p.status.toLowerCase()}`,
+            recommendation: `Consult your healthcare provider about your ${p.status.toLowerCase()} ${p.name} levels`
         })),
         recommendations: recommendations,
         riskLevel: outliers.length > 2 ? 'Moderate' : outliers.length > 0 ? 'Low' : 'Low',
@@ -191,13 +192,32 @@ function validateExtractionResults(results) {
         }
     }
 
+    // Valid parameterType values per schema
+    const validParameterTypes = ['numeric', 'categorical', 'boolean', 'text'];
+
     // Validate each parameter
     results.healthParameters?.forEach((param, index) => {
         if (!param.name || param.name.trim() === '') {
             issues.push(`Parameter ${index}: Missing name`);
         }
-        if (param.value === null || param.value === undefined || isNaN(param.value)) {
-            issues.push(`Parameter ${index} (${param.name}): Invalid value`);
+        
+        // Validate value based on parameterType
+        if (param.parameterType === 'numeric') {
+            if (param.value === null || param.value === undefined || isNaN(param.value)) {
+                issues.push(`Parameter ${index} (${param.name}): Invalid numeric value`);
+            }
+        } else if (['categorical', 'text', 'boolean'].includes(param.parameterType)) {
+            // Categorical/text/boolean parameters should have textValue
+            if (!param.textValue && param.value === undefined) {
+                issues.push(`Parameter ${index} (${param.name}): Missing textValue for ${param.parameterType} type`);
+            }
+        }
+        
+        // Validate parameterType is present and valid
+        if (!param.parameterType) {
+            issues.push(`Parameter ${index} (${param.name}): Missing parameterType`);
+        } else if (!validParameterTypes.includes(param.parameterType)) {
+            issues.push(`Parameter ${index} (${param.name}): Invalid parameterType '${param.parameterType}'`);
         }
     });
 

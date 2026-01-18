@@ -156,13 +156,8 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         onError(error.message || "Upload failed. Please try again.");
       }
     } finally {
-
-      setLoading(false);
+      hideLoading();
       resetProgress();
-      setUploadProgress(0);
-      setProcessingOcr(false);
-      setOcrProgress(0);
-      if (ocrTimerRef.current) clearInterval(ocrTimerRef.current);
     }
   };
 

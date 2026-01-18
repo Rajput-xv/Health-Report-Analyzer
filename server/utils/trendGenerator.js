@@ -2,8 +2,19 @@
 function generateTrendData(currentParameters) {
   const trends = {};
   
-  // Generate dummy historical data for each parameter
+  // Generate dummy historical data for each numeric parameter only
+  // Categorical/text parameters don't have meaningful trends
   currentParameters.forEach(param => {
+    // Skip non-numeric parameters - they can't have trend data
+    if (param.parameterType && param.parameterType !== 'numeric') {
+      return;
+    }
+    
+    // Also skip if value is not a valid number
+    if (typeof param.value !== 'number' || isNaN(param.value) || param.value === 0) {
+      return;
+    }
+    
     const trendData = generateParameterTrend(param);
     trends[param.name] = trendData;
   });

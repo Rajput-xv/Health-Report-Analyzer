@@ -150,6 +150,8 @@ function extractHealthParameters(text) {
                 normalRange: normalRange,
                 status: getStatus(value, normalRange),
                 category: 'Lab Result',
+                parameterType: 'numeric', // Required per schema - OCR extracts numeric lab values
+                textValue: null // For categorical values - not applicable for numeric OCR extractions
               });
               lineProcessed = true; // Mark line as processed
               break; // Exit the pattern loop
