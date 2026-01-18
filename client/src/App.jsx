@@ -39,13 +39,31 @@ import AnalyticsTracker from './AnalyticsTracker';
 function Dashboard({ user, setUser }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
   const [uploadedReportId, setUploadedReportId] = useState(null);
   const [viewingReportId, setViewingReportId] = useState(null);
   const [trendData, setTrendData] = useState(null);
   const [error, setError] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [paymentMessage, setPaymentMessage] = useState(null);
 
   const { loading } = useLoading();
+
+  // Check for payment success/cancelled in URL
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const paymentStatus = params.get('payment');
+    
+    if (paymentStatus === 'success') {
+      setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active. Enjoy unlimited uploads!' });
+      toast.success('🎉 Welcome to Pro! Enjoy unlimited uploads.');
+      // Clear the URL parameter
+      navigate('/dashboard', { replace: true });
+    } else if (paymentStatus === 'cancelled') {
+      setPaymentMessage({ type: 'info', text: 'Payment was cancelled. You can upgrade anytime from the pricing page.' });
+      navigate('/dashboard', { replace: true });
+    }
+  }, [location.search, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -195,6 +213,28 @@ function Dashboard({ user, setUser }) {
       </header>
 
       <main className="app-main">
+        {/* Payment Success/Cancelled Message */}
+        {paymentMessage && (
+          <div className={`payment-message ${paymentMessage.type}`} style={{
+            padding: '1rem 1.5rem',
+            marginBottom: '1.5rem',
+            borderRadius: '12px',
+            backgroundColor: paymentMessage.type === 'success' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+            border: `1px solid ${paymentMessage.type === 'success' ? 'rgba(34, 197, 94, 0.3)' : 'rgba(59, 130, 246, 0.3)'}`,
+            color: paymentMessage.type === 'success' ? '#16a34a' : '#2563eb',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            fontSize: '0.95rem'
+          }}>
+            <span>{paymentMessage.text}</span>
+            <button 
+              onClick={() => setPaymentMessage(null)} 
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.7 }}
+            >×</button>
+          </div>
+        )}
+
         {error && (
           <div className="error-banner">
             <span>{error}</span>
@@ -598,6 +638,14 @@ function App() {
                 <PricingPage user={user} />
                 <Footer />
               </>
+            }
+          />
+
+          {/* Gumroad Callback - redirect after purchase */}
+          <Route
+            path="/callback"
+            element={
+              <Navigate to="/dashboard?payment=success" replace />
             }
           />
 

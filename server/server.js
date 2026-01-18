@@ -22,6 +22,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// IMPORTANT: Gumroad webhook needs urlencoded body BEFORE express.json middleware
+// The payments route handles its own body parsing for the webhook endpoint
+app.use('/api/payments/webhook', express.urlencoded({ extended: true }));
+
 // Ensure Express handles large payloads for OCR images
 app.use(express.json({ limit: '20mb' }));
 app.use(express.urlencoded({ extended: true, limit: '20mb' }));

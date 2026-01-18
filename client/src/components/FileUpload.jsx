@@ -150,6 +150,8 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         onError("File too large. Please upload under 10MB.");
       } else if (error.response?.status === 415) {
         onError("Unsupported format. Please upload PDF, JPEG, JPG, or PNG.");
+      } else if (error.response?.status === 403 && error.response?.data?.upgradeRequired) {
+        onError(`📊 ${error.response.data.message} Click here to upgrade.`);
       } else if (error.response?.status >= 500) {
         onError("Server error. Please try again later.");
       } else {

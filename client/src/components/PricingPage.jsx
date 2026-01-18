@@ -27,7 +27,7 @@ const PLANS = [
   {
     id: 'pro_monthly',
     name: 'Pro',
-    price: 9.99,
+    price: 5,
     period: 'month',
     description: 'Best for regular health tracking',
     features: [
@@ -47,11 +47,11 @@ const PLANS = [
   {
     id: 'pro_yearly',
     name: 'Pro Annual',
-    price: 99.90,
+    price: 45,
     period: 'year',
-    originalPrice: 119.88,
-    description: 'Save 17% with annual billing',
-    savings: '2 months free!',
+    originalPrice: 60,
+    description: 'Save 25% with annual billing',
+    savings: '3 months free!',
     features: [
       { text: 'Everything in Pro Monthly', included: true },
       { text: 'Unlimited report history', included: true },
@@ -59,7 +59,7 @@ const PLANS = [
       { text: 'Annual health summary', included: true },
       { text: 'Priority feature requests', included: true },
     ],
-    cta: 'Save 17%',
+    cta: 'Save 25%',
     ctaAction: 'checkout',
     popular: false,
   },
@@ -123,7 +123,7 @@ export default function PricingPage({ user }) {
       const response = await api.post('/payments/create-checkout', { planId });
       
       if (response.data.checkoutUrl) {
-        // Redirect to Lemon Squeezy checkout
+        // Redirect to Gumroad checkout
         window.location.href = response.data.checkoutUrl;
       } else {
         throw new Error('No checkout URL received');
@@ -285,11 +285,11 @@ export default function PricingPage({ user }) {
         <div className="faq-grid">
           <div className="faq-item">
             <h4>💳 What payment methods do you accept?</h4>
-            <p>We accept all major credit cards, debit cards, and PayPal through our secure payment partner Lemon Squeezy.</p>
+            <p>We accept all major credit cards, debit cards, and PayPal through our secure payment partner Gumroad.</p>
           </div>
           <div className="faq-item">
             <h4>🔄 Can I cancel anytime?</h4>
-            <p>Yes! Cancel your subscription anytime from your dashboard. You'll keep access until the end of your billing period.</p>
+            <p>Yes! Cancel your subscription anytime from your Gumroad library. You'll keep access until the end of your billing period.</p>
           </div>
           <div className="faq-item">
             <h4>🔒 Is my health data secure?</h4>

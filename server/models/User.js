@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const bcrypt = require("bcryptjs");
 
-// Subscription schema for Lemon Squeezy integration
+// Subscription schema for Gumroad integration
 const subscriptionSchema = new mongoose.Schema({
   plan: {
     type: String,
@@ -10,13 +10,13 @@ const subscriptionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'past_due', 'cancelled', 'expired', 'trialing', 'paused'],
+    enum: ['active', 'past_due', 'cancelled', 'expired', 'trialing', 'paused', 'disputed'],
     default: 'active'
   },
-  // Lemon Squeezy identifiers
-  lemonSqueezyCustomerId: String,
-  lemonSqueezySubscriptionId: String,
-  lemonSqueezyOrderId: String,
+  // Gumroad identifiers
+  gumroadSubscriptionId: String,
+  gumroadSubscriberId: String,
+  gumroadSaleId: String,
   // Billing period
   currentPeriodStart: Date,
   renewsAt: Date,
