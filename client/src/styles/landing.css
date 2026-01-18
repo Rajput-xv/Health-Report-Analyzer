@@ -360,22 +360,41 @@
 }
 
 .landing-primary-button {
-  background: #FFB300;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   border: none;
-  padding: 1rem 2rem;
+  padding: 1rem 2.5rem;
   font-size: 1.1rem;
-  font-weight: 600;
-  border-radius: 0.75rem;
+  font-weight: 700;
+  border-radius: 50px;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.landing-primary-button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #7c8ff5 0%, #9b6dc6 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.landing-primary-button span {
+  position: relative;
+  z-index: 1;
 }
 
 .landing-primary-button:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-  background: linear-gradient(45deg, #5a6fd8, #6a42a0);
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 10px 35px rgba(102, 126, 234, 0.5);
+}
+
+.landing-primary-button:hover::before {
+  opacity: 1;
 }
 
 /* Features Section */

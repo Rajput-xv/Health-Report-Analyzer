@@ -296,10 +296,6 @@ export default function PricingPage({ user }) {
             <p>Absolutely. We use bank-level encryption and never share your data with third parties.</p>
           </div>
           <div className="faq-item">
-            <h4>💰 Do you offer refunds?</h4>
-            <p>Yes, we offer a 7-day money-back guarantee if you're not satisfied with Pro.</p>
-          </div>
-          <div className="faq-item">
             <h4>👨‍👩‍👧‍👦 How does family sharing work?</h4>
             <p>Pro users can invite up to 5 family members to share their subscription. Each member gets their own private account.</p>
           </div>
@@ -316,10 +312,6 @@ export default function PricingPage({ user }) {
           <div className="trust-badge">
             <span className="badge-icon">🔒</span>
             <span>Secure Payments</span>
-          </div>
-          <div className="trust-badge">
-            <span className="badge-icon">💯</span>
-            <span>7-Day Guarantee</span>
           </div>
           <div className="trust-badge">
             <span className="badge-icon">🚫</span>

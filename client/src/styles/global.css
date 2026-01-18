@@ -102,72 +102,126 @@ a:active {
   text-decoration: none;
 }
 
-/* Buttons */
+/* ================= GLOBAL BUTTON STYLES ================= */
 button {
   border: none;
-  border-radius: 8px;
+  border-radius: 12px;
   cursor: pointer;
-  font-weight: 500;
-  transition: all 0.2s ease;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   padding: 0.75rem 1.5rem;
   font-size: 0.9rem;
+  font-family: inherit;
 }
 
 button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
 }
 
+button:active {
+  transform: translateY(0);
+}
+
+/* Primary Button - Gradient Style */
 .btn-primary {
-  background: #4299e1;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #7c8ff5 0%, #9b6dc6 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .btn-primary:hover {
-  background: #3182ce;
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
 }
 
+.btn-primary:hover::before {
+  opacity: 1;
+}
+
+.btn-primary span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Secondary Button - Outline Style */
 .btn-secondary {
-  background: #edf2f7;
-  color: #4a5568;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 50px;
+  padding: 0.7rem 1.5rem;
+  backdrop-filter: blur(10px);
 }
 
 .btn-secondary:hover {
-  background: #e2e8f0;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
 }
 
+/* Accent Button - Gold/Yellow Style */
+.btn-accent {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+  color: #1a1a2e;
+  border: none;
+  border-radius: 50px;
+  padding: 0.75rem 1.75rem;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4);
+}
+
+.btn-accent:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 25px rgba(255, 179, 0, 0.5);
+}
+
+/* Retry/Action Buttons */
 .btn-retry {
-
-  background: linear-gradient(45deg, #667eea, #764ba2);
-
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0.5rem 1rem;
-  font-size: 0.8rem;
+  padding: 0.6rem 1.25rem;
+  font-size: 0.85rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
+
 .btn-retry:hover {
-  background: linear-gradient(45deg, #5a6fd8, #6a42a0);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a42a0 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
+  box-shadow: 0 6px 18px rgba(102, 126, 234, 0.5);
 }
-.btn-new-upload {
 
-  background: linear-gradient(45deg, #667eea, #764ba2);
+.btn-new-upload {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.6rem 1.25rem;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 10px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
 }
 
 .btn-new-upload:hover {
-  background: linear-gradient(45deg, #5a6fd8, #6a42a0);
+  background: linear-gradient(135deg, #5a6fd8 0%, #6a42a0 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
 }

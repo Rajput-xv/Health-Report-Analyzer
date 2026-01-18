@@ -6,7 +6,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
   useNavigate,
   useLocation
 } from "react-router-dom";
@@ -15,7 +14,6 @@ import { refreshAnimations, checkPerformance } from './utils/animationUtils';
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from 'react-i18next';
 import AuthForm from "./components/AuthForm";
-import UserProfile from "./components/UserProfile";
 import FileUpload from "./components/FileUpload";
 import TrendChart from "./components/TrendChart";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -24,16 +22,14 @@ import ResetPassword from "./components/ResetPassword";
 import LandingPage from "./components/LandingPage";
 import Footer from "./components/Footer";
 import ContactUs from "./components/ContactUs";
-import LanguageSwitcher from "./components/LanguageSwitcher";
 import { getCurrentUser } from "./utils/api";
 import "./styles/App.css";
 import FAQ from "./components/FAQ";
-import { FileText, Menu, X, LogOut } from "lucide-react";
-import DarkModeToggle from "./components/DarkModeToggle";
 import { useLoading } from "./context/LoadingContext.jsx";
 import { ReportsList, ReportDetail } from "./components/ReportList";
 import Stats from "./components/Stats";
 import PricingPage from "./components/PricingPage";
+import Header from "./components/Header";
 import AnalyticsTracker from './AnalyticsTracker';
 
 function Dashboard({ user, setUser }) {
@@ -44,7 +40,6 @@ function Dashboard({ user, setUser }) {
   const [viewingReportId, setViewingReportId] = useState(null);
   const [trendData, setTrendData] = useState(null);
   const [error, setError] = useState(null);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [paymentMessage, setPaymentMessage] = useState(null);
 
   const { loading } = useLoading();
@@ -64,25 +59,6 @@ function Dashboard({ user, setUser }) {
       navigate('/dashboard', { replace: true });
     }
   }, [location.search, navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    setUploadedReportId(null);
-    setViewingReportId(null);
-    setTrendData(null);
-    setError(null);
-    toast.success(t('toast.logout_success'));
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
 
   const handleFileProcessed = (data) => {
     setUploadedReportId(data.reportId || data._id);
@@ -118,99 +94,7 @@ function Dashboard({ user, setUser }) {
         </div>
       )}
 
-      <header className="landing-header app-header">
-        <div className="landing-header-content">
-          <div className="landing-logo">
-            <Link to="/" aria-label={t('nav.home')} tabIndex={0}>
-              <FileText className="landing-logo-icon" />
-            </Link>
-            <Link to="/" className="landing-logo-text" style={{ paddingBottom: '0.5rem' }}>
-              {t('app.title')}
-            </Link>
-          </div>
-
-          <div className="nav-button user-section desktop-nav">
-            <Link to="/" className="btn-home" aria-label={t('nav.home')} tabIndex={0}>
-              {t('nav.home')}
-            </Link>
-            <Link to="/contact" className="btn-contact" aria-label={t('nav.contact')} tabIndex={0}>
-              {t('nav.contact')}
-            </Link>
-
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-
-            <UserProfile
-              className="user-section"
-              user={user}
-              onLogout={handleLogout}
-              aria-label="User Profile and Logout"
-              tabIndex={0}
-            />
-
-            <DarkModeToggle aria-label="Toggle Dark Mode" tabIndex={0} />
-          </div>
-
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/');
-                    closeMobileMenu();
-                  }}
-                >
-                  {t('nav.home')}
-                </button>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/contact');
-                    closeMobileMenu();
-                  }}
-                >
-                  {t('nav.contact')}
-                </button>
-
-                <button
-                  className="mobile-menu-btn mobile-logout-btn"
-                  onClick={() => {
-                    handleLogout();
-                    closeMobileMenu();
-                  }}
-                >
-                  <LogOut size={16} />
-                  {t('auth.logout')}
-                </button>
-
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      <Header user={user} setUser={setUser} />
 
       <main className="app-main">
         {/* Payment Success/Cancelled Message */}
@@ -284,131 +168,14 @@ function Dashboard({ user, setUser }) {
   );
 }
 
-// Contact Page Component with mobile navigation
+// Contact Page Component - now uses shared Header
 function ContactPage({ user, setUser }) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    toast.success(t('toast.logout_success'));
-    navigate('/');
-  };
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
   return (
     <>
-      <header className="landing-header app-header">
-        <div className="landing-header-content">
-          <div className="landing-logo">
-            <Link to="/" aria-label={t('nav.home')} tabIndex={0}>
-              <FileText className="landing-logo-icon" />
-            </Link>
-            <Link to="/" className="landing-logo-text" style={{ paddingBottom: '0.5rem' }}>
-              {t('app.title')}
-            </Link>
-          </div>
-
-          {/* Desktop Navigation */}
-          <div className="nav-button user-section desktop-nav">
-            <Link to="/" className="btn-home" aria-label={t('nav.home')} tabIndex={0}>
-              {t('nav.home')}
-            </Link>
-            <Link to="/contact" className="btn-contact" aria-label={t('nav.contact')} tabIndex={0}>
-              {t('nav.contact')}
-            </Link>
-
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-
-            <UserProfile
-              className="user-section"
-              user={user}
-              onLogout={handleLogout}
-              aria-label="User Profile and Logout"
-              tabIndex={0}
-            />
-
-            <DarkModeToggle aria-label="Toggle Dark Mode" tabIndex={0} />
-          </div>
-
-          {/* Mobile Hamburger Button */}
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {/* Mobile Menu Overlay */}
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/');
-                    closeMobileMenu();
-                  }}
-                >
-                  {t('nav.home')}
-                </button>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/contact');
-                    closeMobileMenu();
-                  }}
-                >
-                  {t('nav.contact')}
-                </button>
-
-                <button
-                  className="mobile-menu-btn mobile-logout-btn"
-                  onClick={() => {
-                    handleLogout();
-                    closeMobileMenu();
-                  }}
-                >
-                  <LogOut size={16} />
-                  {t('auth.logout')}
-                </button>
-
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
-
+      <Header user={user} setUser={setUser} />
       <main className="app-main">
         <ContactUs user={user} />
       </main>
-
       <Footer />
     </>
   );

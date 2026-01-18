@@ -1,34 +1,13 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FileText, Shield, Zap, TrendingUp, Clock, LogOut, Menu, X } from 'lucide-react';
-import { toast } from 'react-toastify';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { FileText, Shield, Zap, TrendingUp, Clock } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../styles/landing.css';
-import DarkModeToggle from './DarkModeToggle';
-import LanguageSwitcher from './LanguageSwitcher';
+import Header from './Header';
 
 export default function LandingPage({ user, setUser }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [showDialog, setShowDialog] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const handleSignInClick = () => {
-    navigate('/login');
-  };
-
-  const handleSignUpClick = () => {
-    navigate('/signup');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    setUser(null);
-    setShowDialog(false);
-    toast.success(t('toast.logout_success'));
-    navigate('/');
-  };
 
   const handleGetStartedClick = () => {
     if (user) {
@@ -38,176 +17,10 @@ export default function LandingPage({ user, setUser }) {
     }
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
   return (
     <div className="landing-container">
-      {/* Header */}
-      <header className="landing-header">
-        <div className="landing-header-content">
-          <div className="landing-logo">
-            <FileText className="landing-logo-icon" />
-            <Link to="/" className="landing-logo-text">
-              {t('app.title')}
-            </Link>
-          </div>
-          
-          <div className="landing-header-buttons desktop-nav">
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-            {user ? (
-              <>
-                <button className="landing-signin-button" onClick={() => navigate('/dashboard')}>
-                  {t('nav.return_to_dashboard')}
-                </button>
-                <button className="landing-contact-button" onClick={() => navigate('/contact')}>
-                  {t('nav.contact')}
-                </button>
-                <div className="dashboard-profile">
-                  <button onClick={() => setShowDialog(true)} className="btn-logout">
-                    <LogOut size={16} /> {t('auth.logout')}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <button className="landing-signin-button" onClick={handleSignInClick}>
-                  {t('auth.login')}
-                </button>
-                <button className="landing-contact-button" onClick={() => navigate('/contact')}>
-                  {t('nav.contact')}
-                </button>
-                <button className="landing-signup-button" onClick={handleSignUpClick}>
-                  {t('auth.signup')}
-                </button>
-              </>
-            )}
-            <DarkModeToggle />
-          </div>
-
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-              
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-                
-                {user ? (
-                  <>
-                    <button 
-                      className="mobile-menu-btn"
-                      onClick={() => {
-                        navigate('/dashboard');
-                        closeMobileMenu();
-                      }}
-                    >
-                      {t('nav.return_to_dashboard')}
-                    </button>
-                    <button 
-                      className="mobile-menu-btn"
-                      onClick={() => {
-                        navigate('/contact');
-                        closeMobileMenu();
-                      }}
-                    >
-                      {t('nav.contact')}
-                    </button>
-                    <button 
-                      className="mobile-menu-btn mobile-logout-btn"
-                      onClick={() => {
-                        setShowDialog(true);
-                        closeMobileMenu();
-                      }}
-                    >
-                      <LogOut size={16} />
-                      {t('auth.logout')}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <button 
-                      className="mobile-menu-btn"
-                      onClick={() => {
-                        handleSignInClick();
-                        closeMobileMenu();
-                      }}
-                    >
-                      {t('auth.login')}
-                    </button>
-                    <button 
-                      className="mobile-menu-btn"
-                      onClick={() => {
-                        navigate('/contact');
-                        closeMobileMenu();
-                      }}
-                    >
-                      {t('nav.contact')}
-                    </button>
-                    <button 
-                      className="mobile-menu-btn mobile-signup-btn"
-                      onClick={() => {
-                        handleSignUpClick();
-                        closeMobileMenu();
-                      }}
-                    >
-                      {t('auth.signup')}
-                    </button>
-                  </>
-                )}
-                
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
-
-      {showDialog && (
-        <div className="overlay-popup" role="dialog" aria-modal="true">
-          <div className="overlay-card">
-            <div className="overlay-header">
-              <LogOut size={18} className="overlay-icon" />
-              <div className="overlay-title">{t('auth.logout')}</div>
-            </div>
-            <div className="overlay-body">
-              <div className="overlay-text">
-                Are you sure you want to log out?
-                <div className="overlay-subtext">You'll need to sign in again to continue.</div>
-              </div>
-              <div className="overlay-actions">
-                <button className="btn-confirm" onClick={handleLogout}>
-                  {t('common.yes')}, {t('auth.logout')}
-                </button>
-                <button className="btn-cancel" onClick={() => setShowDialog(false)}>
-                  {t('common.cancel')}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Shared Header Component */}
+      <Header user={user} setUser={setUser} />
 
       <section className="landing-hero-section">
         <div className="landing-hero-content">
