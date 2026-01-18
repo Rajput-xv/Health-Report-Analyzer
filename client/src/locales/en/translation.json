@@ -3,7 +3,8 @@
     "home": "Home",
     "contact": "Contact Us",
     "dashboard": "Dashboard",
-    "return_to_dashboard": "Return to Dashboard"
+    "return_to_dashboard": "Return to Dashboard",
+    "pricing": "Pricing"
   },
   "auth": {
     "login": "Sign In",

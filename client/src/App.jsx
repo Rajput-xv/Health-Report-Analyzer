@@ -33,6 +33,7 @@ import DarkModeToggle from "./components/DarkModeToggle";
 import { useLoading } from "./context/LoadingContext.jsx";
 import { ReportsList, ReportDetail } from "./components/ReportList";
 import Stats from "./components/Stats";
+import PricingPage from "./components/PricingPage";
 import AnalyticsTracker from './AnalyticsTracker';
 
 function Dashboard({ user, setUser }) {
@@ -585,6 +586,18 @@ function App() {
               ) : (
                 <Navigate to="/login" />
               )
+            }
+          />
+
+          {/* Pricing Page - accessible to all */}
+          <Route
+            path="/pricing"
+            element={
+              <>
+                <Header user={user} setUser={setUser} />
+                <PricingPage user={user} />
+                <Footer />
+              </>
             }
           />
 

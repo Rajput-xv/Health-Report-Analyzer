@@ -3,7 +3,8 @@
     "home": "होम",
     "contact": "संपर्क करें",
     "dashboard": "डैशबोर्ड",
-    "return_to_dashboard": "डैशबोर्ड पर वापस जाएं"
+    "return_to_dashboard": "डैशबोर्ड पर वापस जाएं",
+    "pricing": "मूल्य निर्धारण"
   },
   "auth": {
     "login": "साइन इन",

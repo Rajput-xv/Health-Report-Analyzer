@@ -31,6 +31,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/reports', require('./routes/reports'));
 app.use('/api/analysis', require('./routes/analysis'));
+app.use('/api/payments', require('./routes/payments'));
 
 
 // Health check endpoint

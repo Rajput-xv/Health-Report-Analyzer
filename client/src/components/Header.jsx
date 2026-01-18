@@ -33,6 +33,7 @@ const Header = ({ user, setUser, isDashboard = false }) => {
         {isDashboard ? (
           <div className="nav-button user-section">
             <Link to="/" className="btn-home">{t('nav.home')}</Link>
+            <Link to="/pricing" className="btn-pricing">{t('nav.pricing')}</Link>
             <Link to="/contact" className="btn-contact">{t('nav.contact')}</Link>
             <div className="language-switcher-wrapper">
               <LanguageSwitcher />
@@ -52,6 +53,9 @@ const Header = ({ user, setUser, isDashboard = false }) => {
               <>
                 <button className="landing-signin-button" onClick={handleSignInClick}>
                   {t('auth.login')}
+                </button>
+                <button className="landing-pricing-button" onClick={() => navigate('/pricing')}>
+                  {t('nav.pricing')}
                 </button>
                 <button className="landing-contact-button" onClick={() => navigate('/contact')}>
                   {t('nav.contact')}

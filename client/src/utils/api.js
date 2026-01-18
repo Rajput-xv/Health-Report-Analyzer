@@ -119,4 +119,44 @@ export const resetPassword = async (token, newPassword) => {
   }
 };
 
+// Get subscription status
+export const getSubscription = async () => {
+  try {
+    const response = await api.get('/payments/subscription');
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to get subscription' };
+  }
+};
+
+// Create checkout session
+export const createCheckout = async (planId) => {
+  try {
+    const response = await api.post('/payments/create-checkout', { planId });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to create checkout' };
+  }
+};
+
+// Cancel subscription
+export const cancelSubscription = async () => {
+  try {
+    const response = await api.post('/payments/cancel');
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to cancel subscription' };
+  }
+};
+
+// Get customer portal URL
+export const getCustomerPortal = async () => {
+  try {
+    const response = await api.get('/payments/customer-portal');
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to get customer portal' };
+  }
+};
+
 export default api;

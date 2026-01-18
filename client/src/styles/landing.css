@@ -204,7 +204,9 @@
 .landing-signin-button,
 .landing-signup-button,
 .landing-logout-button,
-.btn-logout {
+.landing-pricing-button,
+.btn-logout,
+.btn-pricing {
   background: rgba(255, 255, 255, 0.12);
   color: white;
   border: 2px solid transparent;
@@ -226,10 +228,26 @@
   flex-shrink: 0;
 }
 
+/* Pricing button special style - gradient background */
+.landing-pricing-button,
+.btn-pricing {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  color: white;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.landing-pricing-button:hover,
+.btn-pricing:hover {
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
 .landing-contact-button span,
 .landing-signin-button span,
 .landing-signup-button span,
-.landing-logout-button span {
+.landing-logout-button span,
+.landing-pricing-button span {
   background: linear-gradient(90deg, #6EE7F9, #A855F7, #F472B6);
   background-clip: text;
   -webkit-background-clip: text;

@@ -2,6 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const authMiddleware = require('../utils/authMiddleware');
 const Report = require('../models/Report');
+const User = require('../models/User');
 const { extractHealthData, validateExtractionResults, getExtractionStats } = require('../services/extractionService');
 
 const router = express.Router();
@@ -31,7 +32,25 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
+    // Check subscription limits
+    const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const uploadPermission = user.canUploadReport();
+    if (!uploadPermission.allowed) {
+      return res.status(403).json({ 
+        error: 'Monthly upload limit reached',
+        message: `You've used all ${uploadPermission.limit} reports this month. Upgrade to Pro for unlimited uploads!`,
+        upgradeRequired: true,
+        used: uploadPermission.used,
+        limit: uploadPermission.limit
+      });
+    }
+
     console.log(`\nProcessing upload: ${req.file.originalname} (${req.file.mimetype})`);
+    console.log(`User: ${user.email} | Plan: ${user.subscription?.plan || 'free'} | Reports used: ${uploadPermission.used}/${uploadPermission.remaining === 'unlimited' ? '∞' : uploadPermission.limit}`);
 
     // Extract options from query/body
     const options = {
@@ -92,6 +111,9 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
     // Save report to database
     const report = new Report(reportData);
     const savedReport = await report.save();
+
+    // Increment user's report usage count
+    await user.incrementReportUsage();
 
     console.log(`✅ Report saved: ${savedReport._id} (${extractionResult.method})`);
 
