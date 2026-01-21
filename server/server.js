@@ -14,10 +14,10 @@ app.timeout = 300000;
 
 // Configure CORS for frontend communication
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production'
-    ? ['https://health-report-analyzer.vercel.app','https://health-report-analyzer-client.vercel.app', 'https://health-report-analyzer-backend.onrender.com', 'https://health-report-analyzer.onrender.com']
-    : ['http://localhost:3000', 'http://localhost:5173'],
-  credentials: true
+	origin: process.env.NODE_ENV === 'production'
+		? ['https://health-report-analyzer.vercel.app', 'https://health-report-analyzer-client.vercel.app', 'https://health-report-analyzer-backend.onrender.com', 'https://health-report-analyzer.onrender.com']
+		: ['http://localhost:3000', 'http://localhost:5173'],
+	credentials: true
 };
 
 app.use(cors(corsOptions));
@@ -40,27 +40,29 @@ app.use('/api/payments', require('./routes/payments'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-  const mongoose = require('mongoose');
-  const dbConnected = mongoose.connection.readyState === 1;
+	const mongoose = require('mongoose');
+	const dbConnected = mongoose.connection.readyState === 1;
 
-  res.json({
-    message: 'Health Report Analyzer API is running!',
-    database: dbConnected ? 'Connected' : 'Disconnected',
-    features: {
-      fileUpload: true,
-      ocr: true,
-      authentication: dbConnected,
-      reportSaving: dbConnected
-    }
-  });
+	res.json({
+		message: 'Health Report Analyzer API is running!',
+		database: dbConnected ? 'Connected' : 'Disconnected',
+		features: {
+			fileUpload: true,
+			ocr: true,
+			authentication: dbConnected,
+			reportSaving: dbConnected
+		}
+	});
 });
 
-//Centralized error handler 
-// app.use((err, req, res, next) => {
-//   console.error("Server error:",err);
-//   res.status(500).json({ error:err.message|| 'Internal Server Error' });
-// });
+// Centralized error handler 
+app.use((err, req, res, next) => {
+	console.error("Server error:", err);
+	res.status(500).json({
+		error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message
+	});
+});
 app.listen(PORT, () => {
-  // Server started successfully
-  console.log(`Server is running on port ${PORT}`);
+	// Server started successfully
+	console.log(`Server is running on port ${PORT}`);
 });

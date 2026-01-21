@@ -1,18 +1,22 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../utils/api";
+import api from "../utils/api";
 import { useLoading } from "../context/LoadingContext";
 import AOS from 'aos';
 
 const FileUpload = ({ onFileProcessed, onError }) => {
+  const navigate = useNavigate();
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processingOcr, setProcessingOcr] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
+  const [subscription, setSubscription] = useState(null);
   const ocrTimerRef = useRef(null);
   const fileInputRef = useRef(null);
-  
+
   //Reset state helper
-  const resetProgress=()=>{
+  const resetProgress = () => {
     setUploadProgress(0);
     setProcessingOcr(false);
     setOcrProgress(0);
@@ -23,8 +27,20 @@ const FileUpload = ({ onFileProcessed, onError }) => {
 
   const { showLoading, hideLoading } = useLoading();
 
-  // Clean up the timer when component unmounts
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      try {
+        const response = await api.get('/payments/subscription');
+        setSubscription(response.data);
+      } catch (error) {
+        console.error('Failed to fetch subscription:', error);
+      }
+    };
+    fetchSubscription();
+  }, []);
 
+  // Clean up the timer when component unmounts
   useEffect(() => {
     AOS.refresh();
     return () => resetProgress(); //ensure cleanup
@@ -89,12 +105,12 @@ const FileUpload = ({ onFileProcessed, onError }) => {
               prev < 20
                 ? 0.8
                 : prev < 40
-                ? 0.5
-                : prev < 60
-                ? 0.3
-                : prev < 80
-                ? 0.2
-                : 0.1;
+                  ? 0.5
+                  : prev < 60
+                    ? 0.3
+                    : prev < 80
+                      ? 0.2
+                      : 0.1;
             return prev + increment;
           });
         }, 1000);
@@ -177,8 +193,44 @@ const FileUpload = ({ onFileProcessed, onError }) => {
 
   return (
     <div className="file-upload-container">
+      {/* Subscription Status Indicator */}
+      {subscription && (
+        <div className={`upload-quota-indicator ${subscription.plan !== 'free' ? 'pro' : subscription.reportsUsed >= subscription.reportsLimit ? 'limit-reached' : ''}`}>
+          {subscription.plan !== 'free' ? (
+            <div className="quota-content">
+              <span className="quota-icon">👑</span>
+              <span className="quota-text">Pro Plan - Unlimited uploads</span>
+            </div>
+          ) : subscription.reportsUsed >= subscription.reportsLimit ? (
+            <div className="quota-content limit-reached">
+              <span className="quota-icon">⚠️</span>
+              <span className="quota-text">Monthly limit reached ({subscription.reportsUsed}/{subscription.reportsLimit} uploads)</span>
+              <button
+                className="upgrade-cta-btn"
+                onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
+              >
+                Upgrade to Pro
+              </button>
+            </div>
+          ) : (
+            <div className="quota-content">
+              <span className="quota-icon">📊</span>
+              <span className="quota-text">{subscription.reportsLimit - subscription.reportsUsed} of {subscription.reportsLimit} uploads remaining this month</span>
+              {subscription.reportsLimit - subscription.reportsUsed <= 1 && (
+                <button
+                  className="upgrade-cta-btn subtle"
+                  onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
+                >
+                  Get Unlimited
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+
       <div
-        className={`file-upload-area ${isDragOver ? "drag-over" : ""}`}
+        className={`file-upload-area ${isDragOver ? "drag-over" : ""} ${subscription?.reportsUsed >= subscription?.reportsLimit && subscription?.plan === 'free' ? 'disabled' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}

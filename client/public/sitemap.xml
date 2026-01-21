@@ -6,7 +6,7 @@
   
   <!-- Home/Landing Page -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -14,7 +14,7 @@
 
   <!-- Login Page -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/login</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/login</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -22,7 +22,7 @@
 
   <!-- Signup Page -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/signup</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/signup</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -30,7 +30,7 @@
 
   <!-- Dashboard Page (requires authentication) -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/dashboard</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/dashboard</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
@@ -38,7 +38,7 @@
 
   <!-- Contact Page -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/contact</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/contact</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -46,7 +46,7 @@
 
   <!-- Forgot Password Page -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/forgot-password</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/forgot-password</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.5</priority>
@@ -54,7 +54,7 @@
 
   <!-- Home redirect -->
   <url>
-    <loc>https://health-report-analyzer.vercel.app/home</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/home</loc>
     <lastmod>2025-10-29</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>

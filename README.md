@@ -1,6 +1,6 @@
 # 🩺 Health Report Analyzer
 
-You can take a look at this project at - [Website](https://health-report-analyzer.vercel.app/)
+You can take a look at this project at - [Website](https://health-report-analyzer-client.vercel.app/)
 
 > **Upload your lab reports (PDF/image) and get your health data automatically extracted into organized tables with trend analysis. No more manual data entry!**
 
@@ -191,7 +191,7 @@ For questions, suggestions, or collaboration, reach out via [LinkedIn](https://w
 <img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
 
 **Made with ❤️ by YASH VERMA ❤️**
-[Watch Demo](https://health-report-analyzer.vercel.app/)
+[Watch Demo](https://health-report-analyzer-client.vercel.app/)
 
 <p align="center">
   <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>

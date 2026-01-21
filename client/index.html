@@ -1,50 +1,121 @@
 <!DOCTYPE html>
 <html lang="en" class="lenis lenis-smooth">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#667eea" />
-    <meta name="description" content="Analyze your health reports with advanced AI technology" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <title>Health Report Analyzer</title>
-    <link rel="shortcut icon" href="/Health Report Analyzer Logo.png" type="image/x-icon">
-    <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
-    <meta name="google-site-verification" content="V4eqMhokbu6jbcleIrX6VB0qJ9cwTWDKBpKcHLykJuo" />
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
 
-      gtag('config', '%VITE_GA_MEASUREMENT_ID%');
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#667eea" />
+
+  <!-- Primary Meta Tags -->
+  <title>Health Report Analyzer - AI-Powered Medical Report Analysis</title>
+  <meta name="title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
+  <meta name="description"
+    content="Upload your lab reports (PDF/image) and get your health data automatically extracted into organized tables with AI-powered trend analysis. Track your health journey with ease." />
+  <meta name="keywords"
+    content="health report analyzer, medical report analysis, lab report OCR, health tracking, AI health insights, blood test analyzer, medical document scanner" />
+  <meta name="author" content="Health Report Analyzer" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://health-report-analyzer-client.vercel.app/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://health-report-analyzer-client.vercel.app/" />
+  <meta property="og:title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
+  <meta property="og:description"
+    content="Upload your lab reports and get instant AI-powered analysis with trend tracking. Free to start, Pro for unlimited access." />
+  <meta property="og:image"
+    content="https://health-report-analyzer-client.vercel.app/Health%20Report%20Analyzer%20Logo.png" />
+  <meta property="og:site_name" content="Health Report Analyzer" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://health-report-analyzer-client.vercel.app/" />
+  <meta name="twitter:title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
+  <meta name="twitter:description"
+    content="Upload your lab reports and get instant AI-powered analysis with trend tracking. Free to start, Pro for unlimited access." />
+  <meta name="twitter:image"
+    content="https://health-report-analyzer-client.vercel.app/Health%20Report%20Analyzer%20Logo.png" />
+
+  <!-- PWA -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Health Analyzer" />
+
+  <!-- Favicon -->
+  <link rel="shortcut icon" href="/Health Report Analyzer Logo.png" type="image/x-icon" />
+  <link rel="apple-touch-icon" href="/Health Report Analyzer Logo.png" />
+
+  <!-- Preconnect for performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+  <!-- AOS Animation -->
+  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
+
+  <!-- Google Site Verification -->
+  <meta name="google-site-verification" content="V4eqMhokbu6jbcleIrX6VB0qJ9cwTWDKBpKcHLykJuo" />
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Health Report Analyzer",
+      "description": "AI-powered medical report analysis tool that extracts health data from lab reports",
+      "url": "https://health-report-analyzer-client.vercel.app/",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "description": "Free tier with 3 reports per month"
+      },
+      "featureList": ["OCR extraction", "AI analysis", "Trend tracking", "PDF export"]
+    }
     </script>
-    <style>
-      /* Position chatbot at 25% from bottom */
-      #chatbase-bubble-button {
-        bottom: 25vh !important;
-        margin-right: 15px !important;
-      }
-      #chatbase-bubble-window {
-        bottom: calc(25vh + 70px) !important;
-        margin-right: 15px !important;
-      }
-    </style>
 
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script>
-(function(){if(!window.chatbase||window.chatbase("getState")!=="initialized"){window.chatbase=(...arguments)=>{if(!window.chatbase.q){window.chatbase.q=[]}window.chatbase.q.push(arguments)};window.chatbase=new Proxy(window.chatbase,{get(target,prop){if(prop==="q"){return target.q}return(...args)=>target(prop,...args)}})}const onLoad=function(){const script=document.createElement("script");script.src="https://www.chatbase.co/embed.min.js";script.id="jY6ba8Rxvx__D7VSNuuxj";script.domain="www.chatbase.co";document.body.appendChild(script)};if(document.readyState==="complete"){onLoad()}else{window.addEventListener("load",onLoad)}})();
-</script>
-<script>
-  AOS.init({
-    once: true,
-    duration: 700
-  });
-</script>
-  </body>
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', '%VITE_GA_MEASUREMENT_ID%');
+  </script>
+
+  <style>
+    /* Position chatbot at 25% from bottom */
+    #chatbase-bubble-button {
+      bottom: 25vh !important;
+      margin-right: 15px !important;
+    }
+
+    #chatbase-bubble-window {
+      bottom: calc(25vh + 70px) !important;
+      margin-right: 15px !important;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
+  <script>
+    (function () { if (!window.chatbase || window.chatbase("getState") !== "initialized") { window.chatbase = (...arguments) => { if (!window.chatbase.q) { window.chatbase.q = [] } window.chatbase.q.push(arguments) }; window.chatbase = new Proxy(window.chatbase, { get(target, prop) { if (prop === "q") { return target.q } return (...args) => target(prop, ...args) } }) } const onLoad = function () { const script = document.createElement("script"); script.src = "https://www.chatbase.co/embed.min.js"; script.id = "jY6ba8Rxvx__D7VSNuuxj"; script.domain = "www.chatbase.co"; document.body.appendChild(script) }; if (document.readyState === "complete") { onLoad() } else { window.addEventListener("load", onLoad) } })();
+  </script>
+  <script>
+    AOS.init({
+      once: true,
+      duration: 700
+    });
+  </script>
+</body>
+
 </html>

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, Menu, X, LogOut, Home, LayoutDashboard, DollarSign, Mail, ChevronDown } from 'lucide-react';
+import { FileText, Menu, X, LogOut, Home, LayoutDashboard, DollarSign, Mail, ChevronDown, Crown, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import LanguageSwitcher from './LanguageSwitcher';
 import DarkModeToggle from './DarkModeToggle';
+import api from '../utils/api';
 import '../styles/Header.css';
 
 const Header = ({ user, setUser }) => {
@@ -14,6 +15,7 @@ const Header = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [subscription, setSubscription] = useState(null);
 
   // Handle scroll effect
   useEffect(() => {
@@ -29,6 +31,21 @@ const Header = ({ user, setUser }) => {
     closeMobileMenu();
     setShowUserMenu(false);
   }, [location.pathname]);
+
+  // Fetch subscription status
+  useEffect(() => {
+    const fetchSubscription = async () => {
+      if (user) {
+        try {
+          const response = await api.get('/payments/subscription');
+          setSubscription(response.data);
+        } catch (error) {
+          console.error('Failed to fetch subscription:', error);
+        }
+      }
+    };
+    fetchSubscription();
+  }, [user]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -90,7 +107,7 @@ const Header = ({ user, setUser }) => {
 
             {user ? (
               <div className="user-dropdown" onMouseLeave={() => setShowUserMenu(false)}>
-                <button 
+                <button
                   className="user-trigger"
                   onClick={() => setShowUserMenu(!showUserMenu)}
                   onMouseEnter={() => setShowUserMenu(true)}
@@ -101,15 +118,35 @@ const Header = ({ user, setUser }) => {
                   <span className="user-name">{user.firstName || 'User'}</span>
                   <ChevronDown size={14} className={`chevron ${showUserMenu ? 'open' : ''}`} />
                 </button>
-                
+
                 {showUserMenu && (
                   <div className="dropdown-menu">
                     <div className="dropdown-header">
                       <span className="dropdown-email">{user.email}</span>
+                      {/* Subscription Status Badge */}
+                      {subscription && (
+                        <div className={`subscription-badge ${subscription.plan !== 'free' ? 'pro' : 'free'}`}>
+                          {subscription.plan !== 'free' ? (
+                            <>
+                              <Crown size={12} />
+                              <span>Pro</span>
+                            </>
+                          ) : (
+                            <>
+                              <Zap size={12} />
+                              <span>{subscription.reportsLimit - subscription.reportsUsed} uploads left</span>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <Link to="/dashboard" className="dropdown-item">
                       <LayoutDashboard size={16} />
                       <span>Dashboard</span>
+                    </Link>
+                    <Link to="/pricing" className="dropdown-item">
+                      <DollarSign size={16} />
+                      <span>{subscription?.plan !== 'free' ? 'Manage Plan' : 'Upgrade to Pro'}</span>
                     </Link>
                     <button className="dropdown-item logout" onClick={handleLogout}>
                       <LogOut size={16} />

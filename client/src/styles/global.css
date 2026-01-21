@@ -11,7 +11,8 @@ html {
   /* Ensure mobile can scroll */
   overflow-x: hidden;
   overflow-y: auto;
-  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+  -webkit-overflow-scrolling: touch;
+  /* iOS momentum scrolling */
 }
 
 html.lenis,
@@ -37,13 +38,15 @@ html.lenis body {
 
 /* Mobile-specific fixes */
 @media (max-width: 768px) {
-  html, body {
+
+  html,
+  body {
     /* Force enable scrolling on mobile */
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-y: none;
   }
-  
+
   html.lenis-smooth {
     /* Disable Lenis class effects on mobile */
     scroll-behavior: smooth !important;
@@ -103,7 +106,8 @@ a:active {
 }
 
 /* ================= GLOBAL BUTTON STYLES ================= */
-button {
+/* Note: nav-link buttons are styled separately in Header.css */
+button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):not(.mobile-menu-btn):not(.mobile-close-btn) {
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -114,11 +118,11 @@ button {
   font-family: inherit;
 }
 
-button:hover {
+button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):hover {
   transform: translateY(-2px);
 }
 
-button:active {
+button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):active {
   transform: translateY(0);
 }
 
@@ -225,6 +229,7 @@ button:active {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(102, 126, 234, 0.5);
 }
+
 /* Cards and Containers */
 .card {
   background: white;

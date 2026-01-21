@@ -20,7 +20,7 @@
   background-color: #fff;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 2rem;
 }
 
@@ -33,4 +33,11 @@
   font-size: 1.2rem;
   border: 2px dashed #ccc;
   border-radius: 8px;
+}
+
+.chart-title {
+  font-size: 1.3rem;
+  font-weight: 500;
+  margin-bottom: 1rem;
+  color: #333;
 }

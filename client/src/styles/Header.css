@@ -10,6 +10,11 @@
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Enforce Landing Page typography for consistency */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  line-height: 2.5;
+  box-sizing: border-box;
 }
 
 .main-header.scrolled {
@@ -91,9 +96,9 @@
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  padding: 0.1rem 1rem;
+  padding: 0.2rem 1.2rem;
   border-radius: 50px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 0.9rem;
   font-weight: 500;
   text-decoration: none;
@@ -119,13 +124,14 @@
 
 .nav-link:hover {
   color: white;
-  transform: translateY(-2px);
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav-link.active {
   color: white;
-  background: rgba(255, 255, 255, 0.15);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 /* Pricing button highlight */
@@ -275,26 +281,38 @@
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 8px);
+  top: calc(100% + 12px);
   right: 0;
-  min-width: 220px;
+  min-width: 240px;
   background: rgba(30, 30, 50, 0.95);
   backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 0.5rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  animation: dropdownFade 0.2s ease;
+  animation: dropdownEnter 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+  transform-origin: top right;
+  z-index: 100;
 }
 
-@keyframes dropdownFade {
+.dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -20px;
+  left: 0;
+  right: 0;
+  height: 20px;
+}
+
+@keyframes dropdownEnter {
   from {
     opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px) scale(0.96);
   }
+
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
@@ -311,6 +329,43 @@
   text-overflow: ellipsis;
   white-space: nowrap;
   display: block;
+}
+
+/* Subscription Badge */
+.subscription-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 50px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+.subscription-badge.pro {
+  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
+  color: #1a1a2e;
+  box-shadow: 0 2px 10px rgba(255, 179, 0, 0.3);
+}
+
+.subscription-badge.free {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+@keyframes badgePulse {
+
+  0%,
+  100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.02);
+  }
 }
 
 .dropdown-item {

@@ -31,6 +31,7 @@ import Stats from "./components/Stats";
 import PricingPage from "./components/PricingPage";
 import Header from "./components/Header";
 import AnalyticsTracker from './AnalyticsTracker';
+import NotFoundPage from "./components/NotFoundPage";
 
 function Dashboard({ user, setUser }) {
   const { t } = useTranslation();
@@ -48,7 +49,7 @@ function Dashboard({ user, setUser }) {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const paymentStatus = params.get('payment');
-    
+
     if (paymentStatus === 'success') {
       setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active. Enjoy unlimited uploads!' });
       toast.success('🎉 Welcome to Pro! Enjoy unlimited uploads.');
@@ -112,8 +113,8 @@ function Dashboard({ user, setUser }) {
             fontSize: '0.95rem'
           }}>
             <span>{paymentMessage.text}</span>
-            <button 
-              onClick={() => setPaymentMessage(null)} 
+            <button
+              onClick={() => setPaymentMessage(null)}
               style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', opacity: 0.7 }}
             >×</button>
           </div>
@@ -202,7 +203,7 @@ function App() {
   useEffect(() => {
     // Detect mobile to skip complex animations
     const isMobile = window.innerWidth < 768;
-    
+
     if (!isMobile) {
       // Only check performance and add listeners on desktop
       checkPerformance();
@@ -428,8 +429,8 @@ function App() {
             }
           />
 
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" />} />
+          {/* Catch all - 404 Page */}
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
 
         <ToastContainer

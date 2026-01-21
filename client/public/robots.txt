@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://health-report-analyzer.vercel.app/sitemap.xml
+Sitemap: https://health-report-analyzer-client.vercel.app/sitemap.xml

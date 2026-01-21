@@ -33,7 +33,7 @@ const PLANS = [
     features: [
       { text: 'Unlimited reports', included: true },
       { text: 'Advanced AI insights', included: true },
-      { text: 'Trend analysis & charts', included: true },
+      // { text: 'Trend analysis & charts', included: true },
       { text: 'PDF export', included: true },
       { text: 'Family sharing (5 members)', included: true },
       { text: 'Priority support', included: true },
@@ -121,7 +121,7 @@ export default function PricingPage({ user }) {
 
     try {
       const response = await api.post('/payments/create-checkout', { planId });
-      
+
       if (response.data.checkoutUrl) {
         // Redirect to Gumroad checkout
         window.location.href = response.data.checkoutUrl;
@@ -130,9 +130,9 @@ export default function PricingPage({ user }) {
       }
     } catch (error) {
       console.error('Checkout error:', error);
-      setMessage({ 
-        type: 'error', 
-        text: error.response?.data?.error || 'Failed to start checkout. Please try again.' 
+      setMessage({
+        type: 'error',
+        text: error.response?.data?.error || 'Failed to start checkout. Please try again.'
       });
     } finally {
       setLoading(null);
@@ -210,13 +210,13 @@ export default function PricingPage({ user }) {
             data-aos="fade-up"
             data-aos-delay={index * 100}
           >
-            {plan.badge && <div className="pricing-badge">{plan.badge}</div>}
+            {plan.badge && !isCurrentPlan(plan.id) && <div className="pricing-badge">{plan.badge}</div>}
             {isCurrentPlan(plan.id) && <div className="current-badge">Your Plan</div>}
-            
+
             <div className="pricing-card-header">
               <h2 className="plan-name">{plan.name}</h2>
               <p className="plan-description">{plan.description}</p>
-              
+
               <div className="plan-price">
                 {plan.originalPrice && (
                   <span className="original-price">${plan.originalPrice}</span>
@@ -224,7 +224,7 @@ export default function PricingPage({ user }) {
                 <span className="price">${plan.price}</span>
                 <span className="period">/{plan.period}</span>
               </div>
-              
+
               {plan.savings && (
                 <div className="savings-badge">{plan.savings}</div>
               )}
@@ -261,17 +261,17 @@ export default function PricingPage({ user }) {
         <div className="usage-stats" data-aos="fade-up">
           <h3>Your Usage This Month</h3>
           <div className="usage-bar-container">
-            <div 
-              className="usage-bar" 
-              style={{ 
-                width: subscription.reportsLimit === -1 
-                  ? '10%' 
-                  : `${Math.min(100, (subscription.reportsUsed / subscription.reportsLimit) * 100)}%` 
+            <div
+              className="usage-bar"
+              style={{
+                width: subscription.reportsLimit === -1
+                  ? '10%'
+                  : `${Math.min(100, (subscription.reportsUsed / subscription.reportsLimit) * 100)}%`
               }}
             ></div>
           </div>
           <p className="usage-text">
-            {subscription.reportsLimit === -1 
+            {subscription.reportsLimit === -1
               ? `${subscription.reportsUsed} reports uploaded (Unlimited)`
               : `${subscription.reportsUsed} of ${subscription.reportsLimit} reports used`
             }

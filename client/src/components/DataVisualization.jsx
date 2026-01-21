@@ -1,7 +1,7 @@
 import React from 'react';
 import { Line, Bar, Pie } from 'react-chartjs-2';
 import 'chart.js/auto';
-import '../styles/css/datavisualization.css';
+import '../styles/dashboard.css';
 
 export default function DataVisualization() {
   // Example health data (replace with your real data)

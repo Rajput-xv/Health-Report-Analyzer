@@ -79,6 +79,7 @@
     opacity: 0;
     transform: translateY(-20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -121,7 +122,8 @@
 }
 
 .subscription-renews {
-  color: var(--text-secondary, #6b7280);
+  color: #374151;
+  /* Darker for readability */
   font-size: 0.9rem;
 }
 
@@ -144,7 +146,7 @@
 /* Pricing Grid */
 .pricing-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 24px;
   margin-bottom: 60px;
 }
@@ -199,7 +201,8 @@
 .current-badge {
   position: absolute;
   top: -12px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   color: white;
   padding: 6px 16px;
@@ -219,12 +222,13 @@
 .plan-name {
   font-size: 1.75rem;
   font-weight: 700;
-  color: var(--text-primary, #1f2937);
+  color: #1f2937;
   margin-bottom: 8px;
 }
 
 .plan-description {
-  color: var(--text-secondary, #6b7280);
+  color: #4b5563;
+  /* Darker gray for better visibility */
   font-size: 0.95rem;
   margin-bottom: 20px;
 }
@@ -238,7 +242,8 @@
 
 .original-price {
   font-size: 1.25rem;
-  color: #9ca3af;
+  color: #6b7280;
+  /* Darker gray */
   text-decoration: line-through;
   margin-right: 8px;
 }
@@ -246,7 +251,7 @@
 .price {
   font-size: 3rem;
   font-weight: 800;
-  color: var(--text-primary, #1f2937);
+  color: #1f2937;
 }
 
 .period {
@@ -548,18 +553,25 @@
 }
 
 /* Dark Mode */
+/* Dark Mode Visibility Improvements */
 [data-theme="dark"] .pricing-card {
-  background: #1f2937;
-  border-color: #374151;
+  background: rgba(30, 41, 59, 0.7);
+  /* Semi-transparent dark blue-gray */
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 [data-theme="dark"] .pricing-card.popular {
-  background: linear-gradient(180deg, rgba(102, 126, 234, 0.1) 0%, #1f2937 100%);
+  background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%);
+  border: 2px solid rgba(102, 126, 234, 0.5);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
 [data-theme="dark"] .faq-item {
-  background: #1f2937;
-  border-color: #374151;
+  background: rgba(30, 41, 59, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 [data-theme="dark"] .usage-stats {
