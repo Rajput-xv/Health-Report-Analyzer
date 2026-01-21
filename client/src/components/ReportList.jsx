@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import '../styles/ReportList.css';
 
-// Reports List Component
 export const ReportsList = ({ onSelectReport }) => {
     const navigate = useNavigate();
     const [reports, setReports] = useState([]);
@@ -38,47 +38,28 @@ export const ReportsList = ({ onSelectReport }) => {
         }
     };
 
-    // Loading skeleton
+    // Loading skeleton (simplified for brevity, can also be moved to CSS or kept as is if complex)
     if (loading) {
         return (
-            <div style={{ padding: '20px' }}>
-                <h2 style={{ marginBottom: '20px', fontSize: '20px', color: '#1f2937' }}>My Reports</h2>
-                <div style={{ display: 'grid', gap: '12px' }}>
+            <div className="reports-container">
+                <h2 className="reports-title" style={{ marginBottom: '20px' }}>My Reports</h2>
+                <div className="reports-grid">
                     {[1, 2, 3].map((i) => (
-                        <div
-                            key={i}
-                            style={{
-                                border: '1px solid #e5e7eb',
-                                borderRadius: '12px',
-                                padding: '20px',
-                                backgroundColor: '#f9fafb',
-                                animation: 'pulse 1.5s ease-in-out infinite'
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ height: '16px', width: '60%', backgroundColor: '#e5e7eb', borderRadius: '4px', marginBottom: '8px' }}></div>
-                                    <div style={{ height: '12px', width: '40%', backgroundColor: '#e5e7eb', borderRadius: '4px' }}></div>
-                                </div>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    <div style={{ height: '32px', width: '60px', backgroundColor: '#e5e7eb', borderRadius: '6px' }}></div>
-                                    <div style={{ height: '32px', width: '60px', backgroundColor: '#e5e7eb', borderRadius: '6px' }}></div>
-                                </div>
-                            </div>
-                        </div>
+                        <div key={i} style={{
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            backgroundColor: '#f9fafb',
+                            height: '100px',
+                            animation: 'pulse 1.5s ease-in-out infinite'
+                        }}></div>
                     ))}
                 </div>
-                <style>{`
-                    @keyframes pulse {
-                        0%, 100% { opacity: 1; }
-                        50% { opacity: 0.5; }
-                    }
-                `}</style>
             </div>
         );
     }
 
-    // Error state with retry
+    // Error state
     if (error) {
         return (
             <div style={{
@@ -89,29 +70,13 @@ export const ReportsList = ({ onSelectReport }) => {
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 margin: '20px 0'
             }}>
-                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>⚠️</div>
-                <h3 style={{ color: '#dc2626', marginBottom: '0.5rem' }}>Unable to Load Reports</h3>
-                <p style={{ color: '#6b7280', marginBottom: '1rem' }}>{error}</p>
-                <button
-                    onClick={fetchReports}
-                    style={{
-                        padding: '0.75rem 1.5rem',
-                        fontSize: '0.9rem',
-                        backgroundColor: '#dc2626',
-                        color: '#fff',
-                        border: 'none',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                    }}
-                >
-                    Try Again
-                </button>
+                <h3 style={{ color: '#dc2626' }}>{error}</h3>
+                <button onClick={fetchReports} className="btn-delete" style={{ marginTop: '10px' }}>Try Again</button>
             </div>
         );
     }
 
-    // Empty state with CTA
+    // Empty state
     if (reports.length === 0) {
         return (
             <div style={{
@@ -122,156 +87,70 @@ export const ReportsList = ({ onSelectReport }) => {
                 border: '1px dashed rgba(102, 126, 234, 0.3)',
                 margin: '20px 0'
             }}>
-                <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>📋</div>
-                <h3 style={{
-                    fontSize: '1.5rem',
-                    color: '#1f2937',
-                    marginBottom: '0.75rem',
-                    fontWeight: '600'
-                }}>
-                    No Reports Yet
-                </h3>
-                <p style={{
-                    color: '#6b7280',
-                    marginBottom: '1.5rem',
-                    maxWidth: '400px',
-                    margin: '0 auto 1.5rem'
-                }}>
-                    Upload your first health report to get started with AI-powered analysis and tracking.
-                </p>
-                <div style={{
-                    display: 'flex',
-                    gap: '1rem',
-                    justifyContent: 'center',
-                    flexWrap: 'wrap'
-                }}>
-                    <button
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        style={{
-                            padding: '0.875rem 1.75rem',
-                            fontSize: '0.95rem',
-                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                            color: '#fff',
-                            border: 'none',
-                            borderRadius: '50px',
-                            cursor: 'pointer',
-                            fontWeight: '600',
-                            boxShadow: '0 4px 15px rgba(102, 126, 234, 0.4)',
-                            transition: 'all 0.3s ease'
-                        }}
-                    >
-                        📤 Upload Report
-                    </button>
-                </div>
+                <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.75rem' }}>No Reports Yet</h3>
+                <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Upload your first health report to get started.</p>
+                <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} // Assuming upload is at top
+                    className="btn-view"
+                    style={{ borderRadius: '50px', padding: '12px 24px', fontSize: '1rem' }}
+                >
+                    Upload Report
+                </button>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '20px' }}>
-            <div style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: '20px'
-            }}>
-                <h2 style={{ fontSize: '20px', color: '#1f2937', margin: 0 }}>
+        <div className="reports-container">
+            <div className="reports-header">
+                <h2 className="reports-title">
                     My Reports
-                    <span style={{
-                        marginLeft: '8px',
-                        fontSize: '14px',
-                        padding: '2px 8px',
-                        background: 'rgba(102, 126, 234, 0.1)',
-                        borderRadius: '12px',
-                        color: '#667eea'
-                    }}>
+                    <span className="report-count-badge">
                         {reports.length}
                     </span>
                 </h2>
             </div>
-            <div style={{ display: 'grid', gap: '12px' }}>
+            <div className="reports-grid">
                 {reports.map((reportItem) => (
                     <div
                         key={reportItem._id}
-                        style={{
-                            border: '1px solid #e5e7eb',
-                            borderRadius: '12px',
-                            padding: '18px',
-                            backgroundColor: '#fff',
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                            transition: 'all 0.2s ease',
-                            cursor: 'pointer'
-                        }}
+                        className="report-card"
                         onClick={() => onSelectReport(reportItem._id)}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.transform = 'translateY(-2px)';
-                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.08)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
                     >
-                        <div style={{ flex: 1 }}>
-                            <div style={{ fontWeight: '600', fontSize: '15px', color: '#1f2937', marginBottom: '6px' }}>
+                        <div className="report-info">
+                            <div className="report-filename">
                                 {reportItem.filename}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                            <div className="report-meta">
                                 📅 {new Date(reportItem.createdAt).toLocaleDateString()} • 📊 {reportItem.healthParameters.length} parameters
                             </div>
-                            <div style={{ fontSize: '12px' }}>
-                                <span style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '4px',
-                                    padding: '2px 8px',
-                                    borderRadius: '4px',
-                                    fontWeight: '600',
-                                    fontSize: '11px',
-                                    backgroundColor: reportItem.aiInsights?.riskLevel === 'High' ? 'rgba(220, 38, 38, 0.1)' :
-                                        reportItem.aiInsights?.riskLevel === 'Moderate' ? 'rgba(249, 115, 22, 0.1)' :
-                                            'rgba(16, 185, 129, 0.1)',
-                                    color: reportItem.aiInsights?.riskLevel === 'High' ? '#dc2626' :
-                                        reportItem.aiInsights?.riskLevel === 'Moderate' ? '#f97316' : '#10b981'
-                                }}>
+                            <div>
+                                <span
+                                    className="report-status-badge"
+                                    style={{
+                                        backgroundColor: reportItem.aiInsights?.riskLevel === 'High' ? 'rgba(220, 38, 38, 0.1)' :
+                                            reportItem.aiInsights?.riskLevel === 'Moderate' ? 'rgba(249, 115, 22, 0.1)' :
+                                                'rgba(16, 185, 129, 0.1)',
+                                        color: reportItem.aiInsights?.riskLevel === 'High' ? '#dc2626' :
+                                            reportItem.aiInsights?.riskLevel === 'Moderate' ? '#f97316' : '#10b981'
+                                    }}
+                                >
                                     {reportItem.aiInsights?.riskLevel === 'High' ? '⚠️' :
                                         reportItem.aiInsights?.riskLevel === 'Moderate' ? '⚡' : '✓'}
-                                    {reportItem.aiInsights?.riskLevel || 'Analyzed'}
+                                    {' '}{reportItem.aiInsights?.riskLevel || 'Analyzed'}
                                 </span>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '8px' }} onClick={(e) => e.stopPropagation()}>
+                        <div className="report-actions" onClick={(e) => e.stopPropagation()}>
                             <button
                                 onClick={() => onSelectReport(reportItem._id)}
-                                style={{
-                                    padding: '8px 16px',
-                                    fontSize: '12px',
-                                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                    color: '#fff',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontWeight: '500',
-                                    transition: 'all 0.2s ease'
-                                }}
+                                className="btn-view"
                             >
                                 View
                             </button>
                             <button
                                 onClick={() => handleDelete(reportItem._id)}
-                                style={{
-                                    padding: '8px 16px',
-                                    fontSize: '12px',
-                                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                                    color: '#dc2626',
-                                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer',
-                                    fontWeight: '500',
-                                    transition: 'all 0.2s ease'
-                                }}
+                                className="btn-delete"
                             >
                                 Delete
                             </button>

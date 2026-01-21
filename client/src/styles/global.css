@@ -502,50 +502,7 @@ button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):active {
   white-space: nowrap;
 }
 
-.mobile-nav,
-.mobile-menu {
-  display: none;
-}
-
-/* Mobile navbar */
-@media (max-width: 768px) {
-  .nav-button {
-    display: none !important;
-  }
-
-  .mobile-nav {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .hamburger-btn {
-    display: block;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: white;
-    margin-left: auto;
-  }
-
-  .mobile-menu {
-    position: absolute;
-    top: 100%;
-    /* drop right below header */
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    /* translucent overlay style */
-    backdrop-filter: blur(6px);
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    border-radius: 0 0 12px 12px;
-    animation: fadeIn 0.3s ease-in-out;
-  }
-}
+/* Mobile navbar styles removed to avoid conflict with Header.css */
 
 a.btn-pill,
 button.btn-pill {

@@ -616,7 +616,7 @@
   }
 
   .pricing-card.popular:hover {
-    transform: translateY(-8px);
+    transform: none;
   }
 
   .price {
@@ -643,5 +643,11 @@
 
   .trust-badges {
     gap: 20px;
+  }
+
+  .faq-item:hover {
+    transform: none;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    /* Reset shadow */
   }
 }

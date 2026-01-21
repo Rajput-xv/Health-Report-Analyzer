@@ -45,17 +45,23 @@ export default function DataVisualization() {
     <div>
       <div className="data-vis-container">
         <div className="chart-title">Health Score Over Time</div>
-        <Line data={lineData} />
+        <div className="chart-wrapper">
+          <Line data={lineData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
 
       <div className="data-vis-container">
         <div className="chart-title">Nutrient Intake</div>
-        <Bar data={barData} />
+        <div className="chart-wrapper">
+          <Bar data={barData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
 
       <div className="data-vis-container">
         <div className="chart-title">Weekly Activity Distribution</div>
-        <Pie data={pieData} />
+        <div className="chart-wrapper">
+          <Pie data={pieData} options={{ responsive: true, maintainAspectRatio: false }} />
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,123 @@
+/* ReportList.css */
+.reports-container {
+    padding: 20px;
+}
+
+.reports-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.reports-title {
+    font-size: 20px;
+    color: #1f2937;
+    margin: 0;
+}
+
+.report-count-badge {
+    margin-left: 8px;
+    font-size: 14px;
+    padding: 2px 8px;
+    background: rgba(102, 126, 234, 0.1);
+    border-radius: 12px;
+    color: #667eea;
+}
+
+.reports-grid {
+    display: grid;
+    gap: 12px;
+}
+
+.report-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    background-color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.report-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.report-info {
+    flex: 1;
+}
+
+.report-filename {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1f2937;
+    margin-bottom: 6px;
+}
+
+.report-meta {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+
+.report-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-size: 11px;
+}
+
+.report-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-view,
+.btn-delete {
+    padding: 8px 16px;
+    font-size: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-view {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none;
+}
+
+.btn-delete {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+/* Responsive Styles */
+@media (max-width: 600px) {
+    .report-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .report-actions {
+        width: 100%;
+        gap: 10px;
+    }
+
+    .btn-view,
+    .btn-delete {
+        flex: 1;
+        text-align: center;
+        padding: 10px;
+    }
+}
