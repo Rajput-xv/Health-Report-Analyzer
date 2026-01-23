@@ -602,18 +602,46 @@ router.post('/verify-purchase', authMiddleware, async (req, res) => {
       return res.status(400).json({ error: 'License key required' });
     }
 
-    // Verify license with Gumroad API
-    const response = await gumroadRequest('/licenses/verify', 'POST', {
-      product_id: process.env.GUMROAD_PRODUCT_ID,
-      license_key: licenseKey
-    });
+    // Try to verify license with both product IDs (monthly and yearly)
+    let response = null;
+    let productType = null;
 
-    if (response.success && response.purchase) {
+    // Try monthly product first
+    try {
+      response = await gumroadRequest('/licenses/verify', 'POST', {
+        product_id: process.env.GUMROAD_PRODUCT_ID_MONTH,
+        license_key: licenseKey
+      });
+      if (response.success && response.purchase) {
+        productType = 'monthly';
+      }
+    } catch (err) {
+      console.log('Not a monthly product license');
+    }
+
+    // If not monthly, try yearly
+    if (!response || !response.success) {
+      try {
+        response = await gumroadRequest('/licenses/verify', 'POST', {
+          product_id: process.env.GUMROAD_PRODUCT_ID_YEAR,
+          license_key: licenseKey
+        });
+        if (response.success && response.purchase) {
+          productType = 'yearly';
+        }
+      } catch (err) {
+        console.log('Not a yearly product license');
+      }
+    }
+
+    if (response && response.success && response.purchase) {
       const purchase = response.purchase;
 
-      // Determine plan
+      // Determine plan based on product type or permalink
       let planId = 'pro_monthly';
-      if (purchase.short_product_id === process.env.GUMROAD_PRO_YEARLY_PERMALINK) {
+      if (productType === 'yearly' ||
+        purchase.short_product_id === process.env.GUMROAD_PRO_YEARLY_PERMALINK ||
+        purchase.product_id === process.env.GUMROAD_PRODUCT_ID_YEAR) {
         planId = 'pro_yearly';
       }
 
