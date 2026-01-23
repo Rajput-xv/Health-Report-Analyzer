@@ -5,6 +5,8 @@ import { FileText, Menu, X, Home } from 'lucide-react';
 import { resetPassword } from "../utils/api";
 import DarkModeToggle from './DarkModeToggle';
 import LanguageSwitcher from './LanguageSwitcher';
+import Header from './Header';
+import "../styles/AuthForm.css";
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -52,8 +54,13 @@ const ResetPassword = () => {
 
   return (
     <div className="auth-page">
-      {/* Auth Page Header */}
-      <header className="auth-header">
+      {/* Mobile Only Header (Shared) */}
+      <div className="mobile-only-header">
+        <Header user={null} setUser={() => { }} />
+      </div>
+
+      {/* Auth Page Header (Desktop Only) */}
+      <header className="auth-header desktop-only-auth-header">
         <div className="auth-header-content">
           <div className="auth-logo">
             <FileText className="auth-logo-icon" />
@@ -61,7 +68,7 @@ const ResetPassword = () => {
               {t('app.title')}
             </Link>
           </div>
-          
+
           <div className="auth-header-buttons desktop-nav">
             <div className="language-switcher-wrapper">
               <LanguageSwitcher />
@@ -87,13 +94,13 @@ const ResetPassword = () => {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="mobile-menu-content">
                 <div className="mobile-menu-item">
                   <LanguageSwitcher />
                 </div>
-                
-                <button 
+
+                <button
                   className="mobile-menu-btn"
                   onClick={() => {
                     navigate('/');
@@ -103,7 +110,7 @@ const ResetPassword = () => {
                   <Home size={16} />
                   {t('nav.home')}
                 </button>
-                
+
                 <div className="mobile-menu-item">
                   <DarkModeToggle />
                 </div>

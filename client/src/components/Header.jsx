@@ -78,7 +78,7 @@ const Header = ({ user, setUser }) => {
     <header className={`main-header ${isScrolled ? 'scrolled' : ''}`}>
       <div className="header-container">
         {/* Logo */}
-        <Link to="/" className="header-logo" aria-label={t('nav.home')}>
+        <Link to="/" className="header-logo" aria-label={t('nav.home')} style={{ minWidth: 0, flexShrink: 0 }}>
           <div className="logo-icon-wrapper">
             <FileText className="logo-icon" />
           </div>

@@ -1,4 +1,23 @@
 /* ================= AUTH PAGE HEADER STYLES ================= */
+/* Mobile/Desktop Header Toggles */
+.mobile-only-header {
+  display: block;
+}
+
+.desktop-only-auth-header {
+  display: none !important;
+}
+
+@media (min-width: 769px) {
+  .mobile-only-header {
+    display: none !important;
+  }
+  
+  .desktop-only-auth-header {
+    display: flex !important;
+  }
+}
+
 .auth-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -210,11 +229,11 @@
 }
 
 .mobile-menu-btn {
-  width: 100%;
+  /* width: 100%; */
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
-  padding: 1rem 1.5rem;
+  /* padding: 1rem 1.5rem; */
   color: white;
   font-size: 1rem;
   font-weight: 500;

@@ -9,6 +9,7 @@ import GoogleButton from "react-google-button";
 import { auth, provider, signInWithPopup } from "./firebase.jsx";
 import DarkModeToggle from './DarkModeToggle';
 import LanguageSwitcher from './LanguageSwitcher';
+import Header from './Header';
 import AOS from 'aos';
 
 // SVG Icon for password visibility toggle
@@ -64,7 +65,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   // Password validation checklist state
   const [passwordChecks, setPasswordChecks] = useState({
     length: false,
@@ -131,7 +132,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
         // Save token and user locally
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        
+
         toast.success(t('toast.login_success').replace('Welcome back!', `Welcome, ${data.user.firstName}!`));
         onLogin(data.user, data.token);
         navigate("/");
@@ -192,14 +193,14 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
       if (data.success) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
-        
+
         // Success toasts
         if (isLogin) {
           toast.success(t('toast.login_success').replace('Welcome back!', `Welcome back, ${data.user.firstName}!`));
         } else {
           toast.success(t('toast.signup_success').replace('Account created successfully!', `Account created successfully! Welcome, ${data.user.firstName}!`));
         }
-        
+
         onLogin(data.user, data.token);
         navigate("/");
       } else {
@@ -230,8 +231,13 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
 
   return (
     <div className="auth-page">
-      {/* Auth Page Header */}
-      <header className="auth-header">
+      {/* Mobile Only Header (Shared) */}
+      <div className="mobile-only-header">
+        <Header user={null} setUser={() => { }} />
+      </div>
+
+      {/* Auth Page Header (Desktop Only) */}
+      <header className="auth-header desktop-only-auth-header">
         <div className="auth-header-content">
           <div className="auth-logo">
             <FileText className="auth-logo-icon" />
@@ -239,7 +245,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
               {t('app.title')}
             </Link>
           </div>
-          
+
           <div className="auth-header-buttons desktop-nav">
             <div className="language-switcher-wrapper">
               <LanguageSwitcher />
@@ -265,13 +271,13 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="mobile-menu-content">
                 <div className="mobile-menu-item">
                   <LanguageSwitcher />
                 </div>
-                
-                <button 
+
+                <button
                   className="mobile-menu-btn"
                   onClick={() => {
                     navigate('/');
@@ -281,7 +287,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                   <Home size={16} />
                   Home
                 </button>
-                
+
                 <div className="mobile-menu-item">
                   <DarkModeToggle />
                 </div>
@@ -431,7 +437,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
               </div>
             )}
           </form>
-          
+
           <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
             <GoogleButton onClick={handleGoogleSignIn} />
           </div>

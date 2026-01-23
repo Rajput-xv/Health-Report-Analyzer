@@ -59,7 +59,7 @@ AOS.init({
   delay: 0, // No delay on mobile
   easing: 'ease-out',
   anchorPlacement: 'top-bottom',
-  disable: false, // Always enable AOS (but simplified on mobile)
+  disable: isMobile, // Disable AOS on mobile devices
   debounceDelay: 50,
   throttleDelay: 99,
 });

@@ -678,7 +678,7 @@
 }
 
 /* ================= RESPONSIVE ================= */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .desktop-nav {
     display: none;
   }
