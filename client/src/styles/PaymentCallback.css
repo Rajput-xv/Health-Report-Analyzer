@@ -1,0 +1,280 @@
+/* Payment Callback Page Styles */
+
+.payment-callback {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg,
+            var(--background-gradient-start, #0f0f1a) 0%,
+            var(--background-gradient-end, #1a1a2e) 100%);
+}
+
+.payment-callback-card {
+    background: var(--card-background, rgba(255, 255, 255, 0.05));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.1));
+    border-radius: 24px;
+    padding: 3rem;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+    animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.payment-callback-card h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary, #ffffff);
+    margin: 1.5rem 0 0.75rem;
+    line-height: 1.3;
+}
+
+.payment-callback-message {
+    font-size: 1rem;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7));
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+}
+
+.payment-callback-submessage {
+    font-size: 0.875rem;
+    color: var(--text-tertiary, rgba(255, 255, 255, 0.5));
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+/* Spinner */
+.payment-callback-spinner {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.payment-callback-spinner .loading-spinner {
+    width: 60px;
+    height: 60px;
+}
+
+/* Progress Bar */
+.progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 1.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg,
+            var(--accent-primary, #6366f1) 0%,
+            var(--accent-secondary, #8b5cf6) 100%);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+/* Icons */
+.payment-callback-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.5);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.payment-callback-icon svg {
+    width: 40px;
+    height: 40px;
+}
+
+.payment-callback-icon.success {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2) 0%, rgba(16, 185, 129, 0.2) 100%);
+    border: 2px solid rgba(34, 197, 94, 0.5);
+    color: #22c55e;
+}
+
+.payment-callback-icon.pending {
+    background: linear-gradient(135deg, rgba(234, 179, 8, 0.2) 0%, rgba(245, 158, 11, 0.2) 100%);
+    border: 2px solid rgba(234, 179, 8, 0.5);
+    color: #eab308;
+}
+
+.payment-callback-icon.error {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2) 0%, rgba(220, 38, 38, 0.2) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    color: #ef4444;
+}
+
+/* Action Buttons */
+.payment-callback-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.payment-callback-actions .btn-primary,
+.payment-callback-actions .btn-secondary {
+    width: 100%;
+    padding: 0.875rem 1.5rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.payment-callback-actions .btn-primary {
+    background: linear-gradient(135deg,
+            var(--accent-primary, #6366f1) 0%,
+            var(--accent-secondary, #8b5cf6) 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.payment-callback-actions .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+}
+
+.payment-callback-actions .btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary, #ffffff);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.payment-callback-actions .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Footer */
+.payment-callback-footer {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.payment-callback-footer p {
+    font-size: 0.8rem;
+    color: var(--text-tertiary, rgba(255, 255, 255, 0.4));
+    margin: 0;
+}
+
+.payment-callback-footer strong {
+    color: var(--text-secondary, rgba(255, 255, 255, 0.6));
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .payment-callback {
+        padding: 1rem;
+    }
+
+    .payment-callback-card {
+        padding: 2rem 1.5rem;
+        border-radius: 20px;
+    }
+
+    .payment-callback-card h2 {
+        font-size: 1.5rem;
+    }
+
+    .payment-callback-icon {
+        width: 64px;
+        height: 64px;
+    }
+
+    .payment-callback-icon svg {
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Light Mode Support */
+@media (prefers-color-scheme: light) {
+    .payment-callback {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+
+    .payment-callback-card {
+        background: rgba(255, 255, 255, 0.9);
+        border-color: rgba(0, 0, 0, 0.1);
+        box-shadow:
+            0 25px 50px -12px rgba(0, 0, 0, 0.15),
+            0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+    }
+
+    .payment-callback-card h2 {
+        color: #1e293b;
+    }
+
+    .payment-callback-message {
+        color: #475569;
+    }
+
+    .payment-callback-submessage {
+        color: #64748b;
+    }
+
+    .progress-bar {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-callback-actions .btn-secondary {
+        background: rgba(0, 0, 0, 0.05);
+        color: #1e293b;
+        border-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-callback-actions .btn-secondary:hover {
+        background: rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-callback-footer {
+        border-top-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .payment-callback-footer p {
+        color: #94a3b8;
+    }
+
+    .payment-callback-footer strong {
+        color: #64748b;
+    }
+}

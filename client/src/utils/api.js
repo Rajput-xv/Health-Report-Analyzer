@@ -159,4 +159,14 @@ export const getCustomerPortal = async () => {
   }
 };
 
+// Verify payment status after Gumroad redirect
+export const verifyPayment = async (expectedPlan = '') => {
+  try {
+    const response = await api.get(`/payments/verify-payment?expectedPlan=${expectedPlan}`);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to verify payment' };
+  }
+};
+
 export default api;

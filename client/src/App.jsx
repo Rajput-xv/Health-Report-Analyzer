@@ -29,6 +29,7 @@ import { useLoading } from "./context/LoadingContext.jsx";
 import { ReportsList, ReportDetail } from "./components/ReportList";
 import Stats from "./components/Stats";
 import PricingPage from "./components/PricingPage";
+import PaymentCallback from "./components/PaymentCallback";
 import Header from "./components/Header";
 import AnalyticsTracker from './AnalyticsTracker';
 import NotFoundPage from "./components/NotFoundPage";
@@ -45,21 +46,45 @@ function Dashboard({ user, setUser }) {
 
   const { loading } = useLoading();
 
-  // Check for payment success/cancelled in URL
+  // Check for payment success/cancelled in URL and refresh user data
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const paymentStatus = params.get('payment');
 
+    const refreshUserData = async () => {
+      try {
+        // Fetch fresh user data to get updated subscription
+        const response = await getCurrentUser();
+        const updatedUser = response.user || response;
+
+        // Update user in localStorage and state
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
+
+        console.log('✅ User data refreshed after payment');
+      } catch (error) {
+        console.error('Failed to refresh user data:', error);
+      }
+    };
+
     if (paymentStatus === 'success') {
       setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active. Enjoy unlimited uploads!' });
       toast.success('🎉 Welcome to Pro! Enjoy unlimited uploads.');
-      // Clear the URL parameter
-      navigate('/dashboard', { replace: true });
+
+      // Refresh user data to show updated subscription
+      refreshUserData();
+
+      // Clear the URL parameter after a short delay
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     } else if (paymentStatus === 'cancelled') {
       setPaymentMessage({ type: 'info', text: 'Payment was cancelled. You can upgrade anytime from the pricing page.' });
-      navigate('/dashboard', { replace: true });
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
     }
-  }, [location.search, navigate]);
+  }, [location.search, navigate, setUser]);
 
   const handleFileProcessed = (data) => {
     setUploadedReportId(data.reportId || data._id);
@@ -409,11 +434,27 @@ function App() {
             }
           />
 
-          {/* Gumroad Callback - redirect after purchase */}
+          {/* Payment Callback - handles redirect from Gumroad */}
+          <Route
+            path="/payment-callback"
+            element={
+              user ? (
+                <PaymentCallback />
+              ) : (
+                <Navigate to="/login?redirect=/payment-callback" replace />
+              )
+            }
+          />
+
+          {/* Legacy Gumroad Callback - redirect to new handler */}
           <Route
             path="/callback"
             element={
-              <Navigate to="/dashboard?payment=success" replace />
+              user ? (
+                <PaymentCallback />
+              ) : (
+                <Navigate to="/login?redirect=/payment-callback" replace />
+              )
             }
           />
 

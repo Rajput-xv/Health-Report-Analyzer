@@ -78,6 +78,11 @@ export default function PricingPage({ user }) {
     const paymentStatus = searchParams.get('payment');
     if (paymentStatus === 'success') {
       setMessage({ type: 'success', text: '🎉 Payment successful! Your subscription is now active.' });
+
+      // Refresh subscription data immediately
+      if (user) {
+        fetchSubscription();
+      }
     } else if (paymentStatus === 'cancelled') {
       setMessage({ type: 'info', text: 'Payment was cancelled. You can try again anytime.' });
     }
@@ -92,6 +97,7 @@ export default function PricingPage({ user }) {
     try {
       const response = await api.get('/payments/subscription');
       setSubscription(response.data);
+      console.log('💳 Subscription data refreshed:', response.data.plan);
     } catch (error) {
       console.error('Failed to fetch subscription:', error);
     }
@@ -150,6 +156,37 @@ export default function PricingPage({ user }) {
     }
   };
 
+  const handleSyncSubscription = async () => {
+    setLoading('sync');
+    setMessage(null);
+
+    try {
+      // Fetch fresh subscription data
+      const response = await api.get('/payments/subscription');
+      setSubscription(response.data);
+
+      if (response.data.plan !== 'free') {
+        setMessage({
+          type: 'success',
+          text: `✅ Subscription synced! You're on the ${response.data.planName} plan.`
+        });
+      } else {
+        setMessage({
+          type: 'info',
+          text: 'No active subscription found. If you just completed payment, please wait a moment and try again.'
+        });
+      }
+    } catch (error) {
+      console.error('Sync error:', error);
+      setMessage({
+        type: 'error',
+        text: 'Failed to sync subscription. Please try again.'
+      });
+    } finally {
+      setLoading(null);
+    }
+  };
+
   const getButtonText = (plan) => {
     if (!user) return 'Get Started';
     if (subscription?.plan === plan.id) return 'Current Plan';
@@ -169,6 +206,29 @@ export default function PricingPage({ user }) {
         <p className="pricing-subtitle">
           Choose the plan that fits your health journey. Cancel anytime.
         </p>
+
+        {/* Sync button for users who just paid */}
+        {user && (
+          <button
+            className="sync-subscription-btn"
+            onClick={handleSyncSubscription}
+            disabled={loading === 'sync'}
+            style={{
+              marginTop: '1rem',
+              padding: '0.75rem 1.5rem',
+              background: loading === 'sync' ? '#6b7280' : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: loading === 'sync' ? 'not-allowed' : 'pointer',
+              fontSize: '0.9rem',
+              fontWeight: '600',
+              transition: 'all 0.2s'
+            }}
+          >
+            {loading === 'sync' ? '🔄 Syncing...' : '🔄 Sync Subscription Status'}
+          </button>
+        )}
       </div>
 
       {/* Message Banner */}

@@ -37,7 +37,7 @@ const PLANS = {
  */
 async function gumroadRequest(endpoint, method = 'GET', body = null) {
   const url = new URL(`https://api.gumroad.com/v2${endpoint}`);
-  
+
   const options = {
     method,
     headers: {
@@ -47,7 +47,7 @@ async function gumroadRequest(endpoint, method = 'GET', body = null) {
 
   const params = new URLSearchParams();
   params.append('access_token', GUMROAD_ACCESS_TOKEN);
-  
+
   if (body) {
     Object.entries(body).forEach(([key, value]) => {
       params.append(key, value);
@@ -90,6 +90,12 @@ router.get('/plans', (req, res) => {
 /**
  * POST /api/payments/create-checkout
  * Generate Gumroad checkout URL
+ * 
+ * IMPORTANT: Gumroad redirect must be configured in product settings:
+ * 1. Go to gumroad.com/products
+ * 2. Edit your product
+ * 3. Under "Workflow" or "After Purchase"
+ * 4. Set redirect URL to: https://yourdomain.com/payment-callback
  */
 router.post('/create-checkout', authMiddleware, async (req, res) => {
   try {
@@ -106,16 +112,15 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
     }
 
     // Build Gumroad checkout URL
-    // Gumroad uses direct links - add email pre-fill, user ID, and recurrence
     const baseUrl = `https://${process.env.GUMROAD_USERNAME}.gumroad.com/l/${plan.productPermalink}`;
-    
+
     // Set recurrence based on plan type
     const recurrence = planId === 'pro_yearly' ? 'yearly' : 'monthly';
-    
+
     const params = new URLSearchParams({
       email: user.email,
       wanted: 'true',
-      // Pass user ID for webhook identification
+      // Pass user ID for webhook identification - this is crucial!
       user_id: user._id.toString(),
       // Set the billing frequency
       recurrence: recurrence
@@ -123,10 +128,16 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 
     const checkoutUrl = `${baseUrl}?${params.toString()}`;
 
-    res.json({ 
-      success: true, 
+    console.log(`🛒 Creating checkout for user ${user.email} - Plan: ${planId}`);
+    console.log(`   User ID: ${user._id.toString()}`);
+    console.log(`   Checkout URL: ${checkoutUrl}`);
+    console.log(`   ⚠️  REMINDER: Ensure redirect URL is configured in Gumroad product settings!`);
+
+    res.json({
+      success: true,
       checkoutUrl,
-      message: 'Redirecting to Gumroad checkout'
+      message: 'Redirecting to Gumroad checkout',
+      userId: user._id.toString()
     });
 
   } catch (error) {
@@ -142,7 +153,7 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 router.get('/subscription', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -191,7 +202,7 @@ router.get('/subscription', authMiddleware, async (req, res) => {
 router.post('/cancel', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user?.subscription?.gumroadSubscriptionId) {
       return res.status(400).json({ error: 'No active subscription to cancel' });
     }
@@ -207,9 +218,9 @@ router.post('/cancel', authMiddleware, async (req, res) => {
     user.subscription.status = 'cancelled';
     await user.save();
 
-    res.json({ 
-      success: true, 
-      message: 'Subscription cancelled. You can continue using Pro features until the end of your billing period.' 
+    res.json({
+      success: true,
+      message: 'Subscription cancelled. You can continue using Pro features until the end of your billing period.'
     });
 
   } catch (error) {
@@ -225,7 +236,7 @@ router.post('/cancel', authMiddleware, async (req, res) => {
 router.post('/resume', authMiddleware, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -235,7 +246,7 @@ router.post('/resume', authMiddleware, async (req, res) => {
     const plan = PLANS[previousPlan];
 
     if (!plan?.productPermalink) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Please subscribe again from the pricing page',
         redirectUrl: '/pricing'
       });
@@ -243,8 +254,8 @@ router.post('/resume', authMiddleware, async (req, res) => {
 
     const checkoutUrl = `https://${process.env.GUMROAD_USERNAME || 'yourname'}.gumroad.com/l/${plan.productPermalink}?email=${encodeURIComponent(user.email)}`;
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Please complete checkout to resume your subscription',
       checkoutUrl
     });
@@ -263,11 +274,11 @@ router.get('/customer-portal', authMiddleware, async (req, res) => {
   try {
     // Gumroad uses Library page for customers to manage subscriptions
     const portalUrl = 'https://app.gumroad.com/library';
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       portalUrl,
-      message: 'Manage your subscription on Gumroad' 
+      message: 'Manage your subscription on Gumroad'
     });
 
   } catch (error) {
@@ -291,7 +302,7 @@ router.get('/customer-portal', authMiddleware, async (req, res) => {
 router.post('/webhook', express.urlencoded({ extended: true }), async (req, res) => {
   try {
     const payload = req.body;
-    
+
     console.log('📨 Gumroad webhook received:', payload.resource_name || 'sale');
 
     // Verify webhook by checking seller_id matches
@@ -348,21 +359,53 @@ router.post('/webhook', express.urlencoded({ extended: true }), async (req, res)
  */
 async function handleSale(payload) {
   const email = payload.email?.toLowerCase();
-  const customUserId = payload.url_params?.user_id;
   const isSubscription = payload.is_recurring_billing === 'true';
   const productPermalink = payload.short_product_id || payload.permalink;
 
-  // Find user by custom user_id or email
-  let user;
-  if (customUserId) {
-    user = await User.findById(customUserId);
+  // Gumroad passes custom fields in different formats depending on integration
+  // Try multiple ways to get the user_id
+  let customUserId = null;
+
+  // Method 1: url_params object (when using ?user_id=xxx in checkout URL)
+  if (payload.url_params && payload.url_params.user_id) {
+    customUserId = payload.url_params.user_id;
   }
+  // Method 2: Direct custom field (some Gumroad integrations)
+  else if (payload.custom_fields && payload.custom_fields.user_id) {
+    customUserId = payload.custom_fields.user_id;
+  }
+  // Method 3: Check if it's in the referrer or other fields
+  else if (payload.referrer) {
+    const referrerUrl = new URL(payload.referrer);
+    customUserId = referrerUrl.searchParams.get('user_id');
+  }
+
+  console.log(`📝 Processing sale - Email: ${email}, Custom User ID: ${customUserId}, Product: ${productPermalink}`);
+
+  // Find user by custom user_id or email
+  let user = null;
+
+  if (customUserId) {
+    try {
+      user = await User.findById(customUserId);
+      if (user) {
+        console.log(`✓ Found user by ID: ${customUserId}`);
+      }
+    } catch (e) {
+      console.log(`⚠️ Invalid user ID format: ${customUserId}`);
+    }
+  }
+
   if (!user && email) {
     user = await User.findOne({ email });
+    if (user) {
+      console.log(`✓ Found user by email: ${email}`);
+    }
   }
 
   if (!user) {
-    console.error(`❌ User not found for sale: ${email || customUserId}`);
+    console.error(`❌ User not found for sale - Email: ${email}, User ID: ${customUserId}`);
+    console.error(`   Payload keys: ${Object.keys(payload).join(', ')}`);
     return;
   }
 
@@ -381,6 +424,7 @@ async function handleSale(payload) {
     renewsAt.setMonth(renewsAt.getMonth() + 1);
   }
 
+  // Update user subscription
   user.subscription = {
     plan: planId,
     status: 'active',
@@ -395,7 +439,7 @@ async function handleSale(payload) {
   };
 
   await user.save();
-  console.log(`✅ Sale processed for user ${user.email} - Plan: ${planId}, Recurring: ${isSubscription}`);
+  console.log(`✅ Sale processed successfully for user ${user.email} - Plan: ${planId}, Recurring: ${isSubscription}`);
 }
 
 /**
@@ -435,7 +479,7 @@ async function handleRefund(payload) {
  */
 async function handleDispute(payload) {
   const saleId = payload.sale_id;
-  
+
   const user = await User.findOne({
     'subscription.gumroadSaleId': saleId
   });
@@ -444,7 +488,7 @@ async function handleDispute(payload) {
 
   user.subscription.status = 'disputed';
   await user.save();
-  
+
   console.log(`⚠️ Dispute opened for user ${user.email}`);
 }
 
@@ -530,7 +574,7 @@ async function handleSubscriptionUpdated(payload) {
     renewsAt.setMonth(renewsAt.getMonth() + 1);
   }
   user.subscription.renewsAt = renewsAt;
-  
+
   // Reset monthly usage on renewal
   user.subscription.reportsUsedThisMonth = 0;
   user.subscription.lastReportReset = now;
@@ -566,7 +610,7 @@ router.post('/verify-purchase', authMiddleware, async (req, res) => {
 
     if (response.success && response.purchase) {
       const purchase = response.purchase;
-      
+
       // Determine plan
       let planId = 'pro_monthly';
       if (purchase.short_product_id === process.env.GUMROAD_PRO_YEARLY_PERMALINK) {
@@ -608,6 +652,46 @@ router.post('/verify-purchase', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Verify purchase error:', error);
     res.status(500).json({ error: 'Failed to verify purchase' });
+  }
+});
+
+/**
+ * GET /api/payments/verify-payment
+ * Check if payment was successful (for polling after Gumroad redirect)
+ * Returns the current subscription status
+ */
+router.get('/verify-payment', authMiddleware, async (req, res) => {
+  try {
+    const { expectedPlan } = req.query;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    const currentPlan = user.subscription?.plan || 'free';
+    const planDetails = PLANS[currentPlan];
+
+    // Check if the subscription was updated to the expected plan
+    const isUpdated = expectedPlan
+      ? (currentPlan === expectedPlan || (expectedPlan.startsWith('pro') && currentPlan.startsWith('pro')))
+      : currentPlan !== 'free';
+
+    res.json({
+      success: true,
+      isUpdated,
+      subscription: {
+        plan: currentPlan,
+        planName: planDetails?.name || 'Free',
+        status: user.subscription?.status || 'active',
+        features: planDetails?.features || PLANS.free.features,
+        renewsAt: user.subscription?.renewsAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Verify payment error:', error);
+    res.status(500).json({ error: 'Failed to verify payment status' });
   }
 });
 
