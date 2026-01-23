@@ -68,8 +68,8 @@ function Dashboard({ user, setUser }) {
     };
 
     if (paymentStatus === 'success') {
-      setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active. Enjoy unlimited uploads!' });
-      toast.success('🎉 Welcome to Pro! Enjoy unlimited uploads.');
+      setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active.' });
+      toast.success('🎉 Welcome to Pro! Your subscription is now active.');
 
       // Refresh user data to show updated subscription
       refreshUserData();

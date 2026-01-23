@@ -20,7 +20,7 @@ const PLANS = {
     name: 'Pro Monthly',
     productPermalink: process.env.GUMROAD_PRO_MONTHLY_PERMALINK, // e.g., "health-analyzer-pro"
     price: 500, // $5.00 in cents
-    reportsPerMonth: -1, // unlimited
+    reportsPerMonth: 10,
     features: ['advanced_insights', 'trend_analysis', 'pdf_export', 'priority_support', 'family_sharing', 'unlimited_history']
   },
   pro_yearly: {

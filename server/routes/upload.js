@@ -40,9 +40,9 @@ router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
 
     const uploadPermission = user.canUploadReport();
     if (!uploadPermission.allowed) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Monthly upload limit reached',
-        message: `You've used all ${uploadPermission.limit} reports this month. Upgrade to Pro for unlimited uploads!`,
+        message: `You've used all ${uploadPermission.limit} reports this month. Upgrade to Pro for more uploads!`,
         upgradeRequired: true,
         used: uploadPermission.used,
         limit: uploadPermission.limit

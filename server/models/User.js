@@ -105,10 +105,10 @@ userSchema.pre("save", async function (next) {
   try {
     // Use a consistent salt rounds value of 10
     const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  console.log(`Password hashed for user ${this.email} (Google auth: ${this.googleAuth}, Password changed: ${this.passwordChanged})`);
-  next();
-} catch (error) {
+    this.password = await bcrypt.hash(this.password, salt);
+    console.log(`Password hashed for user ${this.email} (Google auth: ${this.googleAuth}, Password changed: ${this.passwordChanged})`);
+    next();
+  } catch (error) {
     console.error(`Error hashing password for user ${this.email}:`, error);
     next(error);
   }
@@ -121,23 +121,23 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 };
 
 // Method to check if user can upload reports based on subscription
-userSchema.methods.canUploadReport = function() {
+userSchema.methods.canUploadReport = function () {
   const plan = this.subscription?.plan || 'free';
   const limits = {
     free: 3,
-    pro_monthly: -1, // unlimited
+    pro_monthly: 10,
     pro_yearly: -1,
     enterprise: -1
   };
-  
+
   const limit = limits[plan];
   if (limit === -1) return { allowed: true, remaining: 'unlimited' };
-  
+
   const used = this.subscription?.reportsUsedThisMonth || 0;
   const remaining = Math.max(0, limit - used);
-  
-  return { 
-    allowed: used < limit, 
+
+  return {
+    allowed: used < limit,
     remaining,
     limit,
     used
@@ -145,7 +145,7 @@ userSchema.methods.canUploadReport = function() {
 };
 
 // Method to increment report usage
-userSchema.methods.incrementReportUsage = async function() {
+userSchema.methods.incrementReportUsage = async function () {
   if (!this.subscription) {
     this.subscription = { plan: 'free', reportsUsedThisMonth: 0 };
   }
@@ -155,21 +155,21 @@ userSchema.methods.incrementReportUsage = async function() {
 };
 
 // Static method to reset monthly usage for all users (run via cron)
-userSchema.statics.resetMonthlyUsage = async function() {
+userSchema.statics.resetMonthlyUsage = async function () {
   const startOfMonth = new Date();
   startOfMonth.setDate(1);
   startOfMonth.setHours(0, 0, 0, 0);
-  
+
   const result = await this.updateMany(
     { 'subscription.lastReportReset': { $lt: startOfMonth } },
-    { 
-      $set: { 
+    {
+      $set: {
         'subscription.reportsUsedThisMonth': 0,
         'subscription.lastReportReset': new Date()
       }
     }
   );
-  
+
   console.log(`Reset monthly usage for ${result.modifiedCount} users`);
   return result.modifiedCount;
 };

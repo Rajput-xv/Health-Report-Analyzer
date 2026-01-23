@@ -196,10 +196,23 @@ const FileUpload = ({ onFileProcessed, onError }) => {
       {/* Subscription Status Indicator */}
       {subscription && (
         <div className={`upload-quota-indicator ${subscription.plan !== 'free' ? 'pro' : subscription.reportsUsed >= subscription.reportsLimit ? 'limit-reached' : ''}`}>
-          {subscription.plan !== 'free' ? (
+          {subscription.plan === 'pro_yearly' ? (
             <div className="quota-content">
               <span className="quota-icon">👑</span>
-              <span className="quota-text">Pro Plan - Unlimited uploads</span>
+              <span className="quota-text">Pro Yearly - Unlimited uploads</span>
+            </div>
+          ) : subscription.plan === 'pro_monthly' ? (
+            <div className="quota-content">
+              <span className="quota-icon">⭐</span>
+              <span className="quota-text">{subscription.reportsLimit - subscription.reportsUsed} of {subscription.reportsLimit} uploads remaining this month</span>
+              {subscription.reportsLimit - subscription.reportsUsed <= 2 && (
+                <button
+                  className="upgrade-cta-btn subtle"
+                  onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
+                >
+                  Upgrade to Yearly
+                </button>
+              )}
             </div>
           ) : subscription.reportsUsed >= subscription.reportsLimit ? (
             <div className="quota-content limit-reached">
