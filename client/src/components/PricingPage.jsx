@@ -245,6 +245,8 @@ export default function PricingPage({ user }) {
           <div className="subscription-details">
             <span className="subscription-badge">
               ✨ {subscription.planName} Plan
+              {subscription.plan === 'pro_yearly' && ' (Annual Billing)'}
+              {subscription.plan === 'pro_monthly' && ' (Monthly Billing)'}
             </span>
             <span className="subscription-status">
               {subscription.status === 'active' ? '● Active' : `● ${subscription.status}`}

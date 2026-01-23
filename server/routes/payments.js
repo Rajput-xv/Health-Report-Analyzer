@@ -360,7 +360,13 @@ router.post('/webhook', express.urlencoded({ extended: true }), async (req, res)
 async function handleSale(payload) {
   const email = payload.email?.toLowerCase();
   const isSubscription = payload.is_recurring_billing === 'true';
-  const productPermalink = payload.short_product_id || payload.permalink;
+  const productPermalink = payload.permalink;
+  const shortProductId = payload.short_product_id;
+  const productId = payload.product_id;
+
+  // Enhanced logging to understand what Gumroad sends
+  console.log('📦 Full webhook payload keys:', Object.keys(payload).join(', '));
+  console.log(`📦 Product info - Permalink: ${productPermalink}, Short ID: ${shortProductId}, Product ID: ${productId}`);
 
   // Gumroad passes custom fields in different formats depending on integration
   // Try multiple ways to get the user_id
@@ -376,11 +382,15 @@ async function handleSale(payload) {
   }
   // Method 3: Check if it's in the referrer or other fields
   else if (payload.referrer) {
-    const referrerUrl = new URL(payload.referrer);
-    customUserId = referrerUrl.searchParams.get('user_id');
+    try {
+      const referrerUrl = new URL(payload.referrer);
+      customUserId = referrerUrl.searchParams.get('user_id');
+    } catch (e) {
+      console.log('⚠️ Could not parse referrer URL');
+    }
   }
 
-  console.log(`📝 Processing sale - Email: ${email}, Custom User ID: ${customUserId}, Product: ${productPermalink}`);
+  console.log(`📝 Processing sale - Email: ${email}, Custom User ID: ${customUserId}, Product: ${productPermalink || shortProductId}`);
 
   // Find user by custom user_id or email
   let user = null;
@@ -409,11 +419,33 @@ async function handleSale(payload) {
     return;
   }
 
-  // Determine plan from product permalink
-  let planId = 'pro_monthly';
-  if (productPermalink === process.env.GUMROAD_PRO_YEARLY_PERMALINK) {
+  // Determine plan from product identifiers
+  // Check against all possible fields: permalink, short_product_id, product_id
+  let planId = 'pro_monthly'; // default
+
+  const monthlyPermalink = process.env.GUMROAD_PRO_MONTHLY_PERMALINK;
+  const yearlyPermalink = process.env.GUMROAD_PRO_YEARLY_PERMALINK;
+  const monthlyShortId = process.env.GUMROAD_PRODUCT_SHORT_ID_MONTH;
+  const yearlyShortId = process.env.GUMROAD_PRODUCT_SHORT_ID_YEAR;
+  const monthlyProductId = process.env.GUMROAD_PRODUCT_ID_MONTH;
+  const yearlyProductId = process.env.GUMROAD_PRODUCT_ID_YEAR;
+
+  // Check if it's a yearly plan
+  if (productPermalink === yearlyPermalink ||
+    shortProductId === yearlyShortId ||
+    shortProductId === yearlyPermalink ||
+    productId === yearlyProductId) {
     planId = 'pro_yearly';
   }
+  // Check if it's a monthly plan (for completeness)
+  else if (productPermalink === monthlyPermalink ||
+    shortProductId === monthlyShortId ||
+    shortProductId === monthlyPermalink ||
+    productId === monthlyProductId) {
+    planId = 'pro_monthly';
+  }
+
+  console.log(`🎯 Detected plan: ${planId}`);
 
   // Calculate next renewal date
   const now = new Date();
