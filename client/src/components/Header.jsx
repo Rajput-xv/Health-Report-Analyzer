@@ -32,6 +32,25 @@ const Header = ({ user, setUser }) => {
     setShowUserMenu(false);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      // Save current scroll position and lock body
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.overflow = 'hidden';
+    } else {
+      // Restore scrolling
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.documentElement.style.overflow = '';
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen]);
+
   // Fetch subscription status
   useEffect(() => {
     const fetchSubscription = async () => {

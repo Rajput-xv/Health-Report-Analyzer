@@ -742,3 +742,13 @@
 .dark-mode .mobile-nav-link.active {
   background: rgba(255, 255, 255, 0.1);
 }
+
+/* Show hamburger and mobile nav at 1260px and below */
+@media (max-width: 1260px) {
+  .mobile-menu-btn {
+    display: flex !important;
+  }
+  .desktop-nav {
+    display: none !important;
+  }
+}
