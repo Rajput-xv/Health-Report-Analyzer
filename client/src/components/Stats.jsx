@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/Stats.css';
+import { fetchGlobalStats } from '../utils/api';
 
 // Stats Section Component
 function HealthStats() {
   const [isVisible, setIsVisible] = useState(false);
+  const [stats, setStats] = useState({ totalUsers: 0, totalReports: 0 });
+  const [loading, setLoading] = useState(true);
   const statsRef = useRef(null);
 
   useEffect(() => {
@@ -27,6 +30,16 @@ function HealthStats() {
     };
   }, []);
 
+  useEffect(() => {
+    fetchGlobalStats().then((data) => {
+      setStats({
+        totalUsers: data.totalUsers || 0,
+        totalReports: data.totalReports || 0
+      });
+      setLoading(false);
+    });
+  }, []);
+
   return (
     <section className="health-stats-section" ref={statsRef} data-aos="fade-up">
       <div className="health-stats-container">
@@ -40,7 +53,7 @@ function HealthStats() {
         <div className="health-stats-grid">
           <StatCard
             icon="📊"
-            end={50000}
+            end={loading ? 0 : stats.totalReports}
             suffix="+"
             label="Reports Analyzed"
             isVisible={isVisible}
@@ -49,7 +62,7 @@ function HealthStats() {
           />
           <StatCard
             icon="👥"
-            end={15000}
+            end={loading ? 0 : stats.totalUsers}
             suffix="+"
             label="Happy Users"
             isVisible={isVisible}

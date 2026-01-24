@@ -1,3 +1,12 @@
+// Fetch global stats (total users and reports)
+export const fetchGlobalStats = async () => {
+  try {
+    const response = await api.get('/stats');
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to fetch stats' };
+  }
+};
 import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
