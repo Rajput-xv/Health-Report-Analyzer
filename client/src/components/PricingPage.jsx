@@ -15,7 +15,6 @@ const PLANS = [
       { text: '3 reports per month', included: true },
       { text: 'Basic health insights', included: true },
       { text: '7-day report history', included: true },
-      { text: 'Email support', included: true },
       { text: 'Trend analysis', included: false },
       { text: 'PDF export', included: false },
       { text: 'Family sharing', included: false },

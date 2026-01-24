@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useSubscription } from '../context/SubscriptionContext';
 import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../utils/api";
 import api from "../utils/api";
@@ -11,7 +12,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [processingOcr, setProcessingOcr] = useState(false);
   const [ocrProgress, setOcrProgress] = useState(0);
-  const [subscription, setSubscription] = useState(null);
+  const { subscription, fetchSubscription } = useSubscription();
   const ocrTimerRef = useRef(null);
   const fileInputRef = useRef(null);
 
@@ -29,15 +30,8 @@ const FileUpload = ({ onFileProcessed, onError }) => {
 
   // Fetch subscription status
   useEffect(() => {
-    const fetchSubscription = async () => {
-      try {
-        const response = await api.get('/payments/subscription');
-        setSubscription(response.data);
-      } catch (error) {
-        console.error('Failed to fetch subscription:', error);
-      }
-    };
     fetchSubscription();
+    // eslint-disable-next-line
   }, []);
 
   // Clean up the timer when component unmounts
@@ -86,7 +80,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
     }
 
     try {
-      showLoading();
+      // showLoading();
       setUploadProgress(0);
 
       if (
@@ -125,9 +119,10 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         setOcrProgress(100);
       }
 
-      hideLoading();
+      // hideLoading();
       if (result.isScannedDocument) {
         onFileProcessed(result);
+        await fetchSubscription();
         if (result.requiresManualEntry) {
           onError(
             "This looks like a scanned document. No health parameters detected — you may need to enter data manually."
@@ -139,6 +134,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         }
       } else {
         onFileProcessed(result);
+        await fetchSubscription();
       }
     } catch (error) {
       console.error("File upload error:", error);
@@ -174,7 +170,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         onError(error.message || "Upload failed. Please try again.");
       }
     } finally {
-      hideLoading();
+      // hideLoading();
       resetProgress();
     }
   };

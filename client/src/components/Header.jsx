@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSubscription } from '../context/SubscriptionContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { FileText, Menu, X, LogOut, Home, LayoutDashboard, DollarSign, Mail, ChevronDown, Crown, Zap } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -15,7 +16,7 @@ const Header = ({ user, setUser }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [subscription, setSubscription] = useState(null);
+  const { subscription, fetchSubscription } = useSubscription();
 
   // Handle scroll effect
   useEffect(() => {
@@ -53,18 +54,8 @@ const Header = ({ user, setUser }) => {
 
   // Fetch subscription status
   useEffect(() => {
-    const fetchSubscription = async () => {
-      if (user) {
-        try {
-          const response = await api.get('/payments/subscription');
-          setSubscription(response.data);
-        } catch (error) {
-          console.error('Failed to fetch subscription:', error);
-        }
-      }
-    };
-    fetchSubscription();
-  }, [user]);
+    if (user) fetchSubscription();
+  }, [user, fetchSubscription]);
 
   const handleLogout = () => {
     localStorage.removeItem('token');

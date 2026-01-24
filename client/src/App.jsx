@@ -26,6 +26,7 @@ import { getCurrentUser } from "./utils/api";
 import "./styles/App.css";
 import FAQ from "./components/FAQ";
 import { useLoading } from "./context/LoadingContext.jsx";
+import { SubscriptionProvider } from "./context/SubscriptionContext.jsx";
 import { ReportsList, ReportDetail } from "./components/ReportList";
 import Stats from "./components/Stats";
 import PricingPage from "./components/PricingPage";
@@ -317,11 +318,12 @@ function App() {
   }
 
   return (
-    <Router>
-      <AnalyticsTracker />
-      <RouteChangeTracker />
-      <div className="app">
-        <Routes>
+    <SubscriptionProvider>
+      <Router>
+        <AnalyticsTracker />
+        <RouteChangeTracker />
+        <div className="app">
+          <Routes>
 
           {/* Landing page */}
           <Route
@@ -472,24 +474,25 @@ function App() {
 
           {/* Catch all - 404 Page */}
           <Route path="*" element={<NotFoundPage />} />
-        </Routes>
+          </Routes>
 
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={i18n.language === 'ar' || i18n.language === 'he'}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
+          <ToastContainer
+            position="top-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={false}
+            closeOnClick
+            rtl={i18n.language === 'ar' || i18n.language === 'he'}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="light"
+          />
 
-        <BackToTopButton />
-      </div>
-    </Router>
+          <BackToTopButton />
+        </div>
+      </Router>
+    </SubscriptionProvider>
   );
 }
 
