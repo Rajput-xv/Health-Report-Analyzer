@@ -2,6 +2,7 @@ const pdfParse = require('pdf-parse');
 const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
 const { extractHealthParameters } = require('../utils/parameterExtractor');
+const pdfToImages = require('../utils/pdfToImages');
 
 /**
  * Extract text and parameters using traditional OCR (Tesseract)
@@ -183,16 +184,37 @@ async function extractTextFromImageBuffer(buffer) {
  */
 async function extractTextFromPDFBuffer(buffer) {
     try {
+        // Try text extraction first
         const data = await pdfParse(buffer);
         console.log(`📄 PDF text extracted: ${data.text.length} chars`);
-
         if (data.text.trim().length > 100) {
             return data.text;
         }
 
-        console.log('PDF appears to be scanned, using OCR...');
-        return await extractTextFromImageBuffer(buffer);
-
+        // If not enough text, try OCR on each page
+        console.log('PDF appears to be scanned, using OCR on each page...');
+        let ocrText = '';
+        let pageCount = 0;
+        try {
+            const imageBuffers = await pdfToImages(buffer);
+            pageCount = imageBuffers.length;
+            for (let i = 0; i < imageBuffers.length; i++) {
+                try {
+                    const pageText = await extractTextFromImageBuffer(imageBuffers[i]);
+                    ocrText += `\n--- Page ${i + 1} ---\n` + pageText;
+                } catch (ocrErr) {
+                    ocrText += `\n--- Page ${i + 1} OCR failed: ${ocrErr.message} ---\n`;
+                }
+            }
+        } catch (imgErr) {
+            console.error('PDF to image conversion failed:', imgErr.message);
+            throw new Error('Failed to convert PDF pages to images for OCR.');
+        }
+        if (ocrText.trim().length > 0) {
+            return ocrText;
+        } else {
+            throw new Error('No text could be extracted from PDF via OCR.');
+        }
     } catch (error) {
         console.error('PDF extraction error:', error);
         return ' ';

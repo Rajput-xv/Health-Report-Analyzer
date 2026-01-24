@@ -23,8 +23,10 @@
     "multer": "^1.4.5-lts.1",
     "natural": "^8.1.0",
     "nodemailer": "^7.0.5",
+    "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1",
-    "sharp": "^0.34.2",
+    "pdf-poppler": "^0.2.3",
+    "sharp": "^0.34.5",
     "string-similarity": "^4.0.4",
     "tesseract.js": "^5.0.4"
   },
