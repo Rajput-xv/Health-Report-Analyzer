@@ -32,7 +32,7 @@ export default function LandingPage({ user, setUser }) {
             {t('homepage.hero_subtitle')}
           </p>
           <div className="landing-hero-button-container" data-aos="zoom-in" data-aos-delay="700">
-            <button className="landing-primary-button" onClick={handleGetStartedClick}>
+            <button className="landing-primary-button" id='highlights' onClick={handleGetStartedClick}>
               <span>{user ? t('nav.return_to_dashboard') : t('homepage.get_started')}</span>
             </button>
           </div>
@@ -154,7 +154,7 @@ export default function LandingPage({ user, setUser }) {
             {t('homepage.cta_desc')}
           </p>
           <div className="landing-cta-button-container" data-aos="zoom-in" >
-            <button className="landing-primary-button" onClick={handleGetStartedClick}>
+            <button className="landing-primary-button" id='highlights' onClick={handleGetStartedClick}>
               <span>{user ? t('homepage.continue_dashboard') : t('homepage.start_free')}</span>
             </button>
           </div>

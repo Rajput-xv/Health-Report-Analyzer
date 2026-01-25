@@ -135,19 +135,19 @@
 }
 
 /* Pricing button highlight */
-.nav-link.highlight {
+#highlights {
   background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
   color: #1a1a2e;
   font-weight: 600;
   box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4);
 }
 
-.nav-link.highlight:hover {
+#highlights:hover {
   transform: translateY(-3px) scale(1.02);
   box-shadow: 0 6px 25px rgba(255, 179, 0, 0.5);
 }
 
-.nav-link.highlight.active {
+#highlights.active {
   background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
 }
 
@@ -573,11 +573,11 @@
   color: white;
 }
 
-.mobile-nav-link.highlight {
+/* .mobile-nav-link.highlight {
   background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
   color: #1a1a2e;
   font-weight: 600;
-}
+} */
 
 .mobile-nav-link.highlight:hover {
   box-shadow: 0 4px 20px rgba(255, 179, 0, 0.4);
