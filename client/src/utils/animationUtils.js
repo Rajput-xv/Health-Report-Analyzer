@@ -30,15 +30,11 @@ export const addStaggeredAnimations = (selector, animation = 'fade-up', baseDela
 };
 
 /**
- * Updates AOS configuration at runtime
+ * Updates AOS configuration at runtime by re-initializing with new settings
  * @param {Object} config - AOS configuration object
  */
 export const updateAOSConfig = (config) => {
-  AOS.refresh(true);
-  Object.keys(config).forEach(key => {
-    AOS.settings[key] = config[key];
-  });
-  AOS.refresh();
+  AOS.init(config);
 };
 
 /**
