@@ -1,4 +1,54 @@
 {
+  "headers": [
+    {
+      "source": "/dashboard(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/login",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/signup",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/forgot-password",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/reset-password/(.*)",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/payment-callback",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/callback",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    },
+    {
+      "source": "/home",
+      "headers": [
+        { "key": "X-Robots-Tag", "value": "noindex, nofollow, noarchive" }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api|_next|static|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
