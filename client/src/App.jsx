@@ -415,13 +415,7 @@ function App() {
           {/* Contact Us route */}
           <Route
             path="/contact"
-            element={
-              user ? (
-                <ContactPage user={user} setUser={setUser} />
-              ) : (
-                <Navigate to="/login" />
-              )
-            }
+            element={<ContactPage user={user} setUser={setUser} />}
           />
 
           {/* Pricing Page - accessible to all */}
