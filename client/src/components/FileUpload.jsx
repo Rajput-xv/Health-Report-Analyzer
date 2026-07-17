@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import { useSubscription } from '../context/SubscriptionContext';
 import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../utils/api";
@@ -7,6 +8,7 @@ import { useLoading } from "../context/LoadingContext";
 import AOS from 'aos';
 
 const FileUpload = ({ onFileProcessed, onError }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isDragOver, setIsDragOver] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -70,12 +72,12 @@ const FileUpload = ({ onFileProcessed, onError }) => {
       "image/png",
     ];
     if (!allowedTypes.includes(file.type)) {
-      onError("Please upload a PDF or image file (JPEG, JPG, PNG)");
+      onError(t('file_upload.error_invalid_type'));
       return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      onError("File size must be less than 10MB");
+      onError(t('file_upload.error_too_large'));
       return;
     }
 
@@ -124,13 +126,9 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         onFileProcessed(result);
         await fetchSubscription();
         if (result.requiresManualEntry) {
-          onError(
-            "This looks like a scanned document. No health parameters detected — you may need to enter data manually."
-          );
+          onError(t('file_upload.scanned_manual'));
         } else {
-          onError(
-            "This looks like a scanned document. Some health parameters detected, but verify for completeness."
-          );
+          onError(t('file_upload.scanned_verify'));
         }
       } else {
         onFileProcessed(result);
@@ -141,33 +139,29 @@ const FileUpload = ({ onFileProcessed, onError }) => {
       if (ocrTimerRef.current) clearInterval(ocrTimerRef.current);
 
       if (error.message?.includes("No text could be extracted")) {
-        onError("No readable text found. Please upload a clearer report.");
+        onError(t('file_upload.error_no_text'));
       } else if (error.message?.includes("No health parameters found")) {
-        onError(
-          "Could not detect health parameters. Please upload a standard health report."
-        );
+        onError(t('file_upload.error_no_parameters'));
       } else if (
         error.message?.includes("timeout") ||
         error.code === "ECONNABORTED"
       ) {
-        onError(
-          "The server is taking too long. Try again later or with a simpler file."
-        );
+        onError(t('file_upload.error_timeout'));
       } else if (
         error.message?.includes("Network Error") ||
         !navigator.onLine
       ) {
-        onError("Network issue detected. Please check your connection.");
+        onError(t('file_upload.error_network'));
       } else if (error.response?.status === 413) {
-        onError("File too large. Please upload under 10MB.");
+        onError(t('file_upload.error_413'));
       } else if (error.response?.status === 415) {
-        onError("Unsupported format. Please upload PDF, JPEG, JPG, or PNG.");
+        onError(t('file_upload.error_415'));
       } else if (error.response?.status === 403 && error.response?.data?.upgradeRequired) {
-        onError(`📊 ${error.response.data.message} Click here to upgrade.`);
+        onError(t('file_upload.error_upgrade', { message: error.response.data.message }));
       } else if (error.response?.status >= 500) {
-        onError("Server error. Please try again later.");
+        onError(t('file_upload.error_server'));
       } else {
-        onError(error.message || "Upload failed. Please try again.");
+        onError(error.message || t('file_upload.error_generic'));
       }
     } finally {
       // hideLoading();
@@ -195,42 +189,42 @@ const FileUpload = ({ onFileProcessed, onError }) => {
           {subscription.plan === 'pro_yearly' ? (
             <div className="quota-content">
               <span className="quota-icon">👑</span>
-              <span className="quota-text">Pro Yearly - Unlimited uploads</span>
+              <span className="quota-text">{t('file_upload.quota_pro_yearly')}</span>
             </div>
           ) : subscription.plan === 'pro_monthly' ? (
             <div className="quota-content">
               <span className="quota-icon">⭐</span>
-              <span className="quota-text">{subscription.reportsLimit - subscription.reportsUsed} of {subscription.reportsLimit} uploads remaining this month</span>
+              <span className="quota-text">{t('file_upload.quota_remaining', { remaining: subscription.reportsLimit - subscription.reportsUsed, limit: subscription.reportsLimit })}</span>
               {subscription.reportsLimit - subscription.reportsUsed <= 2 && (
                 <button
                   className="upgrade-cta-btn subtle"
                   onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
                 >
-                  Upgrade to Yearly
+                  {t('file_upload.upgrade_yearly')}
                 </button>
               )}
             </div>
           ) : subscription.reportsUsed >= subscription.reportsLimit ? (
             <div className="quota-content limit-reached">
               <span className="quota-icon">⚠️</span>
-              <span className="quota-text">Monthly limit reached ({subscription.reportsUsed}/{subscription.reportsLimit} uploads)</span>
+              <span className="quota-text">{t('file_upload.quota_limit_reached', { used: subscription.reportsUsed, limit: subscription.reportsLimit })}</span>
               <button
                 className="upgrade-cta-btn"
                 onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
               >
-                Upgrade to Pro
+                {t('file_upload.upgrade_pro')}
               </button>
             </div>
           ) : (
             <div className="quota-content">
               <span className="quota-icon">📊</span>
-              <span className="quota-text">{subscription.reportsLimit - subscription.reportsUsed} of {subscription.reportsLimit} uploads remaining this month</span>
+              <span className="quota-text">{t('file_upload.quota_remaining', { remaining: subscription.reportsLimit - subscription.reportsUsed, limit: subscription.reportsLimit })}</span>
               {subscription.reportsLimit - subscription.reportsUsed <= 1 && (
                 <button
                   className="upgrade-cta-btn subtle"
                   onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
                 >
-                  Get Unlimited
+                  {t('file_upload.get_unlimited')}
                 </button>
               )}
             </div>
@@ -247,12 +241,12 @@ const FileUpload = ({ onFileProcessed, onError }) => {
         onKeyDown={handleKeyPress}
         tabIndex={0}
         role="button"
-        aria-label="Upload your health report via click or drag-and-drop"
+        aria-label={t('file_upload.aria_label')}
       >
         <div className="upload-icon">📄</div>
-        <h3>Upload Your Health Report</h3>
-        <p>Drag and drop your PDF or image file here, or click to browse</p>
-        <p className="file-types">Supported: PDF, JPEG, JPG, PNG (max 10MB)</p>
+        <h3>{t('file_upload.heading')}</h3>
+        <p>{t('file_upload.subtext')}</p>
+        <p className="file-types">{t('file_upload.supported')}</p>
 
         {uploadProgress > 0 && !processingOcr && (
           <div className="upload-progress">
@@ -262,7 +256,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                 style={{ width: `${uploadProgress}%` }}
               ></div>
             </div>
-            <span>{uploadProgress}% uploaded</span>
+            <span>{t('file_upload.percent_uploaded', { percent: uploadProgress })}</span>
           </div>
         )}
 
@@ -276,11 +270,11 @@ const FileUpload = ({ onFileProcessed, onError }) => {
             </div>
             <span>
               {ocrProgress < 100
-                ? "Analyzing document with OCR..."
-                : "Analysis complete!"}
+                ? t('file_upload.ocr_analyzing')
+                : t('file_upload.ocr_complete')}
             </span>
             <p className="ocr-note">
-              OCR processing can take up to 5 minutes for complex documents
+              {t('file_upload.ocr_note')}
             </p>
           </div>
         )}
@@ -295,12 +289,12 @@ const FileUpload = ({ onFileProcessed, onError }) => {
       />
 
       <div className="upload-tips" data-aos="fade-up" data-aos-delay="400">
-        <h4 data-aos="fade-right" data-aos-delay="500">📋 Tips for better results:</h4>
+        <h4 data-aos="fade-right" data-aos-delay="500">{t('file_upload.tips_title')}</h4>
         <ul data-aos="fade-up" data-aos-delay="600">
-          <li>Ensure the document is clear and well-lit</li>
-          <li>Include the full lab report with parameter names and values</li>
-          <li>Avoid blurry or skewed images</li>
-          <li>Make sure text is readable and not cut off</li>
+          <li>{t('file_upload.tip_1')}</li>
+          <li>{t('file_upload.tip_2')}</li>
+          <li>{t('file_upload.tip_3')}</li>
+          <li>{t('file_upload.tip_4')}</li>
         </ul>
       </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSubscription } from '../context/SubscriptionContext';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { FileText, Menu, X, LogOut, Home, LayoutDashboard, DollarSign, Mail, ChevronDown, Crown, Zap } from 'lucide-react';
+import { FileText, Menu, X, LogOut, Home, LayoutDashboard, DollarSign, Mail, ChevronDown, Crown, Zap, LineChart, BookOpen } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
 import LanguageSwitcher from './LanguageSwitcher';
@@ -80,7 +80,9 @@ const Header = ({ user, setUser }) => {
   const navItems = [
     { path: '/', label: t('nav.home'), icon: Home },
     ...(user ? [{ path: '/dashboard', label: t('nav.dashboard') || 'Dashboard', icon: LayoutDashboard }] : []),
+    ...(user ? [{ path: '/insights', label: t('nav.insights'), icon: LineChart }] : []),
     { path: '/pricing', label: t('nav.pricing') || 'Pricing', icon: DollarSign, highlight: true },
+    { path: '/blog/', label: t('nav.blog'), icon: BookOpen, external: true },
     { path: '/contact', label: t('nav.contact'), icon: Mail },
   ];
 
@@ -100,13 +102,20 @@ const Header = ({ user, setUser }) => {
           <ul className="nav-links">
             {navItems.map((item) => (
               <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`nav-link ${isActive(item.path) ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
-                >
-                  <item.icon size={16} />
-                  <span>{item.label}</span>
-                </Link>
+                {item.external ? (
+                  <a href={item.path} className={`nav-link ${item.highlight ? 'highlight' : ''}`}>
+                    <item.icon size={16} />
+                    <span>{item.label}</span>
+                  </a>
+                ) : (
+                  <Link
+                    to={item.path}
+                    className={`nav-link ${isActive(item.path) ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
+                  >
+                    <item.icon size={16} />
+                    <span>{item.label}</span>
+                  </Link>
+                )}
               </li>
             ))}
           </ul>
@@ -125,7 +134,7 @@ const Header = ({ user, setUser }) => {
                   <div className="user-avatar">
                     {user.firstName?.charAt(0) || user.email?.charAt(0) || 'U'}
                   </div>
-                  <span className="user-name">{user.firstName || 'User'}</span>
+                  <span className="user-name">{user.firstName || t('header.user_fallback')}</span>
                   <ChevronDown size={14} className={`chevron ${showUserMenu ? 'open' : ''}`} />
                 </button>
 
@@ -139,12 +148,12 @@ const Header = ({ user, setUser }) => {
                           {subscription.plan !== 'free' ? (
                             <>
                               <Crown size={12} />
-                              <span>Pro</span>
+                              <span>{t('header.pro')}</span>
                             </>
                           ) : (
                             <>
                               <Zap size={12} />
-                              <span>{subscription.reportsLimit - subscription.reportsUsed} uploads left</span>
+                              <span>{t('header.uploads_left', { count: subscription.reportsLimit - subscription.reportsUsed })}</span>
                             </>
                           )}
                         </div>
@@ -152,11 +161,11 @@ const Header = ({ user, setUser }) => {
                     </div>
                     <Link to="/dashboard" className="dropdown-item">
                       <LayoutDashboard size={16} />
-                      <span>Dashboard</span>
+                      <span>{t('nav.dashboard')}</span>
                     </Link>
                     <Link to="/pricing" className="dropdown-item">
                       <DollarSign size={16} />
-                      <span>{subscription?.plan !== 'free' ? 'Manage Plan' : 'Upgrade to Pro'}</span>
+                      <span>{subscription?.plan !== 'free' ? t('header.manage_plan') : t('header.upgrade_to_pro')}</span>
                     </Link>
                     <button className="dropdown-item logout" onClick={handleLogout}>
                       <LogOut size={16} />
@@ -179,7 +188,7 @@ const Header = ({ user, setUser }) => {
         </nav>
 
         {/* Mobile Menu Button */}
-        <button className="mobile-menu-btn" onClick={toggleMobileMenu} aria-label="Toggle menu">
+        <button className="mobile-menu-btn" onClick={toggleMobileMenu} aria-label={t('header.toggle_menu')}>
           {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </div>
@@ -216,7 +225,11 @@ const Header = ({ user, setUser }) => {
                   <button
                     className={`mobile-nav-link ${isActive(item.path) ? 'active' : ''} ${item.highlight ? 'highlight' : ''}`}
                     onClick={() => {
-                      navigate(item.path);
+                      if (item.external) {
+                        window.location.href = item.path;
+                      } else {
+                        navigate(item.path);
+                      }
                       closeMobileMenu();
                     }}
                   >

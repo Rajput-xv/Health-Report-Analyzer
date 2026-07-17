@@ -758,6 +758,17 @@
   color: #3b82f6;
 }
 
+/* Password checklist: lighter red/green for readable contrast on the dark card */
+.dark-mode .password-checklist li.invalid,
+.dark-mode .password-checklist li.invalid::before {
+  color: #fca5a5;
+}
+
+.dark-mode .password-checklist li.valid,
+.dark-mode .password-checklist li.valid::before {
+  color: #4ade80;
+}
+
 .dark-mode .demo-notice {
   background: rgba(56, 189, 248, 0.1);
   color: #7dd3fc;

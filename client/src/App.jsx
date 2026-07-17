@@ -34,6 +34,7 @@ import PaymentCallback from "./components/PaymentCallback";
 import Header from "./components/Header";
 import AnalyticsTracker from './AnalyticsTracker';
 import NotFoundPage from "./components/NotFoundPage";
+import HealthInsights from "./components/HealthInsights";
 
 function Dashboard({ user, setUser }) {
   const { t } = useTranslation();
@@ -69,8 +70,8 @@ function Dashboard({ user, setUser }) {
     };
 
     if (paymentStatus === 'success') {
-      setPaymentMessage({ type: 'success', text: '🎉 Payment successful! Your Pro subscription is now active.' });
-      toast.success('🎉 Welcome to Pro! Your subscription is now active.');
+      setPaymentMessage({ type: 'success', text: t('payment.banner_success') });
+      toast.success(t('payment.banner_toast_success'));
 
       // Refresh user data to show updated subscription
       refreshUserData();
@@ -80,7 +81,7 @@ function Dashboard({ user, setUser }) {
         navigate('/dashboard', { replace: true });
       }, 100);
     } else if (paymentStatus === 'cancelled') {
-      setPaymentMessage({ type: 'info', text: 'Payment was cancelled. You can upgrade anytime from the pricing page.' });
+      setPaymentMessage({ type: 'info', text: t('payment.banner_cancelled') });
       setTimeout(() => {
         navigate('/dashboard', { replace: true });
       }, 100);
@@ -274,7 +275,7 @@ function App() {
 
         try {
           await getCurrentUser();
-          toast.info(t('toast.login_success', { name: parsedUser.firstName }));
+          toast.info(t('toast.login_success_named', { name: parsedUser.firstName }));
         } catch (error) {
           // Only log out on a real 401. Network/server hiccups shouldn't drop the session.
           if (error.response?.status === 401) {
@@ -321,7 +322,7 @@ function App() {
       <div className="app">
         <div className="global-loading-overlay">
           <LoadingSpinner />
-          <p>Loading...</p>
+          <p>{t('app.loading')}</p>
         </div>
       </div>
     );
@@ -472,6 +473,18 @@ function App() {
                 <Dashboard user={user} setUser={setUser} />
               ) : (
                 <Navigate to="/" />
+              )
+            }
+          />
+
+          {/* Health Insights & Analysis */}
+          <Route
+            path="/insights"
+            element={
+              user ? (
+                <HealthInsights user={user} setUser={setUser} />
+              ) : (
+                <Navigate to="/login" />
               )
             }
           />

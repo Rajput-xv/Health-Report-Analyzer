@@ -133,7 +133,7 @@ const ResetPassword = () => {
         <div className="auth-card">
           <div className="auth-header">
             <h2>{t('auth.reset_password')}</h2>
-            <p>Enter your new password below</p>
+            <p>{t('reset_password.subtitle')}</p>
           </div>
 
           {message && (
@@ -141,7 +141,7 @@ const ResetPassword = () => {
               {success ? "✅" : "❌"} {message}
               {success && (
                 <div style={{ fontSize: "0.9em", marginTop: "0.5rem" }}>
-                  Redirecting to login in 3 seconds...
+                  {t('reset_password.redirecting', { seconds: 3 })}
                 </div>
               )}
             </div>
@@ -187,7 +187,7 @@ const ResetPassword = () => {
               {loading ? (
                 <span>
                   <span className="spinner-small"></span>
-                  Resetting...
+                  {t('reset_password.resetting')}
                 </span>
               ) : (
                 t('auth.reset_password')
@@ -213,7 +213,7 @@ const ResetPassword = () => {
 
           <div className="auth-demo">
             <p className="demo-notice">
-              🔒 <strong>Secure Platform:</strong> Your new password will be encrypted and stored securely.
+              🔒 <strong>{t('auth_form.secure_platform')}:</strong> {t('reset_password.secure_notice')}
             </p>
           </div>
         </div>

@@ -873,7 +873,7 @@
   color: #e0e7ff;
 }
 .dark-mode .mobile-btn-signin:hover {
-  background: rgba(255, 255, 255, 0.71);
+  background: rgba(120, 120, 180, 0.30);
   color: #fff;
 }
 .dark-mode .mobile-btn-signup {

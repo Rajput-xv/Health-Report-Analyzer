@@ -4,7 +4,9 @@
     "contact": "Contact Us",
     "dashboard": "Dashboard",
     "return_to_dashboard": "Return to Dashboard",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "insights": "Insights",
+    "blog": "Blog"
   },
   "auth": {
     "login": "Sign In",
@@ -53,7 +55,7 @@
     "how_it_works_desc": "Get insights from your health reports in three simple steps",
     "step_1_title": "Upload Report",
     "step_1_desc": "Simply drag and drop your health report or take a photo with your device",
-    "step_2_title": "Smart Analysis", 
+    "step_2_title": "Smart Analysis",
     "step_2_desc": "Our advanced technology processes and analyzes your report data in real-time",
     "step_3_title": "Get Insights",
     "step_3_desc": "Receive detailed analysis with explanations and recommendations",
@@ -80,6 +82,46 @@
     "analysis_complete": "Analysis Complete",
     "download_report": "Download Report"
   },
+  "reports_detail": {
+    "my_reports": "My Reports",
+    "no_reports_title": "No Reports Yet",
+    "no_reports_text": "Upload your first health report to get started.",
+    "upload_report": "Upload Report",
+    "view": "View",
+    "parameters_count": "{{count}} parameters",
+    "status_analyzed": "Analyzed",
+    "load_reports_error": "Failed to load reports",
+    "confirm_delete": "Delete this report?",
+    "delete_error": "Failed to delete report",
+    "loading": "Loading report...",
+    "load_report_error": "Failed to load report",
+    "not_found": "Report not found",
+    "back": "Back to Reports",
+    "medical_report": "Medical Report",
+    "patient_info": "Patient Information",
+    "label_name": "Name",
+    "label_age": "Age",
+    "label_gender": "Gender",
+    "label_test_date": "Test Date",
+    "label_hospital": "Hospital",
+    "total_parameters": "Total Parameters",
+    "risk_level": "Risk Level",
+    "ai_insights": "AI Insights",
+    "summary": "Summary",
+    "outliers": "Outliers",
+    "normal_label": "Normal",
+    "recommendations": "Recommendations",
+    "positive_findings": "Positive Findings",
+    "health_parameters": "Health Parameters",
+    "processed": "Processed",
+    "confidence": "Confidence",
+    "regenerate": "Regenerate insights",
+    "regenerating": "Generating…",
+    "generate_insights": "Generate AI insights",
+    "no_insights": "No AI insights yet for this report.",
+    "insights_regenerated": "AI insights updated",
+    "insights_error": "Could not generate insights"
+  },
   "contact": {
     "title": "Contact Us",
     "subtitle": "Get in touch with our team",
@@ -93,7 +135,8 @@
     "form_notice": "Working Email Service: Your message will be sent directly to our team via email.",
     "send_another": "Send Another Message",
     "sending": "Sending...",
-    "feedback_question": "Have questions or feedback? We'd love to hear from you!"
+    "feedback_question": "Have questions or feedback? We'd love to hear from you!",
+    "success_body": "Thank you for contacting us. We've received your message and will get back to you via email soon."
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -109,7 +152,8 @@
     "a5": "No. The tool provides AI-powered summaries only; for any medical advice, consult a professional."
   },
   "footer": {
-    "copyright": "© 2024 Health Report Analyzer. All rights reserved.",
+    "copyright": "© 2024 Health Report Analyzer. Empowering better health decisions through technology.",
+    "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "about": "About Us",
@@ -118,11 +162,38 @@
   "toast": {
     "logout_success": "Successfully logged out. See you again!",
     "login_success": "Welcome back!",
+    "login_success_named": "Welcome back, {{name}}!",
+    "login_success_google": "Welcome, {{name}}!",
     "signup_success": "Account created successfully!",
+    "signup_success_named": "Account created successfully! Welcome, {{name}}!",
     "upload_success": "Report uploaded successfully",
     "upload_error": "Failed to upload report",
     "analysis_success": "Report analyzed successfully",
-    "analysis_error": "Failed to analyze report"
+    "analysis_error": "Failed to analyze report",
+    "google_failed": "Google sign-in failed. Please try again.",
+    "google_auth_failed": "Google authentication failed. Please try again.",
+    "auth_failed": "Authentication failed",
+    "network_error": "Network error. Please try again."
+  },
+  "payment": {
+    "verifying": "Verifying your payment...",
+    "confirming": "Confirming your payment... ({{current}}/{{max}})",
+    "success_message": "🎉 Payment successful! Your subscription is now active.",
+    "pending_message": "Your payment is being processed. This may take a few moments.",
+    "error_message": "Unable to verify payment. Please check your email for confirmation.",
+    "processing_title": "Processing Payment",
+    "success_title": "Payment Successful!",
+    "redirecting": "Redirecting to dashboard...",
+    "pending_title": "Payment Processing",
+    "pending_submessage": "You'll receive an email confirmation shortly. Your subscription will be activated automatically.",
+    "error_title": "Verification Issue",
+    "error_submessage": "If you completed the payment, your subscription should be activated within a few minutes.",
+    "check_again": "Check Again",
+    "contact_support": "Contact Support",
+    "footer_secure": "Secure payment powered by",
+    "banner_success": "🎉 Payment successful! Your Pro subscription is now active.",
+    "banner_toast_success": "🎉 Welcome to Pro! Your subscription is now active.",
+    "banner_cancelled": "Payment was cancelled. You can upgrade anytime from the pricing page."
   },
   "language": {
     "select": "Select Language",
@@ -143,7 +214,7 @@
   },
   "validation": {
     "passwords_no_match": "Passwords do not match.",
-    "password_min_length": "Password must be at least 6 characters",
+    "password_min_length": "Password must be at least 8 characters",
     "confirm_password_placeholder": "Confirm your new password",
     "new_password_placeholder": "Enter your new password"
   },
@@ -165,10 +236,12 @@
     "password_requirements": {
       "length": "At least 8 characters",
       "upper": "Contains uppercase letter",
-      "lower": "Contains lowercase letter", 
+      "lower": "Contains lowercase letter",
       "number": "Contains number",
       "special": "Contains special character"
-    }
+    },
+    "password_requirements_text": "Password must be at least 8 characters and include an uppercase letter, lowercase letter, number, and special character (@$!%*?&).",
+    "password_security_error": "Please choose a stronger password."
   },
   "forgot_password_form": {
     "description": "Enter your email to receive a reset link",
@@ -179,10 +252,211 @@
     "reset_sent_message": "If an account with that email exists, a reset link has been sent.",
     "error_sending": "An error occurred while sending the reset link"
   },
-
-  
-  "footer": {
-    "copyright": "© 2024 Health Report Analyzer. Empowering better health decisions through technology.",
-    "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals."
-}
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your health journey. Cancel anytime.",
+    "your_plan": "Your Plan",
+    "sync": {
+      "syncing": "🔄 Syncing...",
+      "button": "🔄 Sync Subscription Status"
+    },
+    "buttons": {
+      "get_started": "Get Started",
+      "current_plan": "Current Plan",
+      "downgrade": "Downgrade"
+    },
+    "messages": {
+      "payment_success": "🎉 Payment successful! Your subscription is now active.",
+      "payment_cancelled": "Payment was cancelled. You can try again anytime.",
+      "already_on_plan": "You are already on this plan!",
+      "checkout_failed": "Failed to start checkout. Please try again.",
+      "portal_failed": "Failed to open billing portal",
+      "sync_success": "✅ Subscription synced! You're on the {{planName}} plan.",
+      "sync_none": "No active subscription found. If you just completed payment, please wait a moment and try again.",
+      "sync_failed": "Failed to sync subscription. Please try again."
+    },
+    "subscription": {
+      "plan_label": "{{planName}} Plan",
+      "annual_billing": "(Annual Billing)",
+      "monthly_billing": "(Monthly Billing)",
+      "active": "Active",
+      "renews": "Renews {{date}}",
+      "manage_billing": "Manage Billing"
+    },
+    "usage": {
+      "title": "Your Usage This Month",
+      "unlimited": "{{count}} reports uploaded (Unlimited)",
+      "used": "{{used}} of {{limit}} reports used"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "q1": "What payment methods do you accept?",
+      "a1": "We accept all major credit cards, debit cards, and PayPal through our secure payment partner Gumroad.",
+      "q2": "Can I cancel anytime?",
+      "a2": "Yes! Cancel your subscription anytime from your Gumroad library. You'll keep access until the end of your billing period.",
+      "q3": "Is my health data secure?",
+      "a3": "Absolutely. We use bank-level encryption and never share your data with third parties.",
+      "q4": "How does family sharing work?",
+      "a4": "Pro users can invite up to 5 family members to share their subscription. Each member gets their own private account.",
+      "q5": "How do I get support?",
+      "a5": "Free users get email support. Pro users get priority support with faster response times."
+    },
+    "trust": {
+      "secure_payments": "Secure Payments",
+      "cancel_anytime": "Cancel Anytime",
+      "global_access": "Global Access"
+    },
+    "enterprise": {
+      "title": "Need a solution for your clinic or hospital?",
+      "description": "We offer custom enterprise plans with API access, white-labeling, and dedicated support.",
+      "cta": "Contact Sales"
+    },
+    "plans": {
+      "free": {
+        "name": "Free",
+        "period": "forever",
+        "description": "Perfect for trying out the platform",
+        "cta": "Current Plan",
+        "features": {
+          "f1": "3 reports per month",
+          "f2": "Basic health insights",
+          "f3": "7-day report history",
+          "f4": "Trend analysis",
+          "f5": "PDF export",
+          "f6": "Family sharing"
+        }
+      },
+      "pro_monthly": {
+        "name": "Pro Monthly",
+        "period": "month",
+        "description": "Best for regular health tracking",
+        "cta": "Get Started",
+        "badge": "Most Popular",
+        "features": {
+          "f1": "10 Report Uploads - Scan or upload lab reports (PDFs & images)",
+          "f2": "Advanced AI Insights - Get personalized health recommendations powered by Gemini AI",
+          "f3": "AI-powered parameter extraction (50+ tests supported)",
+          "f4": "Personalized health insights & recommendations"
+        }
+      },
+      "pro_yearly": {
+        "name": "Pro Yearly",
+        "period": "year",
+        "description": "Save 25% with annual billing",
+        "savings": "3 months free!",
+        "cta": "Save 25%",
+        "features": {
+          "f1": "Unlimited Report Uploads - Scan or upload unlimited lab reports (PDFs & images)",
+          "f2": "Advanced AI Insights - Get personalized health recommendations powered by Gemini AI",
+          "f3": "Trend Analysis - Track your health parameters over time with interactive charts",
+          "f4": "PDF Export - Download professional reports to share with your doctor",
+          "f5": "AI-powered parameter extraction (50+ tests supported)",
+          "f6": "Personalized health insights & recommendations",
+          "f7": "Trend tracking with interactive charts",
+          "f8": "PDF export for your doctor",
+          "f9": "Priority email support"
+        }
+      }
+    }
+  },
+  "file_upload": {
+    "error_invalid_type": "Please upload a PDF or image file (JPEG, JPG, PNG)",
+    "error_too_large": "File size must be less than 10MB",
+    "scanned_manual": "This looks like a scanned document. No health parameters detected — you may need to enter data manually.",
+    "scanned_verify": "This looks like a scanned document. Some health parameters detected, but verify for completeness.",
+    "error_no_text": "No readable text found. Please upload a clearer report.",
+    "error_no_parameters": "Could not detect health parameters. Please upload a standard health report.",
+    "error_timeout": "The server is taking too long. Try again later or with a simpler file.",
+    "error_network": "Network issue detected. Please check your connection.",
+    "error_413": "File too large. Please upload under 10MB.",
+    "error_415": "Unsupported format. Please upload PDF, JPEG, JPG, or PNG.",
+    "error_upgrade": "📊 {{message}} Click here to upgrade.",
+    "error_server": "Server error. Please try again later.",
+    "error_generic": "Upload failed. Please try again.",
+    "quota_pro_yearly": "Pro Yearly - Unlimited uploads",
+    "quota_remaining": "{{remaining}} of {{limit}} uploads remaining this month",
+    "upgrade_yearly": "Upgrade to Yearly",
+    "quota_limit_reached": "Monthly limit reached ({{used}}/{{limit}} uploads)",
+    "upgrade_pro": "Upgrade to Pro",
+    "get_unlimited": "Get Unlimited",
+    "aria_label": "Upload your health report via click or drag-and-drop",
+    "heading": "Upload Your Health Report",
+    "subtext": "Drag and drop your PDF or image file here, or click to browse",
+    "supported": "Supported: PDF, JPEG, JPG, PNG (max 10MB)",
+    "percent_uploaded": "{{percent}}% uploaded",
+    "ocr_analyzing": "Analyzing document with OCR...",
+    "ocr_complete": "Analysis complete!",
+    "ocr_note": "OCR processing can take up to 5 minutes for complex documents",
+    "tips_title": "📋 Tips for better results:",
+    "tip_1": "Ensure the document is clear and well-lit",
+    "tip_2": "Include the full lab report with parameter names and values",
+    "tip_3": "Avoid blurry or skewed images",
+    "tip_4": "Make sure text is readable and not cut off"
+  },
+  "stats": {
+    "title": "Our Impact in Numbers",
+    "subtitle": "Trusted by thousands for accurate health insights",
+    "reports_analyzed": "Reports Analyzed",
+    "happy_users": "Happy Users",
+    "accuracy_rate": "Accuracy Rate"
+  },
+  "not_found": {
+    "title": "Page Not Found",
+    "description": "Oops! The page you're looking for doesn't exist or has been moved. Let's get you back on track.",
+    "go_home": "Go Home",
+    "go_back": "Go Back",
+    "looking_for": "You might be looking for:",
+    "login": "Login"
+  },
+  "trend": {
+    "no_data": "No trend data available.",
+    "title": "Trend Analysis",
+    "select_parameter": "Select Parameter:",
+    "trend_suffix": "Trend",
+    "normal_range": "Normal Range:",
+    "six_month_trend": "6-Month Trend",
+    "insights_title": "Insights & Recommendations",
+    "no_insights": "No specific insights available for this parameter.",
+    "icon_aria": "{{type}} icon",
+    "info_icon_aria": "info icon",
+    "disclaimer_label": "Disclaimer:",
+    "disclaimer_text": "Trend data includes simulated historical values for demonstration purposes. Always consult with healthcare professionals for medical advice."
+  },
+  "header": {
+    "pro": "Pro",
+    "uploads_left": "{{count}} uploads left",
+    "manage_plan": "Manage Plan",
+    "upgrade_to_pro": "Upgrade to Pro",
+    "user_fallback": "User",
+    "toggle_menu": "Toggle menu"
+  },
+  "reset_password": {
+    "subtitle": "Enter your new password below",
+    "redirecting": "Redirecting to login in {{seconds}} seconds...",
+    "resetting": "Resetting...",
+    "secure_notice": "Your new password will be encrypted and stored securely."
+  },
+  "insights": {
+    "title": "Health Insights",
+    "subtitle": "Trends, comparisons, and an overall summary across your reports.",
+    "loading": "Loading your insights…",
+    "no_reports": "Upload at least one report to see insights.",
+    "go_upload": "Go to Upload",
+    "summary_title": "Overall Summary",
+    "total_reports": "Reports",
+    "total_parameters": "Parameters tracked",
+    "overall_risk": "Overall risk",
+    "persistent_outliers": "Recurring out-of-range values:",
+    "trend_title": "Parameter trend over time",
+    "need_more_points": "Need at least 2 reports with this parameter to show a trend.",
+    "compare_title": "Compare two reports",
+    "select_report": "Select a report…",
+    "compare": "Compare",
+    "comparing": "Comparing…",
+    "no_common": "No shared numeric parameters between these reports.",
+    "parameter": "Parameter",
+    "old": "Older",
+    "new": "Newer",
+    "change": "Change"
+  }
 }

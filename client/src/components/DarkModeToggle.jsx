@@ -9,8 +9,11 @@
     useEffect(() => {
       if (darkMode) {
         document.body.classList.add('dark-mode');
+        // Keep the <html> `dark` class in sync so Tailwind `dark:` utilities work too
+        document.documentElement.classList.add('dark');
       } else {
         document.body.classList.remove('dark-mode');
+        document.documentElement.classList.remove('dark');
       }
       localStorage.setItem('darkMode', darkMode);
     }, [darkMode]);

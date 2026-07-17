@@ -60,9 +60,10 @@
       ]
     }
   ],
+  "cleanUrls": true,
   "rewrites": [
     {
-      "source": "/((?!api|_next|static|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
+      "source": "/((?!api|_next|static|blog|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
       "destination": "/index.html"
     }
   ]

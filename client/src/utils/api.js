@@ -188,4 +188,54 @@ export const verifyPayment = async (expectedPlan = '') => {
   }
 };
 
+// Regenerate AI insights for a report
+export const regenerateInsights = async (reportId) => {
+  try {
+    const response = await api.post(`/analysis/${reportId}/regenerate`);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to regenerate insights' };
+  }
+};
+
+// Get insights for a report
+export const getInsights = async (reportId) => {
+  try {
+    const response = await api.get(`/analysis/${reportId}/insights`);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { hasInsights: false, error: 'Failed to get insights' };
+  }
+};
+
+// Cross-report AI trend analysis (needs 2+ reports)
+export const getTrendAnalysis = async (reportIds = []) => {
+  try {
+    const response = await api.post('/analysis/trends', { reportIds });
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to generate trend analysis' };
+  }
+};
+
+// Overall health summary across the user's reports
+export const getHealthSummary = async () => {
+  try {
+    const response = await api.get('/analysis/summary');
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { hasReports: false, error: 'Failed to get summary' };
+  }
+};
+
+// Compare two reports
+export const compareReports = async (report1, report2) => {
+  try {
+    const response = await api.get(`/analysis/compare?report1=${report1}&report2=${report2}`);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { error: 'Failed to compare reports' };
+  }
+};
+
 export default api;

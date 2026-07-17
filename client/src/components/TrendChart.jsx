@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const TrendChart = ({ data, reportId }) => {
+  const { t, i18n } = useTranslation();
   // Use a function here so Object.keys doesn't run on null data (it would throw)
   const [selectedParameter, setSelectedParameter] = useState(() =>
     data && typeof data === 'object' ? Object.keys(data)[0] : undefined
@@ -15,7 +17,7 @@ const TrendChart = ({ data, reportId }) => {
   if (!data || Object.keys(data).length === 0) {
     return (
       <div className="trend-chart-container">
-        <p>No trend data available.</p>
+        <p>{t('trend.no_data')}</p>
       </div>
     );
   }
@@ -38,7 +40,7 @@ const TrendChart = ({ data, reportId }) => {
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString(i18n.language, { month: 'short', year: 'numeric' });
   };
 
   const getStatusClass = (status) => {
@@ -62,9 +64,9 @@ const TrendChart = ({ data, reportId }) => {
   return (
     <div className="trend-chart-container">
       <div className="trend-header">
-        <h3>📈 Trend Analysis</h3>
+        <h3>📈 {t('trend.title')}</h3>
         <div className="parameter-selector">
-          <label htmlFor="param-select" style={{ marginRight: '0.5rem' }}>Select Parameter:</label>
+          <label htmlFor="param-select" style={{ marginRight: '0.5rem' }}>{t('trend.select_parameter')}</label>
           <select 
             id="param-select"
             value={selectedParameter} 
@@ -85,19 +87,19 @@ const TrendChart = ({ data, reportId }) => {
               <h4>{currentTrend.parameter}</h4>
               <div className="trend-direction">
                 <span className="trend-icon">{getTrendIcon(currentTrend.trend)}</span>
-                <span className="trend-text">{currentTrend.trend} Trend</span>
+                <span className="trend-text">{currentTrend.trend} {t('trend.trend_suffix')}</span>
               </div>
             </div>
             <div className="trend-range">
-              Normal Range: <strong>{currentTrend.normalRange} {currentTrend.unit}</strong>
+              {t('trend.normal_range')} <strong>{currentTrend.normalRange} {currentTrend.unit}</strong>
             </div>
           </div>
 
           <div className="trend-chart">
             <div className="chart-area">
               <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <span>📅 6-Month Trend</span>
-                <span className="chart-unit" style={{ fontWeight: '600', color: '#555' }}>({currentTrend.unit})</span>
+                <span>📅 {t('trend.six_month_trend')}</span>
+                <span className="chart-unit" style={{ fontWeight: '600' }}>({currentTrend.unit})</span>
               </div>
 
               <div className="chart-points" style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
@@ -138,7 +140,7 @@ const TrendChart = ({ data, reportId }) => {
                       >
                         <div className="point-value">{point.value}</div>
                       </div>
-                      <div className="point-date" style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                      <div className="point-date" style={{ marginTop: 4, fontSize: 12 }}>
                         {formatDate(point.date)}
                       </div>
                     </div>
@@ -163,7 +165,7 @@ const TrendChart = ({ data, reportId }) => {
           </div>
 
           <div className="trend-insights" style={{ marginTop: 24 }}>
-            <h4>🔍 Insights & Recommendations</h4>
+            <h4>🔍 {t('trend.insights_title')}</h4>
             <div className="insights-list" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
               {currentTrend.insights && currentTrend.insights.length > 0 ? (
                 currentTrend.insights.map((insight, index) => {
@@ -196,7 +198,7 @@ const TrendChart = ({ data, reportId }) => {
                         boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                       }}
                     >
-                      <span className="insight-icon" aria-label={`${insight.type} icon`} role="img" style={{ fontSize: 20 }}>
+                      <span className="insight-icon" aria-label={t('trend.icon_aria', { type: insight.type })} role="img" style={{ fontSize: 20 }}>
                         {icon}
                       </span>
                       <span className="insight-message">{insight.message}</span>
@@ -217,10 +219,10 @@ const TrendChart = ({ data, reportId }) => {
                     boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                   }}
                 >
-                  <span className="insight-icon" role="img" aria-label="info icon" style={{ fontSize: 20 }}>
+                  <span className="insight-icon" role="img" aria-label={t('trend.info_icon_aria')} style={{ fontSize: 20 }}>
                     📋
                   </span>
-                  <span className="insight-message">No specific insights available for this parameter.</span>
+                  <span className="insight-message">{t('trend.no_insights')}</span>
                 </div>
               )}
             </div>
@@ -231,7 +233,7 @@ const TrendChart = ({ data, reportId }) => {
             style={{ marginTop: 24, fontSize: 12, color: '#7a7a7a', fontStyle: 'italic' }}
           >
             <p>
-              ⚠️ <strong>Disclaimer:</strong> Trend data includes simulated historical values for demonstration purposes. Always consult with healthcare professionals for medical advice.
+              ⚠️ <strong>{t('trend.disclaimer_label')}</strong> {t('trend.disclaimer_text')}
             </p>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/PaymentCallback.css';
@@ -11,9 +12,10 @@ import '../styles/PaymentCallback.css';
  */
 export default function PaymentCallback() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState('verifying'); // verifying, success, pending, error
-    const [message, setMessage] = useState('Verifying your payment...');
+    const [message, setMessage] = useState(t('payment.verifying'));
     const [attempts, setAttempts] = useState(0);
     const [retryCount, setRetryCount] = useState(0); // bump to restart polling
     const MAX_ATTEMPTS = 10;
@@ -43,7 +45,7 @@ export default function PaymentCallback() {
                 if (response.data.isUpdated) {
                     // Payment was successful and subscription updated
                     setStatus('success');
-                    setMessage('🎉 Payment successful! Your subscription is now active.');
+                    setMessage(t('payment.success_message'));
 
                     // Wait a moment then redirect to dashboard
                     setTimeout(() => {
@@ -55,14 +57,14 @@ export default function PaymentCallback() {
                     // Not yet updated, might be webhook delay
                     attemptsRef.current += 1;
                     setAttempts(attemptsRef.current);
-                    setMessage(`Confirming your payment... (${attemptsRef.current}/${MAX_ATTEMPTS})`);
+                    setMessage(t('payment.confirming', { current: attemptsRef.current, max: MAX_ATTEMPTS }));
 
                     // Poll again after interval
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
                 } else {
                     // Max attempts reached, show pending status
                     setStatus('pending');
-                    setMessage('Your payment is being processed. This may take a few moments.');
+                    setMessage(t('payment.pending_message'));
                 }
             } catch (error) {
                 console.error('Payment verification error:', error);
@@ -75,7 +77,7 @@ export default function PaymentCallback() {
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
                 } else {
                     setStatus('error');
-                    setMessage('Unable to verify payment. Please check your email for confirmation.');
+                    setMessage(t('payment.error_message'));
                 }
             }
         };
@@ -97,7 +99,7 @@ export default function PaymentCallback() {
 
     const handleRetry = () => {
         setStatus('verifying');
-        setMessage('Verifying your payment...');
+        setMessage(t('payment.verifying'));
         // Bumping this re-runs the effect and restarts polling
         setRetryCount((c) => c + 1);
     };
@@ -114,7 +116,7 @@ export default function PaymentCallback() {
                         <div className="payment-callback-spinner">
                             <LoadingSpinner />
                         </div>
-                        <h2>Processing Payment</h2>
+                        <h2>{t('payment.processing_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <div className="progress-bar">
                             <div
@@ -133,9 +135,9 @@ export default function PaymentCallback() {
                                 <polyline points="22 4 12 14.01 9 11.01" />
                             </svg>
                         </div>
-                        <h2>Payment Successful!</h2>
+                        <h2>{t('payment.success_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
-                        <p className="payment-callback-submessage">Redirecting to dashboard...</p>
+                        <p className="payment-callback-submessage">{t('payment.redirecting')}</p>
                     </>
                 )}
 
@@ -147,17 +149,17 @@ export default function PaymentCallback() {
                                 <polyline points="12 6 12 12 16 14" />
                             </svg>
                         </div>
-                        <h2>Payment Processing</h2>
+                        <h2>{t('payment.pending_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <p className="payment-callback-submessage">
-                            You'll receive an email confirmation shortly. Your subscription will be activated automatically.
+                            {t('payment.pending_submessage')}
                         </p>
                         <div className="payment-callback-actions">
                             <button className="btn-primary" onClick={handleContinue}>
-                                Continue to Dashboard
+                                {t('homepage.continue_dashboard')}
                             </button>
                             <button className="btn-secondary" onClick={handleRetry}>
-                                Check Again
+                                {t('payment.check_again')}
                             </button>
                         </div>
                     </>
@@ -172,24 +174,24 @@ export default function PaymentCallback() {
                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
                         </div>
-                        <h2>Verification Issue</h2>
+                        <h2>{t('payment.error_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <p className="payment-callback-submessage">
-                            If you completed the payment, your subscription should be activated within a few minutes.
+                            {t('payment.error_submessage')}
                         </p>
                         <div className="payment-callback-actions">
                             <button className="btn-primary" onClick={handleContinue}>
-                                Continue to Dashboard
+                                {t('homepage.continue_dashboard')}
                             </button>
                             <button className="btn-secondary" onClick={handleContactSupport}>
-                                Contact Support
+                                {t('payment.contact_support')}
                             </button>
                         </div>
                     </>
                 )}
 
                 <div className="payment-callback-footer">
-                    <p>Secure payment powered by <strong>Gumroad</strong></p>
+                    <p>{t('payment.footer_secure')} <strong>Gumroad</strong></p>
                 </div>
             </div>
         </div>

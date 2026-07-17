@@ -48,6 +48,26 @@
   width: 100%;
 }
 
+/* Dark mode */
+body.dark-mode .dashboard-container {
+  background-color: #0f172a;
+}
+
+body.dark-mode .data-vis-container {
+  background-color: #0b1220;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+body.dark-mode .dashboard-header h1,
+body.dark-mode .chart-title {
+  color: #e5e7eb;
+}
+
+body.dark-mode .chart-placeholder {
+  color: #94a3b8;
+  border-color: #334155;
+}
+
 /* Responsive Dashboard */
 @media (max-width: 1024px) {
   .dashboard-container {

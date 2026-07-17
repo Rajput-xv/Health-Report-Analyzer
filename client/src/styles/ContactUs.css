@@ -205,6 +205,7 @@
 
 .contact-container.dark .success-container p {
   color: #ccc;
+}
 
 .success-details {
   background-color: #f8f9fa;
@@ -293,5 +294,4 @@
     width: 100%;
     max-width: 300px;
   }
-}
 

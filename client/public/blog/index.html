@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Health Blog — Understand Your Lab Reports | Health Report Analyzer</title>
+  <meta name="description" content="Plain-English guides to understanding your blood test and lab reports: CBC, cholesterol, HbA1c, reference ranges, health tracking, and how AI analyzes medical reports.">
+  <meta name="keywords" content="health blog, understand blood test, lab report guide, CBC, cholesterol, HbA1c, health tracking">
+  <link rel="canonical" href="https://health-report-analyzer-client.vercel.app/blog/">
+  <meta name="robots" content="index, follow">
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Health Blog — Understand Your Lab Reports">
+  <meta property="og:description" content="Plain-English guides to understanding your blood test and lab reports.">
+  <meta property="og:url" content="https://health-report-analyzer-client.vercel.app/blog/">
+  <meta property="og:image" content="https://health-report-analyzer-client.vercel.app/preview.png">
+  <meta property="og:site_name" content="Health Report Analyzer">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Health Blog — Understand Your Lab Reports">
+  <meta name="twitter:description" content="Plain-English guides to understanding your blood test and lab reports.">
+  <meta name="twitter:image" content="https://health-report-analyzer-client.vercel.app/preview.png">
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    "name": "Health Report Analyzer Blog",
+    "description": "Guides to understanding your blood test and lab reports.",
+    "url": "https://health-report-analyzer-client.vercel.app/blog/",
+    "publisher": {
+      "@type": "Organization",
+      "name": "Health Report Analyzer",
+      "logo": { "@type": "ImageObject", "url": "https://health-report-analyzer-client.vercel.app/hra-512x512.png" }
+    },
+    "blogPost": [
+      { "@type": "BlogPosting", "headline": "How to Read Your Blood Test Report: A Complete Guide", "url": "https://health-report-analyzer-client.vercel.app/blog/how-to-read-blood-test-report", "datePublished": "2026-06-10" },
+      { "@type": "BlogPosting", "headline": "Understanding Your CBC (Complete Blood Count) Results", "url": "https://health-report-analyzer-client.vercel.app/blog/understanding-cbc-blood-count", "datePublished": "2026-06-10" },
+      { "@type": "BlogPosting", "headline": "Cholesterol & Lipid Panel Explained: LDL, HDL, Triglycerides", "url": "https://health-report-analyzer-client.vercel.app/blog/cholesterol-lipid-panel-explained", "datePublished": "2026-06-10" },
+      { "@type": "BlogPosting", "headline": "HbA1c Explained: What Your Blood Sugar Test Means", "url": "https://health-report-analyzer-client.vercel.app/blog/hba1c-blood-sugar-explained", "datePublished": "2026-06-10" },
+      { "@type": "BlogPosting", "headline": "Why Tracking Lab Results Over Time Matters", "url": "https://health-report-analyzer-client.vercel.app/blog/track-lab-results-over-time", "datePublished": "2026-06-10" },
+      { "@type": "BlogPosting", "headline": "How AI Analyzes Your Health Reports (Accuracy & Privacy)", "url": "https://health-report-analyzer-client.vercel.app/blog/how-ai-analyzes-health-reports", "datePublished": "2026-06-10" }
+    ]
+  }
+  </script>
+
+  <style>
+    :root {
+      --bg: #f7f8fc; --card: #ffffff; --text: #1f2937; --muted: #6b7280;
+      --border: #e5e7eb; --accent: #6366f1; --accent2: #764ba2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f172a; --card: #0b1220; --text: #e5e7eb; --muted: #9ca3af; --border: #1f2937; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .site-header { display: flex; justify-content: space-between; align-items: center;
+      max-width: 1000px; margin: 0 auto; padding: 18px 20px; }
+    .brand { font-weight: 700; font-size: 1.05rem; color: var(--text); }
+    .site-nav a { margin-left: 18px; color: var(--muted); font-size: 0.95rem; }
+    .hero { max-width: 900px; margin: 0 auto; padding: 30px 20px 10px; text-align: center; }
+    .hero h1 { font-size: 2.1rem; margin: 0 0 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .hero p { color: var(--muted); font-size: 1.1rem; max-width: 640px; margin: 0 auto; }
+    .grid { max-width: 1000px; margin: 30px auto; padding: 0 20px;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; transition: transform .15s ease, box-shadow .15s ease; }
+    .card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+    .card h2 { font-size: 1.15rem; margin: 0 0 8px; }
+    .card h2 a { color: var(--text); }
+    .card p { color: var(--muted); font-size: 0.95rem; margin: 0 0 14px; }
+    .card .read { font-weight: 600; font-size: 0.9rem; }
+    .cta { max-width: 1000px; margin: 20px auto 50px; padding: 26px 20px; text-align: center;
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 16px; color: #fff; }
+    .cta h3 { margin: 0 0 8px; font-size: 1.4rem; }
+    .cta a { display: inline-block; margin-top: 12px; background: #fff; color: var(--accent2);
+      padding: 11px 22px; border-radius: 999px; font-weight: 700; }
+    footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 24px; }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="https://health-report-analyzer-client.vercel.app/">🩺 Health Report Analyzer</a>
+    <nav class="site-nav">
+      <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
+      <a href="/blog/">Blog</a>
+      <a href="https://health-report-analyzer-client.vercel.app/pricing">Pricing</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Understand Your Health Reports</h1>
+    <p>Plain-English guides to reading your blood test and lab results — no medical degree required.</p>
+  </section>
+
+  <main class="grid">
+    <article class="card">
+      <h2><a href="/blog/how-to-read-blood-test-report">How to Read Your Blood Test Report: A Complete Guide</a></h2>
+      <p>Reference ranges, common markers, what "high" and "low" mean, and when to see a doctor.</p>
+      <a class="read" href="/blog/how-to-read-blood-test-report">Read guide →</a>
+    </article>
+    <article class="card">
+      <h2><a href="/blog/understanding-cbc-blood-count">Understanding Your CBC (Complete Blood Count) Results</a></h2>
+      <p>What WBC, RBC, hemoglobin, hematocrit, platelets, and MCV mean — and what high or low can indicate.</p>
+      <a class="read" href="/blog/understanding-cbc-blood-count">Read guide →</a>
+    </article>
+    <article class="card">
+      <h2><a href="/blog/cholesterol-lipid-panel-explained">Cholesterol &amp; Lipid Panel Explained: LDL, HDL, Triglycerides</a></h2>
+      <p>What total cholesterol, LDL, HDL, and triglycerides mean for heart health — and how to improve them.</p>
+      <a class="read" href="/blog/cholesterol-lipid-panel-explained">Read guide →</a>
+    </article>
+    <article class="card">
+      <h2><a href="/blog/hba1c-blood-sugar-explained">HbA1c Explained: What Your Blood Sugar Test Means</a></h2>
+      <p>How A1c reflects your 3-month average blood sugar, the normal / prediabetes / diabetes ranges, and next steps.</p>
+      <a class="read" href="/blog/hba1c-blood-sugar-explained">Read guide →</a>
+    </article>
+    <article class="card">
+      <h2><a href="/blog/track-lab-results-over-time">Why Tracking Lab Results Over Time Matters</a></h2>
+      <p>A single value is a snapshot; trends tell the real story. Spot problems early by tracking your markers.</p>
+      <a class="read" href="/blog/track-lab-results-over-time">Read guide →</a>
+    </article>
+    <article class="card">
+      <h2><a href="/blog/how-ai-analyzes-health-reports">How AI Analyzes Your Health Reports (Accuracy &amp; Privacy)</a></h2>
+      <p>How OCR + AI extract lab values, how accurate it is, privacy considerations, and what AI can and can't do.</p>
+      <a class="read" href="/blog/how-ai-analyzes-health-reports">Read guide →</a>
+    </article>
+  </main>
+
+  <section class="cta">
+    <h3>Turn your lab report into clear insights</h3>
+    <p>Upload a PDF or photo and get your values extracted, explained, and tracked over time — free to start.</p>
+    <a href="https://health-report-analyzer-client.vercel.app/signup">Analyze your report free →</a>
+  </section>
+
+  <footer>
+    © 2024 Health Report Analyzer. Informational content only — not medical advice.
+  </footer>
+</body>
+</html>

@@ -4,67 +4,6 @@ import { useTranslation } from 'react-i18next';
 import api from '../utils/api';
 import '../styles/PricingPage.css';
 
-const PLANS = [
-  {
-    id: 'free',
-    name: 'Free',
-    price: 0,
-    period: 'forever',
-    description: 'Perfect for trying out the platform',
-    features: [
-      { text: '3 reports per month', included: true },
-      { text: 'Basic health insights', included: true },
-      { text: '7-day report history', included: true },
-      { text: 'Trend analysis', included: false },
-      { text: 'PDF export', included: false },
-      { text: 'Family sharing', included: false },
-    ],
-    cta: 'Current Plan',
-    ctaAction: 'free',
-    popular: false,
-  },
-  {
-    id: 'pro_monthly',
-    name: 'Pro Monthly',
-    price: 5,
-    period: 'month',
-    description: 'Best for regular health tracking',
-    features: [
-      { text: '10 Report Uploads - Scan or upload lab reports (PDFs & images)', included: true },
-      { text: 'Advanced AI Insights - Get personalized health recommendations powered by Gemini AI', included: true },
-      { text: 'AI-powered parameter extraction (50+ tests supported)', included: true },
-      { text: 'Personalized health insights & recommendations', included: true },
-    ],
-    cta: 'Get Started',
-    ctaAction: 'checkout',
-    popular: true,
-    badge: 'Most Popular',
-  },
-  {
-    id: 'pro_yearly',
-    name: 'Pro Yearly',
-    price: 45,
-    period: 'year',
-    originalPrice: 60,
-    description: 'Save 25% with annual billing',
-    savings: '3 months free!',
-    features: [
-      { text: 'Unlimited Report Uploads - Scan or upload unlimited lab reports (PDFs & images)', included: true },
-      { text: 'Advanced AI Insights - Get personalized health recommendations powered by Gemini AI', included: true },
-      { text: 'Trend Analysis - Track your health parameters over time with interactive charts', included: true },
-      { text: 'PDF Export - Download professional reports to share with your doctor', included: true },
-      { text: 'AI-powered parameter extraction (50+ tests supported)', included: true },
-      { text: 'Personalized health insights & recommendations', included: true },
-      { text: 'Trend tracking with interactive charts', included: true },
-      { text: 'PDF export for your doctor', included: true },
-      { text: 'Priority email support', included: true },
-    ],
-    cta: 'Save 25%',
-    ctaAction: 'checkout',
-    popular: false,
-  },
-];
-
 export default function PricingPage({ user }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -73,18 +12,79 @@ export default function PricingPage({ user }) {
   const [subscription, setSubscription] = useState(null);
   const [message, setMessage] = useState(null);
 
+  const PLANS = [
+    {
+      id: 'free',
+      name: t('pricing.plans.free.name'),
+      price: 0,
+      period: t('pricing.plans.free.period'),
+      description: t('pricing.plans.free.description'),
+      features: [
+        { text: t('pricing.plans.free.features.f1'), included: true },
+        { text: t('pricing.plans.free.features.f2'), included: true },
+        { text: t('pricing.plans.free.features.f3'), included: true },
+        { text: t('pricing.plans.free.features.f4'), included: false },
+        { text: t('pricing.plans.free.features.f5'), included: false },
+        { text: t('pricing.plans.free.features.f6'), included: false },
+      ],
+      cta: t('pricing.plans.free.cta'),
+      ctaAction: 'free',
+      popular: false,
+    },
+    {
+      id: 'pro_monthly',
+      name: t('pricing.plans.pro_monthly.name'),
+      price: 5,
+      period: t('pricing.plans.pro_monthly.period'),
+      description: t('pricing.plans.pro_monthly.description'),
+      features: [
+        { text: t('pricing.plans.pro_monthly.features.f1'), included: true },
+        { text: t('pricing.plans.pro_monthly.features.f2'), included: true },
+        { text: t('pricing.plans.pro_monthly.features.f3'), included: true },
+        { text: t('pricing.plans.pro_monthly.features.f4'), included: true },
+      ],
+      cta: t('pricing.plans.pro_monthly.cta'),
+      ctaAction: 'checkout',
+      popular: true,
+      badge: t('pricing.plans.pro_monthly.badge'),
+    },
+    {
+      id: 'pro_yearly',
+      name: t('pricing.plans.pro_yearly.name'),
+      price: 45,
+      period: t('pricing.plans.pro_yearly.period'),
+      originalPrice: 60,
+      description: t('pricing.plans.pro_yearly.description'),
+      savings: t('pricing.plans.pro_yearly.savings'),
+      features: [
+        { text: t('pricing.plans.pro_yearly.features.f1'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f2'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f3'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f4'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f5'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f6'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f7'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f8'), included: true },
+        { text: t('pricing.plans.pro_yearly.features.f9'), included: true },
+      ],
+      cta: t('pricing.plans.pro_yearly.cta'),
+      ctaAction: 'checkout',
+      popular: false,
+    },
+  ];
+
   useEffect(() => {
     // Check for payment status in URL
     const paymentStatus = searchParams.get('payment');
     if (paymentStatus === 'success') {
-      setMessage({ type: 'success', text: '🎉 Payment successful! Your subscription is now active.' });
+      setMessage({ type: 'success', text: t('pricing.messages.payment_success') });
 
       // Refresh subscription data immediately
       if (user) {
         fetchSubscription();
       }
     } else if (paymentStatus === 'cancelled') {
-      setMessage({ type: 'info', text: 'Payment was cancelled. You can try again anytime.' });
+      setMessage({ type: 'info', text: t('pricing.messages.payment_cancelled') });
     }
 
     // Fetch current subscription if logged in
@@ -118,7 +118,7 @@ export default function PricingPage({ user }) {
 
     // If already on this plan
     if (subscription?.plan === planId) {
-      setMessage({ type: 'info', text: 'You are already on this plan!' });
+      setMessage({ type: 'info', text: t('pricing.messages.already_on_plan') });
       return;
     }
 
@@ -138,7 +138,7 @@ export default function PricingPage({ user }) {
       console.error('Checkout error:', error);
       setMessage({
         type: 'error',
-        text: error.response?.data?.error || 'Failed to start checkout. Please try again.'
+        text: error.response?.data?.error || t('pricing.messages.checkout_failed')
       });
     } finally {
       setLoading(null);
@@ -152,7 +152,7 @@ export default function PricingPage({ user }) {
         window.open(response.data.portalUrl, '_blank');
       }
     } catch (error) {
-      setMessage({ type: 'error', text: 'Failed to open billing portal' });
+      setMessage({ type: 'error', text: t('pricing.messages.portal_failed') });
     }
   };
 
@@ -168,19 +168,19 @@ export default function PricingPage({ user }) {
       if (response.data.plan !== 'free') {
         setMessage({
           type: 'success',
-          text: `✅ Subscription synced! You're on the ${response.data.planName} plan.`
+          text: t('pricing.messages.sync_success', { planName: response.data.planName })
         });
       } else {
         setMessage({
           type: 'info',
-          text: 'No active subscription found. If you just completed payment, please wait a moment and try again.'
+          text: t('pricing.messages.sync_none')
         });
       }
     } catch (error) {
       console.error('Sync error:', error);
       setMessage({
         type: 'error',
-        text: 'Failed to sync subscription. Please try again.'
+        text: t('pricing.messages.sync_failed')
       });
     } finally {
       setLoading(null);
@@ -188,9 +188,9 @@ export default function PricingPage({ user }) {
   };
 
   const getButtonText = (plan) => {
-    if (!user) return 'Get Started';
-    if (subscription?.plan === plan.id) return 'Current Plan';
-    if (plan.id === 'free' && subscription?.plan !== 'free') return 'Downgrade';
+    if (!user) return t('pricing.buttons.get_started');
+    if (subscription?.plan === plan.id) return t('pricing.buttons.current_plan');
+    if (plan.id === 'free' && subscription?.plan !== 'free') return t('pricing.buttons.downgrade');
     return plan.cta;
   };
 
@@ -202,9 +202,9 @@ export default function PricingPage({ user }) {
     <div className="pricing-page">
       {/* Header */}
       <div className="pricing-header" data-aos="fade-up">
-        <h1 className="pricing-title">Simple, Transparent Pricing</h1>
+        <h1 className="pricing-title">{t('pricing.title')}</h1>
         <p className="pricing-subtitle">
-          Choose the plan that fits your health journey. Cancel anytime.
+          {t('pricing.subtitle')}
         </p>
 
         {/* Sync button for users who just paid */}
@@ -226,7 +226,7 @@ export default function PricingPage({ user }) {
               transition: 'all 0.2s'
             }}
           >
-            {loading === 'sync' ? '🔄 Syncing...' : '🔄 Sync Subscription Status'}
+            {loading === 'sync' ? t('pricing.sync.syncing') : t('pricing.sync.button')}
           </button>
         )}
       </div>
@@ -235,7 +235,7 @@ export default function PricingPage({ user }) {
       {message && (
         <div className={`pricing-message ${message.type}`} data-aos="fade-down">
           {message.text}
-          <button onClick={() => setMessage(null)} className="message-close">×</button>
+          <button onClick={() => setMessage(null)} className="message-close" aria-label={t('common.close')}>×</button>
         </div>
       )}
 
@@ -244,21 +244,21 @@ export default function PricingPage({ user }) {
         <div className="subscription-info" data-aos="fade-up">
           <div className="subscription-details">
             <span className="subscription-badge">
-              ✨ {subscription.planName} Plan
-              {subscription.plan === 'pro_yearly' && ' (Annual Billing)'}
-              {subscription.plan === 'pro_monthly' && ' (Monthly Billing)'}
+              ✨ {t('pricing.subscription.plan_label', { planName: subscription.planName })}
+              {subscription.plan === 'pro_yearly' && ` ${t('pricing.subscription.annual_billing')}`}
+              {subscription.plan === 'pro_monthly' && ` ${t('pricing.subscription.monthly_billing')}`}
             </span>
             <span className="subscription-status">
-              {subscription.status === 'active' ? '● Active' : `● ${subscription.status}`}
+              {subscription.status === 'active' ? `● ${t('pricing.subscription.active')}` : `● ${subscription.status}`}
             </span>
             {subscription.renewsAt && (
               <span className="subscription-renews">
-                Renews {new Date(subscription.renewsAt).toLocaleDateString()}
+                {t('pricing.subscription.renews', { date: new Date(subscription.renewsAt).toLocaleDateString() })}
               </span>
             )}
           </div>
           <button className="manage-btn" onClick={handleManageSubscription}>
-            Manage Billing
+            {t('pricing.subscription.manage_billing')}
           </button>
         </div>
       )}
@@ -273,7 +273,7 @@ export default function PricingPage({ user }) {
             data-aos-delay={index * 100}
           >
             {plan.badge && !isCurrentPlan(plan.id) && <div className="pricing-badge">{plan.badge}</div>}
-            {isCurrentPlan(plan.id) && <div className="current-badge">Your Plan</div>}
+            {isCurrentPlan(plan.id) && <div className="current-badge">{t('pricing.your_plan')}</div>}
 
             <div className="pricing-card-header">
               <h2 className="plan-name">{plan.name}</h2>
@@ -321,7 +321,7 @@ export default function PricingPage({ user }) {
       {/* Usage Stats for logged-in users */}
       {subscription && (
         <div className="usage-stats" data-aos="fade-up">
-          <h3>Your Usage This Month</h3>
+          <h3>{t('pricing.usage.title')}</h3>
           <div className="usage-bar-container">
             <div
               className="usage-bar"
@@ -334,8 +334,8 @@ export default function PricingPage({ user }) {
           </div>
           <p className="usage-text">
             {subscription.reportsLimit === -1
-              ? `${subscription.reportsUsed} reports uploaded (Unlimited)`
-              : `${subscription.reportsUsed} of ${subscription.reportsLimit} reports used`
+              ? t('pricing.usage.unlimited', { count: subscription.reportsUsed })
+              : t('pricing.usage.used', { used: subscription.reportsUsed, limit: subscription.reportsLimit })
             }
           </p>
         </div>
@@ -343,27 +343,27 @@ export default function PricingPage({ user }) {
 
       {/* FAQ Section */}
       <div className="pricing-faq" data-aos="fade-up">
-        <h3>Frequently Asked Questions</h3>
+        <h3>{t('pricing.faq.title')}</h3>
         <div className="faq-grid">
           <div className="faq-item">
-            <h4>💳 What payment methods do you accept?</h4>
-            <p>We accept all major credit cards, debit cards, and PayPal through our secure payment partner Gumroad.</p>
+            <h4>💳 {t('pricing.faq.q1')}</h4>
+            <p>{t('pricing.faq.a1')}</p>
           </div>
           <div className="faq-item">
-            <h4>🔄 Can I cancel anytime?</h4>
-            <p>Yes! Cancel your subscription anytime from your Gumroad library. You'll keep access until the end of your billing period.</p>
+            <h4>🔄 {t('pricing.faq.q2')}</h4>
+            <p>{t('pricing.faq.a2')}</p>
           </div>
           <div className="faq-item">
-            <h4>🔒 Is my health data secure?</h4>
-            <p>Absolutely. We use bank-level encryption and never share your data with third parties.</p>
+            <h4>🔒 {t('pricing.faq.q3')}</h4>
+            <p>{t('pricing.faq.a3')}</p>
           </div>
           <div className="faq-item">
-            <h4>👨‍👩‍👧‍👦 How does family sharing work?</h4>
-            <p>Pro users can invite up to 5 family members to share their subscription. Each member gets their own private account.</p>
+            <h4>👨‍👩‍👧‍👦 {t('pricing.faq.q4')}</h4>
+            <p>{t('pricing.faq.a4')}</p>
           </div>
           <div className="faq-item">
-            <h4>📧 How do I get support?</h4>
-            <p>Free users get email support. Pro users get priority support with faster response times.</p>
+            <h4>📧 {t('pricing.faq.q5')}</h4>
+            <p>{t('pricing.faq.a5')}</p>
           </div>
         </div>
       </div>
@@ -373,15 +373,15 @@ export default function PricingPage({ user }) {
         <div className="trust-badges">
           <div className="trust-badge">
             <span className="badge-icon">🔒</span>
-            <span>Secure Payments</span>
+            <span>{t('pricing.trust.secure_payments')}</span>
           </div>
           <div className="trust-badge">
             <span className="badge-icon">🚫</span>
-            <span>Cancel Anytime</span>
+            <span>{t('pricing.trust.cancel_anytime')}</span>
           </div>
           <div className="trust-badge">
             <span className="badge-icon">🌍</span>
-            <span>Global Access</span>
+            <span>{t('pricing.trust.global_access')}</span>
           </div>
         </div>
       </div>
@@ -390,11 +390,11 @@ export default function PricingPage({ user }) {
       <div className="enterprise-cta" data-aos="fade-up">
         <div className="enterprise-icon">🏥</div>
         <div className="enterprise-content">
-          <h3>Need a solution for your clinic or hospital?</h3>
-          <p>We offer custom enterprise plans with API access, white-labeling, and dedicated support.</p>
+          <h3>{t('pricing.enterprise.title')}</h3>
+          <p>{t('pricing.enterprise.description')}</p>
         </div>
         <button onClick={() => navigate('/contact')} className="enterprise-btn">
-          Contact Sales
+          {t('pricing.enterprise.cta')}
         </button>
       </div>
     </div>

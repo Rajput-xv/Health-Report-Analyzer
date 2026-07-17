@@ -7,6 +7,11 @@
   /* overflow: visible; */
 }
 
+/* Dark mode: match the dark body gradient instead of the light purple one */
+.dark-mode .app {
+  background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
+}
+
 .app-header {
   text-align: center;
   padding: 3rem 2rem 2rem;
@@ -1688,7 +1693,8 @@
   color: #e5e7eb;
 }
 
-.dark-mode .chart-unit {
+.dark-mode .chart-unit,
+.dark-mode .point-date {
   color: #9ca3af;
 }
 
@@ -1762,6 +1768,16 @@
 
 .dark-mode .progress-fill {
   background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+
+/* Upload quota indicator */
+.dark-mode .upload-quota-indicator {
+  background: rgba(17, 24, 39, 0.85);
+  border-color: #334155;
+}
+
+.dark-mode .quota-text {
+  color: #cbd5e1;
 }
 
 /* App header width + alignment */

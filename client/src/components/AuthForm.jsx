@@ -20,7 +20,7 @@ const EyeIcon = ({ size = 20, color = "#6b7280" }) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke={color}
+    stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -37,7 +37,7 @@ const EyeOffIcon = ({ size = 20, color = "#6b7280" }) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke={color}
+    stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -132,19 +132,19 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        toast.success(t('toast.login_success').replace('Welcome back!', `Welcome, ${data.user.firstName}!`));
+        toast.success(t('toast.login_success_google', { name: data.user.firstName }));
         onLogin(data.user, data.token);
         navigate("/");
       } else {
-        const errorMsg = data.error || "Google sign-in failed. Please try again.";
+        const errorMsg = data.error || t('toast.google_failed');
         setError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (error) {
       console.error("Google sign-in error:", error);
-      const errorMsg = "Google sign-in failed. Please try again.";
+      const errorMsg = t('toast.google_failed');
       setError(errorMsg);
-      toast.error("Google authentication failed. Please try again.");
+      toast.error(t('toast.google_auth_failed'));
     } finally {
       setLoading(false);
     }
@@ -195,20 +195,20 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
 
         // Success toasts
         if (isLogin) {
-          toast.success(t('toast.login_success').replace('Welcome back!', `Welcome back, ${data.user.firstName}!`));
+          toast.success(t('toast.login_success_named', { name: data.user.firstName }));
         } else {
-          toast.success(t('toast.signup_success').replace('Account created successfully!', `Account created successfully! Welcome, ${data.user.firstName}!`));
+          toast.success(t('toast.signup_success_named', { name: data.user.firstName }));
         }
 
         onLogin(data.user, data.token);
         navigate("/");
       } else {
-        const errorMessage = data.error || "Authentication failed";
+        const errorMessage = data.error || t('toast.auth_failed');
         setError(errorMessage);
         toast.error(errorMessage);
       }
     } catch (error) {
-      const errorMessage = error.message || "Network error. Please try again.";
+      const errorMessage = error.message || t('toast.network_error');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -251,7 +251,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
             </div>
             <button className="auth-home-button" onClick={() => navigate('/')}>
               <Home size={16} />
-              Home
+              {t('nav.home')}
             </button>
             <DarkModeToggle />
           </div>
@@ -284,7 +284,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                   }}
                 >
                   <Home size={16} />
-                  Home
+                  {t('nav.home')}
                 </button>
 
                 <div className="mobile-menu-item">
@@ -426,10 +426,8 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
               <div style={{ marginTop: "1rem", textAlign: "right" }}>
                 <Link
                   to="/forgot-password"
-                  style={{
-                    color: "#007bff",
-                    textDecoration: "none",
-                  }}
+                  className="btn-toggle"
+                  style={{ textDecoration: "none" }}
                 >
                   {t('auth.forgot_password')}
                 </Link>

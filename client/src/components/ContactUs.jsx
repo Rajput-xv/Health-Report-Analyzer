@@ -1,11 +1,13 @@
 
 import React, { useState, useEffect } from "react";
+import { useTranslation } from 'react-i18next';
 import "../styles/ContactUs.css";
 import AOS from 'aos';
 import { sendContactMessage } from "../utils/api";
 
 
 const ContactUs = ({ user }) => {
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [formData, setFormData] = useState({
@@ -64,7 +66,7 @@ const ContactUs = ({ user }) => {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
+      alert(t('contact.error'));
     } finally {
       setIsSubmitting(false);
     }
@@ -81,41 +83,39 @@ const ContactUs = ({ user }) => {
 
   return (
     <div className={`contact-page ${darkMode ? "dark" : ""}`}>
-      <div className="contact-container" data-aos="fade-up" data-aos-duration="800">
+      <div className={`contact-container ${darkMode ? "dark" : ""}`} data-aos="fade-up" data-aos-duration="800">
         <div className="contact-form-wrapper" data-aos="fade-up" data-aos-delay="200">
           {showSuccess ? (
             <div className="success-container" data-aos="zoom-in">
               <div className="success-icon" data-aos="flip-left" data-aos-delay="300">✅</div>
-              <h2 data-aos="fade-up" data-aos-delay="400">Message Sent Successfully!</h2>
+              <h2 data-aos="fade-up" data-aos-delay="400">{t('contact.success')}</h2>
               <p data-aos="fade-up" data-aos-delay="500">
-                Thank you for contacting us. We've received your message and
-                will get back to you via email soon.
+                {t('contact.success_body')}
               </p>
               <div className="success-actions">
                 <button onClick={handleReset} className="btn-send-another">
-                  Send Another Message
+                  {t('contact.send_another')}
                 </button>
               </div>
             </div>
           ) : (
             <>
               <div className="contact-header">
-                <h2 data-aos="fade-down" data-aos-delay="200">Contact Us</h2>
+                <h2 data-aos="fade-down" data-aos-delay="200">{t('contact.title')}</h2>
                 <p>
-                  Have questions or feedback? We'd love to hear from you!
+                  {t('contact.feedback_question')}
                 </p>
               </div>
 
               <div className="form-notice">
                 <p>
-                  <strong>✅ Working Email Service:</strong> Your message will
-                  be sent directly to our team via email.
+                  <strong>✅</strong> {t('contact.form_notice')}
                 </p>
               </div>
 
                       <form onSubmit={handleSubmit} className="contact-form" data-aos="fade-up" data-aos-delay="300">
                 <div className="form-group">
-                  <label htmlFor="name">Name</label>
+                  <label htmlFor="name">{t('contact.name')}</label>
                   <input
                     type="text"
                     id="name"
@@ -128,7 +128,7 @@ const ContactUs = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="email">Email</label>
+                  <label htmlFor="email">{t('contact.email')}</label>
                   <input
                     type="email"
                     id="email"
@@ -141,7 +141,7 @@ const ContactUs = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="subject">Subject</label>
+                  <label htmlFor="subject">{t('contact.subject')}</label>
                   <input
                     type="text"
                     id="subject"
@@ -153,7 +153,7 @@ const ContactUs = ({ user }) => {
                 </div>
 
                 <div className="form-group">
-                  <label htmlFor="message">Message</label>
+                  <label htmlFor="message">{t('contact.message')}</label>
                   <textarea
                     id="message"
                     name="message"
@@ -169,7 +169,7 @@ const ContactUs = ({ user }) => {
                   className="submit-btn"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Sending..." : "Send Message"}
+                  {isSubmitting ? t('contact.sending') : t('contact.send')}
                 </button>
               </form>
             </>
