@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const { generateTrendData } = require('../utils/trendGenerator');
 const authMiddleware = require('../utils/authMiddleware');
 const Report = require('../models/Report');
@@ -23,6 +24,9 @@ router.get('/', authMiddleware, async (req, res) => {
 // Get specific report by ID
 router.get('/:id', authMiddleware, async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
     const report = await Report.findOne({
       _id: req.params.id,
       userId: req.user.id
@@ -44,6 +48,9 @@ router.get('/:id', authMiddleware, async (req, res) => {
 // Get trend data for specific parameters
 router.get('/:id/trends', authMiddleware, async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
     const currentReport = await Report.findOne({
       _id: req.params.id,
       userId: req.user.id
@@ -66,6 +73,9 @@ router.get('/:id/trends', authMiddleware, async (req, res) => {
 // Delete a report
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: 'Report not found' });
+    }
     const report = await Report.findOneAndDelete({
       _id: req.params.id,
       userId: req.user.id

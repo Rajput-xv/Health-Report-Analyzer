@@ -1,13 +1,27 @@
 const mongoose = require('mongoose');
-const { MongoMemoryServer } = require('mongodb-memory-server');
 
 let mongoServer;
+
+// Close the DB cleanly on Ctrl+C
+process.on('SIGINT', async () => {
+  try {
+    await mongoose.connection.close();
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+    console.log('MongoDB connection closed');
+  } catch (err) {
+    console.error('Error during shutdown:', err.message);
+  } finally {
+    process.exit(0);
+  }
+});
 
 // Connect to MongoDB database
 const connectDB = async () => {
   try {
     // First try to connect to real MongoDB
-    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    await mongoose.connect(process.env.MONGODB_URI);
     console.log('MongoDB connected successfully');
 
     // Handle connection events for better monitoring
@@ -19,30 +33,27 @@ const connectDB = async () => {
       console.log('MongoDB disconnected');
     });
 
-    // Graceful shutdown when app terminates
-    process.on('SIGINT', async () => {
-      await mongoose.connection.close();
-      if (mongoServer) {
-        await mongoServer.stop();
-      }
-      console.log('MongoDB connection closed');
-      process.exit(0);
-    });
-
   } catch (error) {
     console.error('Database connection failed:', error.message);
-    console.log('Trying to start in-memory MongoDB for testing...');
-    
+
+    // Only fall back to the throwaway in-memory DB during tests. In prod we'd rather
+    // crash and let the host restart us than silently lose data to an ephemeral DB.
+    if (process.env.NODE_ENV !== 'test') {
+      console.error('Not starting with an in-memory database outside tests. Exiting.');
+      throw error;
+    }
+
+    console.log('Starting in-memory MongoDB for testing...');
     try {
-      // Start in-memory MongoDB server
+      // Only load this dev dependency when we actually need it
+      const { MongoMemoryServer } = require('mongodb-memory-server');
       mongoServer = await MongoMemoryServer.create();
       const mongoUri = mongoServer.getUri();
-      
-      const conn = await mongoose.connect(mongoUri);
+
+      await mongoose.connect(mongoUri);
       console.log('✅ In-memory MongoDB connected successfully for testing!');
       console.log('📝 Note: Data will not persist between server restarts');
-      
-      // Handle connection events
+
       mongoose.connection.on('error', (err) => {
         console.error('In-memory MongoDB connection error:', err.message);
       });
@@ -53,7 +64,7 @@ const connectDB = async () => {
 
     } catch (memoryError) {
       console.error('Failed to start in-memory database:', memoryError.message);
-      console.log('Server will continue without database connection (limited functionality)');
+      throw memoryError;
     }
   }
 };

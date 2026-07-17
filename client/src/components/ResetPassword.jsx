@@ -8,6 +8,9 @@ import LanguageSwitcher from './LanguageSwitcher';
 import Header from './Header';
 import "../styles/AuthForm.css";
 
+// Same password rules as signup
+const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+
 const ResetPassword = () => {
   const { t } = useTranslation();
   const { token } = useParams();
@@ -33,6 +36,12 @@ const ResetPassword = () => {
 
     if (password !== confirmPassword) {
       setMessage(t('validation.passwords_no_match'));
+      return;
+    }
+
+    // Enforce the same password rules as signup
+    if (!STRONG_PASSWORD_REGEX.test(password)) {
+      setMessage(t('auth_form.password_requirements_text'));
       return;
     }
 
@@ -149,7 +158,7 @@ const ResetPassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder={t('validation.new_password_placeholder')}
-                minLength={6}
+                minLength={8}
               />
               <small className="form-hint">
                 {t('validation.password_min_length')}
@@ -166,7 +175,7 @@ const ResetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder={t('validation.confirm_password_placeholder')}
-                minLength={6}
+                minLength={8}
               />
             </div>
 

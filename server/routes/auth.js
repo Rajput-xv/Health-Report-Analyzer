@@ -3,10 +3,26 @@ const bcrypt = require('bcryptjs');
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const { verifyFirebaseIdToken } = require('../config/firebaseAdmin');
 
 const router = express.Router();
+
+// Limit the login/signup/reset endpoints to slow down brute-force attempts
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many attempts. Please try again in a few minutes.' }
+});
+
+// Password rules, same as the client
+const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+const PASSWORD_REQUIREMENTS_MESSAGE =
+  'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
 
 // Check if database is connected
 const isDatabaseConnected = () => {
@@ -25,7 +41,7 @@ const generateToken = (userId) => {
 };
 
 // Register new user
-router.post('/register', async (req, res) => {
+router.post('/register', authLimiter, async (req, res) => {
   try {
     // Check if database is connected
     if (!isDatabaseConnected()) {
@@ -38,17 +54,16 @@ router.post('/register', async (req, res) => {
 
     const { email, password, confirm_password, firstName, lastName } = req.body;
 
-    // Validation
-    if (!email || !password || !confirm_password || !firstName || !lastName) {
+    // All fields must be non-empty strings
+    if ([email, password, confirm_password, firstName, lastName].some(v => typeof v !== 'string' || !v)) {
       return res.status(400).json({
         error: 'All fields are required'
       });
     }
     // Check for strong password (match client-side validation)
-    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-    if (!strongPasswordRegex.test(password)) {
+    if (!STRONG_PASSWORD_REGEX.test(password)) {
       return res.status(400).json({
-        error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character'
+        error: PASSWORD_REQUIREMENTS_MESSAGE
       });
     }
     // if (password.length < 6) {
@@ -104,7 +119,7 @@ router.post('/register', async (req, res) => {
 });
 
 // Login user
-router.post('/login', async (req, res) => {
+router.post('/login', authLimiter, async (req, res) => {
   try {
     // Check if database is connected
     if (!isDatabaseConnected()) {
@@ -116,8 +131,8 @@ router.post('/login', async (req, res) => {
     }
 
     const { email, password } = req.body;
-    // Validation
-    if (!email || !password) {
+    // Require strings so nobody can pass a Mongo operator object
+    if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
       return res.status(400).json({
         error: 'Email and password are required'
       });
@@ -172,10 +187,14 @@ router.post('/login', async (req, res) => {
 });
 
 // Forgot Password
-router.post("/forgot-password", async (req, res) => {
+router.post("/forgot-password", authLimiter, async (req, res) => {
   const { email } = req.body;
   try {
-    const user = await User.findOne({ email });
+    // Only accept a string so nobody can pass a Mongo operator object
+    if (typeof email !== 'string') {
+      return res.json({ message: "If the email exists, a reset link has been sent" });
+    }
+    const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
       return res.json({ message: "If the email exists, a reset link has been sent" });
     }
@@ -231,11 +250,16 @@ router.post("/forgot-password", async (req, res) => {
 });
 
 // Reset Password
-router.post("/reset-password/:token", async (req, res) => {
+router.post("/reset-password/:token", authLimiter, async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
   try {
+    // Same password rules as signup
+    if (typeof password !== 'string' || !STRONG_PASSWORD_REGEX.test(password)) {
+      return res.status(400).json({ message: PASSWORD_REQUIREMENTS_MESSAGE });
+    }
+
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
     const user = await User.findOne({
@@ -253,7 +277,7 @@ router.post("/reset-password/:token", async (req, res) => {
   user.resetPasswordExpire = null;
   user.passwordChanged = true;
   await user.save();
-    console.log(`Password reset successful for user: ${user.email}`);
+    console.log(`Password reset successful for user: ${user._id}`);
     res.json({ message: "Password updated successfully" });
   } catch (err) {
     console.error("Password reset error:", err);
@@ -296,50 +320,69 @@ router.get('/me', async (req, res) => {
 });
 
 // Google Authentication
-router.post('/google-auth', async (req, res) => {
+// Client signs in with Firebase and sends the ID token. We verify it and read the
+// email/name from the verified token, not from the request body.
+router.post('/google-auth', authLimiter, async (req, res) => {
   try {
-    const { email, firstName, lastName } = req.body;
-    
-    if (!email) {
+    const { idToken } = req.body;
+
+    if (!idToken || typeof idToken !== 'string') {
       return res.status(400).json({
-        error: 'Email is required'
+        error: 'Google ID token is required'
       });
     }
 
-    // Check if user exists
-    let user = await User.findOne({ email: email.toLowerCase() });
-    
+    // Verify the Firebase ID token
+    let decoded;
+    try {
+      decoded = await verifyFirebaseIdToken(idToken);
+    } catch (err) {
+      if (err.code === 'not_configured') {
+        return res.status(503).json({
+          error: 'Google sign-in is not configured on the server'
+        });
+      }
+      console.error('Google ID token verification failed:', err.message);
+      return res.status(401).json({
+        error: 'Invalid or expired Google credential'
+      });
+    }
+
+    const email = (decoded.email || '').toLowerCase();
+    if (!email || decoded.email_verified === false) {
+      return res.status(401).json({
+        error: 'Google account email is missing or not verified'
+      });
+    }
+
+    const fullName = (decoded.name || '').trim();
+    const [derivedFirst, ...derivedRest] = fullName.split(' ');
+    const firstName = derivedFirst || 'Google';
+    const lastName = derivedRest.join(' ') || 'User';
+
+    // Check if user exists (by verified email)
+    let user = await User.findOne({ email });
+
     // If user doesn't exist, create a new one
     if (!user) {
-      // const randomPassword = crypto.randomBytes(16).toString('hex');
-      // const hashedPassword = await bcrypt.hash(randomPassword, 12);
       const randomPassword = crypto.randomBytes(16).toString('hex');
 
       user = new User({
-        email: email.toLowerCase(),
-        firstName: firstName || 'Google',
-        lastName: lastName || 'User',
-        password: randomPassword, // model pre-save hash this
+        email,
+        firstName,
+        lastName,
+        password: randomPassword, // model pre-save hook hashes this
         isActive: true,
         googleAuth: true
       });
-      
-      // user = new User({
-      //   email: email.toLowerCase(),
-      //   firstName: firstName || 'Google',
-      //   lastName: lastName || 'User',
-      //   password: hashedPassword,
-      //   isActive: true,
-      //   googleAuth: true
-      // });
-      
+
       await user.save();
     } else {
       // Update user's name if it changed in Google
-      if (firstName && firstName !== user.firstName) {
+      if (fullName && firstName !== user.firstName) {
         user.firstName = firstName;
       }
-      if (lastName && lastName !== user.lastName) {
+      if (fullName && lastName !== user.lastName) {
         user.lastName = lastName;
       }
       // Mark as Google authenticated if not already set
@@ -347,6 +390,10 @@ router.post('/google-auth', async (req, res) => {
         user.googleAuth = true;
       }
       await user.save();
+    }
+
+    if (!user.isActive) {
+      return res.status(403).json({ error: 'Account is deactivated' });
     }
 
     // Generate token

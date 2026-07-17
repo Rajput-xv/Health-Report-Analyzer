@@ -252,12 +252,7 @@ function App() {
     }
   }, []);
 
-  // Refresh animations on route change (only on desktop)
-  useEffect(() => {
-    if (window.innerWidth >= 768) {
-      refreshAnimations();
-    }
-  }, [window.location.pathname]);
+  // Route-change animation refresh is handled by <RouteChangeTracker/> below.
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -265,22 +260,37 @@ function App() {
       const userData = localStorage.getItem("user");
 
       if (token && userData) {
+        // Show the stored user right away, then confirm with the server
+        let parsedUser = null;
         try {
-          await getCurrentUser();
-          const parsedUser = JSON.parse(userData);
+          parsedUser = JSON.parse(userData);
           setUser(parsedUser);
-          toast.info(t('toast.login_success', { name: parsedUser.firstName }));
-        } catch (error) {
+        } catch (parseErr) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-          toast.error(t('toast.logout_success'));
+          setAuthLoading(false);
+          return;
+        }
+
+        try {
+          await getCurrentUser();
+          toast.info(t('toast.login_success', { name: parsedUser.firstName }));
+        } catch (error) {
+          // Only log out on a real 401. Network/server hiccups shouldn't drop the session.
+          if (error.response?.status === 401) {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setUser(null);
+          }
         }
       }
       setAuthLoading(false);
     };
 
     checkAuth();
-  }, [t]);
+    // Run once on mount (don't re-run when the language changes)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = i18n.language || 'en';

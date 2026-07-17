@@ -31,13 +31,24 @@ function HealthStats() {
   }, []);
 
   useEffect(() => {
-    fetchGlobalStats().then((data) => {
-      setStats({
-        totalUsers: data.totalUsers || 0,
-        totalReports: data.totalReports || 0
+    let isMounted = true;
+    fetchGlobalStats()
+      .then((data) => {
+        if (!isMounted) return;
+        setStats({
+          totalUsers: data.totalUsers || 0,
+          totalReports: data.totalReports || 0
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to load global stats:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
-      setLoading(false);
-    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -91,6 +102,7 @@ function StatCard({ icon, end, suffix, label, isVisible, duration, delay }) {
   useEffect(() => {
     if (!isVisible) return;
 
+    let rafId;
     // Add initial delay
     const delayTimeout = setTimeout(() => {
       let startTime;
@@ -100,22 +112,26 @@ function StatCard({ icon, end, suffix, label, isVisible, duration, delay }) {
       const animate = (currentTime) => {
         if (!startTime) startTime = currentTime;
         const progress = Math.min((currentTime - startTime) / duration, 1);
-        
+
         // Easing function for smooth animation
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
         const currentCount = Math.floor(easeOutQuart * (endValue - startValue) + startValue);
-        
+
         setCount(currentCount);
 
         if (progress < 1) {
-          requestAnimationFrame(animate);
+          rafId = requestAnimationFrame(animate);
         }
       };
 
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
     }, delay);
 
-    return () => clearTimeout(delayTimeout);
+    // Clean up the timer and animation frame on unmount
+    return () => {
+      clearTimeout(delayTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isVisible, end, duration, delay]);
 
   return (

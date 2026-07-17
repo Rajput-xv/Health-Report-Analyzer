@@ -70,6 +70,24 @@ async function gumroadRequest(endpoint, method = 'GET', body = null) {
   return data;
 }
 
+// Look the sale up in Gumroad's API so we don't trust the webhook body blindly.
+// Returns the sale, or null if we can't confirm it.
+async function verifyGumroadSale(saleId) {
+  if (!GUMROAD_ACCESS_TOKEN || !saleId) return null;
+  try {
+    const data = await gumroadRequest(`/sales/${saleId}`);
+    return data.sale || null;
+  } catch (err) {
+    console.error('Gumroad sale verification failed:', err.message);
+    return null;
+  }
+}
+
+// Compare two ids, but treat two undefined/null values as "no match"
+function idMatches(a, b) {
+  return a != null && b != null && String(a) === String(b);
+}
+
 /**
  * GET /api/payments/plans
  * Get available subscription plans
@@ -305,10 +323,15 @@ router.post('/webhook', express.urlencoded({ extended: true }), async (req, res)
 
     console.log('📨 Gumroad webhook received:', payload.resource_name || 'sale');
 
-    // Verify webhook by checking seller_id matches
-    if (GUMROAD_SELLER_ID && payload.seller_id !== GUMROAD_SELLER_ID) {
-      console.warn('⚠️ Webhook seller_id mismatch');
-      // Don't reject - just log warning
+    // Reject anything we can't tie to our seller (the handlers below change
+    // subscriptions based on the body, so an unauthenticated webhook is dangerous).
+    if (!GUMROAD_SELLER_ID) {
+      console.error('Rejecting webhook: GUMROAD_SELLER_ID is not configured');
+      return res.status(503).send('Webhook not configured');
+    }
+    if (payload.seller_id !== GUMROAD_SELLER_ID) {
+      console.warn('Rejecting webhook: seller_id mismatch');
+      return res.status(401).send('Unauthorized');
     }
 
     const resourceName = payload.resource_name || 'sale';
@@ -419,6 +442,15 @@ async function handleSale(payload) {
     return;
   }
 
+  // Double-check the sale with Gumroad before giving out a paid plan
+  if (GUMROAD_ACCESS_TOKEN) {
+    const verifiedSale = await verifyGumroadSale(payload.sale_id);
+    if (!verifiedSale || !idMatches(verifiedSale.seller_id, GUMROAD_SELLER_ID)) {
+      console.error(`Sale ${payload.sale_id} could not be verified with Gumroad; skipping.`);
+      return;
+    }
+  }
+
   // Determine plan from product identifiers
   // Check against all possible fields: permalink, short_product_id, product_id
   let planId = 'pro_monthly'; // default
@@ -430,18 +462,17 @@ async function handleSale(payload) {
   const monthlyProductId = process.env.GUMROAD_PRODUCT_ID_MONTH;
   const yearlyProductId = process.env.GUMROAD_PRODUCT_ID_YEAR;
 
-  // Check if it's a yearly plan
-  if (productPermalink === yearlyPermalink ||
-    shortProductId === yearlyShortId ||
-    shortProductId === yearlyPermalink ||
-    productId === yearlyProductId) {
+  // Check if it's a yearly plan (compare like-for-like identifiers; guarded against
+  // undefined===undefined false matches via idMatches).
+  if (idMatches(productPermalink, yearlyPermalink) ||
+    idMatches(shortProductId, yearlyShortId) ||
+    idMatches(productId, yearlyProductId)) {
     planId = 'pro_yearly';
   }
   // Check if it's a monthly plan (for completeness)
-  else if (productPermalink === monthlyPermalink ||
-    shortProductId === monthlyShortId ||
-    shortProductId === monthlyPermalink ||
-    productId === monthlyProductId) {
+  else if (idMatches(productPermalink, monthlyPermalink) ||
+    idMatches(shortProductId, monthlyShortId) ||
+    idMatches(productId, monthlyProductId)) {
     planId = 'pro_monthly';
   }
 
@@ -565,10 +596,11 @@ async function handleSubscriptionRestarted(payload) {
 
   if (!user) return;
 
-  // Determine plan from product
-  const productPermalink = payload.short_product_id || payload.permalink;
+  // Determine plan from product (guarded, like-for-like identifier matching)
   let planId = 'pro_monthly';
-  if (productPermalink === process.env.GUMROAD_PRO_YEARLY_PERMALINK) {
+  if (idMatches(payload.permalink, process.env.GUMROAD_PRO_YEARLY_PERMALINK) ||
+    idMatches(payload.short_product_id, process.env.GUMROAD_PRODUCT_SHORT_ID_YEAR) ||
+    idMatches(payload.product_id, process.env.GUMROAD_PRODUCT_ID_YEAR)) {
     planId = 'pro_yearly';
   }
 

@@ -71,10 +71,10 @@ export const register = async (userData) => {
   }
 };
 
-// Google Auth function
-export const googleAuth = async (user) => {
+// Google auth - send the Firebase ID token to the backend
+export const googleAuth = async (idToken) => {
   try {
-    const response = await api.post('/auth/google', user);
+    const response = await api.post('/auth/google-auth', { idToken });
     return response.data;
   } catch (error) {
     return error.response?.data || { success: false, error: 'Google authentication failed' };
@@ -165,6 +165,16 @@ export const getCustomerPortal = async () => {
     return response.data;
   } catch (error) {
     return error.response?.data || { success: false, error: 'Failed to get customer portal' };
+  }
+};
+
+// Send a contact message through our backend
+export const sendContactMessage = async (payload) => {
+  try {
+    const response = await api.post('/contact', payload);
+    return response.data;
+  } catch (error) {
+    return error.response?.data || { success: false, error: 'Failed to send message' };
   }
 };
 

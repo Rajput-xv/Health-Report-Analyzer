@@ -744,10 +744,10 @@
   background: rgba(80, 80, 120, 0.22);
   border-color: rgba(120, 120, 180, 0.22);
 }
-.dark-mode .nav-link.highlight {
+/* .dark-mode .nav-link.highlight {
   background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
   color: #1a1a2e;
-}
+} */
 .dark-mode .nav-link.highlight:hover,
 .dark-mode .nav-link.highlight:focus-visible {
   box-shadow: 0 6px 25px rgba(255, 179, 0, 0.5);

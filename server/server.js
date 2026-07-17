@@ -1,16 +1,39 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/database');
 require('dotenv').config();
 
-// Initialize database connection
-connectDB();
+// Initialize database connection. Outside of tests, a failed connection is fatal
+// (connectDB rejects) so the process exits and the orchestrator can restart/retry
+// instead of silently running on an ephemeral database.
+connectDB().catch((err) => {
+  console.error('Fatal: could not establish a database connection.', err.message);
+  process.exit(1);
+});
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+// Needed so rate-limit and req.ip see the real client IP behind Render/Vercel
+app.set('trust proxy', 1);
+
+// Security headers (the browser CSP is set on the client host, not here)
+app.use(helmet({ contentSecurityPolicy: false }));
+
 // Set server timeout to 5 minutes for OCR processing
 app.timeout = 300000;
+
+// Basic rate limit across the whole API
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Please try again later.' }
+});
+app.use('/api', globalLimiter);
 
 // Configure CORS for frontend communication
 const corsOptions = {
@@ -37,6 +60,7 @@ app.use('/api/reports', require('./routes/reports'));
 app.use('/api/analysis', require('./routes/analysis'));
 app.use('/api/payments', require('./routes/payments'));
 app.use('/api/stats', require('./routes/stats'));
+app.use('/api/contact', require('./routes/contact'));
 
 
 // Health check endpoint

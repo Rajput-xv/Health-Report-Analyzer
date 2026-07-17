@@ -106,17 +106,14 @@ userSchema.pre("save", async function (next) {
     // Use a consistent salt rounds value of 10
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
-    console.log(`Password hashed for user ${this.email} (Google auth: ${this.googleAuth}, Password changed: ${this.passwordChanged})`);
     next();
   } catch (error) {
-    console.error(`Error hashing password for user ${this.email}:`, error);
+    console.error(`Error hashing password for user ${this._id}:`, error);
     next(error);
   }
 });
 
 userSchema.methods.comparePassword = function (candidatePassword) {
-  console.log(`Comparing password for user: ${this.email}, Google auth: ${this.googleAuth}, Password changed: ${this.passwordChanged}`);
-
   return bcrypt.compare(candidatePassword, this.password);
 };
 

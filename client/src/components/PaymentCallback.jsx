@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import LoadingSpinner from './LoadingSpinner';
@@ -15,15 +15,24 @@ export default function PaymentCallback() {
     const [status, setStatus] = useState('verifying'); // verifying, success, pending, error
     const [message, setMessage] = useState('Verifying your payment...');
     const [attempts, setAttempts] = useState(0);
+    const [retryCount, setRetryCount] = useState(0); // bump to restart polling
     const MAX_ATTEMPTS = 10;
     const POLL_INTERVAL = 2000; // 2 seconds
 
     const expectedPlan = searchParams.get('plan');
     const saleId = searchParams.get('sale_id'); // Gumroad may include this
 
+    // Keep the count in a ref so the polling loop reads the current value.
+    // (Reading the state variable here would always see 0 and poll forever.)
+    const attemptsRef = useRef(0);
+
     useEffect(() => {
         let timeoutId;
         let isMounted = true;
+
+        // Reset the counter whenever polling starts again
+        attemptsRef.current = 0;
+        setAttempts(0);
 
         const verifyPayment = async () => {
             try {
@@ -42,10 +51,11 @@ export default function PaymentCallback() {
                             navigate('/dashboard?payment=success', { replace: true });
                         }
                     }, 2000);
-                } else if (attempts < MAX_ATTEMPTS) {
+                } else if (attemptsRef.current < MAX_ATTEMPTS) {
                     // Not yet updated, might be webhook delay
-                    setAttempts(prev => prev + 1);
-                    setMessage(`Confirming your payment... (${attempts + 1}/${MAX_ATTEMPTS})`);
+                    attemptsRef.current += 1;
+                    setAttempts(attemptsRef.current);
+                    setMessage(`Confirming your payment... (${attemptsRef.current}/${MAX_ATTEMPTS})`);
 
                     // Poll again after interval
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
@@ -59,8 +69,9 @@ export default function PaymentCallback() {
 
                 if (!isMounted) return;
 
-                if (attempts < MAX_ATTEMPTS) {
-                    setAttempts(prev => prev + 1);
+                if (attemptsRef.current < MAX_ATTEMPTS) {
+                    attemptsRef.current += 1;
+                    setAttempts(attemptsRef.current);
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
                 } else {
                     setStatus('error');
@@ -76,7 +87,9 @@ export default function PaymentCallback() {
             isMounted = false;
             if (timeoutId) clearTimeout(timeoutId);
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        // Re-runs (restarts polling) when handleRetry bumps retryCount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [retryCount, expectedPlan]);
 
     const handleContinue = () => {
         navigate('/dashboard?payment=success', { replace: true });
@@ -84,8 +97,9 @@ export default function PaymentCallback() {
 
     const handleRetry = () => {
         setStatus('verifying');
-        setAttempts(0);
         setMessage('Verifying your payment...');
+        // Bumping this re-runs the effect and restarts polling
+        setRetryCount((c) => c + 1);
     };
 
     const handleContactSupport = () => {

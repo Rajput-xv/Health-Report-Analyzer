@@ -21,15 +21,50 @@ const upload = multer({
   }
 });
 
+// Check the real file type from its first bytes (the mimetype can be faked)
+function hasValidSignature(buffer, mimetype) {
+  if (!buffer || buffer.length < 5) return false;
+  const isPdf = buffer.slice(0, 5).toString('latin1') === '%PDF-';
+  const isJpg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+  const isPng = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  switch (mimetype) {
+    case 'application/pdf': return isPdf;
+    case 'image/png': return isPng;
+    case 'image/jpeg':
+    case 'image/jpg': return isJpg;
+    default: return false;
+  }
+}
+
+// Turn multer's upload errors (bad type / too large) into clean 400/413 responses
+const uploadSingle = (req, res, next) => {
+  upload.single('file')(req, res, (err) => {
+    if (!err) return next();
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'File too large. Maximum size is 10MB.' });
+      }
+      return res.status(400).json({ error: err.message });
+    }
+    // fileFilter rejection (e.g. unsupported type)
+    return res.status(400).json({ error: err.message || 'Invalid file upload' });
+  });
+};
+
 /**
  * POST /api/upload
  * Upload and process medical report
  * Uses Gemini (primary) → OCR (fallback) → Manual entry
  */
-router.post('/', authMiddleware, upload.single('file'), async (req, res) => {
+router.post('/', authMiddleware, uploadSingle, async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    // Make sure the bytes actually match an allowed type
+    if (!hasValidSignature(req.file.buffer, req.file.mimetype)) {
+      return res.status(400).json({ error: 'File content does not match an allowed type (PDF, JPG, or PNG).' });
     }
 
     // Check subscription limits

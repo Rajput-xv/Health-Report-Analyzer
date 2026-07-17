@@ -122,7 +122,7 @@ export const ReportsList = ({ onSelectReport }) => {
                                 {reportItem.filename}
                             </div>
                             <div className="report-meta">
-                                📅 {new Date(reportItem.createdAt).toLocaleDateString()} • 📊 {reportItem.healthParameters.length} parameters
+                                📅 {new Date(reportItem.createdAt).toLocaleDateString()} • 📊 {reportItem.healthParameters?.length || 0} parameters
                             </div>
                             <div>
                                 <span
@@ -218,7 +218,8 @@ export const ReportDetail = ({ reportId, onBack }) => {
         }
     };
 
-    const groupedParams = report.healthParameters.reduce((accumulator, param) => {
+    const healthParameters = report.healthParameters || [];
+    const groupedParams = healthParameters.reduce((accumulator, param) => {
         const category = param.category || 'Other';
         if (!accumulator[category]) accumulator[category] = [];
         accumulator[category].push(param);
@@ -226,7 +227,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
     }, {});
 
     const categories = Object.keys(groupedParams).sort();
-    const abnormalParams = report.healthParameters.filter(p => ['High', 'Low', 'Abnormal'].includes(p.status));
+    const abnormalParams = healthParameters.filter(p => ['High', 'Low', 'Abnormal'].includes(p.status));
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -268,7 +269,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '20px' }}>
                 <div style={{ backgroundColor: '#e0f2fe', padding: '15px', borderRadius: '4px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0369a1' }}>{report.healthParameters.length}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0369a1' }}>{healthParameters.length}</div>
                     <div style={{ fontSize: '12px', color: '#0c4a6e' }}>Total Parameters</div>
                 </div>
                 {report.aiInsights && (

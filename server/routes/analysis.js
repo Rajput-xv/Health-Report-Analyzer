@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const authMiddleware = require('../utils/authMiddleware');
 const Report = require('../models/Report');
 const { reanalyzeReport, generateTrendAnalysis } = require('../services/geminiService');
@@ -12,6 +13,9 @@ const router = express.Router();
  */
 router.post('/:reportId/regenerate', authMiddleware, async (req, res) => {
     try {
+        if (!mongoose.isValidObjectId(req.params.reportId)) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
         const report = await Report.findOne({
             _id: req.params.reportId,
             userId: req.user.id
@@ -71,6 +75,9 @@ router.post('/:reportId/regenerate', authMiddleware, async (req, res) => {
  */
 router.get('/:reportId/insights', authMiddleware, async (req, res) => {
     try {
+        if (!mongoose.isValidObjectId(req.params.reportId)) {
+            return res.status(404).json({ error: 'Report not found' });
+        }
         const report = await Report.findOne({
             _id: req.params.reportId,
             userId: req.user.id
@@ -253,6 +260,10 @@ router.get('/compare', authMiddleware, async (req, res) => {
             });
         }
 
+        if (!mongoose.isValidObjectId(report1) || !mongoose.isValidObjectId(report2)) {
+            return res.status(404).json({ error: 'One or both reports not found' });
+        }
+
         const reports = await Report.find({
             _id: { $in: [report1, report2] },
             userId: req.user.id
@@ -286,29 +297,42 @@ router.get('/compare', authMiddleware, async (req, res) => {
                 p.name.toLowerCase() === oldParam.name.toLowerCase()
             );
 
-            if (newParam) {
-                const change = newParam.value - oldParam.value;
-                const percentChange = ((change / oldParam.value) * 100).toFixed(1);
+            if (!newParam) return;
 
-                comparison.changes.push({
-                    parameter: oldParam.name,
-                    oldValue: oldParam.value,
-                    newValue: newParam.value,
-                    change: change,
-                    percentChange: parseFloat(percentChange),
-                    unit: oldParam.unit,
-                    trend: change > 0 ? 'increased' : change < 0 ? 'decreased' : 'stable',
-                    statusChange: {
-                        old: oldParam.status,
-                        new: newParam.status,
-                        improved: (oldParam.status !== 'Normal' && newParam.status === 'Normal')
-                    }
-                });
-            }
+            // Only compare numeric parameters with finite values. Categorical values
+            // (e.g. 'Positive') would otherwise produce NaN change / wrong 'stable' trend,
+            // and a zero old value would divide-by-zero into Infinity (serialized as null).
+            const oldValue = Number(oldParam.value);
+            const newValue = Number(newParam.value);
+            const isNumeric =
+                (oldParam.parameterType ? oldParam.parameterType === 'numeric' : true) &&
+                Number.isFinite(oldValue) && Number.isFinite(newValue);
+
+            if (!isNumeric) return;
+
+            const change = newValue - oldValue;
+            const percentChange = oldValue !== 0
+                ? parseFloat(((change / oldValue) * 100).toFixed(1))
+                : null;
+
+            comparison.changes.push({
+                parameter: oldParam.name,
+                oldValue: oldValue,
+                newValue: newValue,
+                change: parseFloat(change.toFixed(2)),
+                percentChange: percentChange,
+                unit: oldParam.unit,
+                trend: change > 0 ? 'increased' : change < 0 ? 'decreased' : 'stable',
+                statusChange: {
+                    old: oldParam.status,
+                    new: newParam.status,
+                    improved: (oldParam.status !== 'Normal' && newParam.status === 'Normal')
+                }
+            });
         });
 
-        // Sort by absolute change
-        comparison.changes.sort((a, b) => Math.abs(b.percentChange) - Math.abs(a.percentChange));
+        // Sort by absolute change (null percentChange sorts last)
+        comparison.changes.sort((a, b) => Math.abs(b.percentChange ?? 0) - Math.abs(a.percentChange ?? 0));
 
         res.json(comparison);
 

@@ -47,6 +47,8 @@ const EyeOffIcon = ({ size = 20, color = "#6b7280" }) => (
   </svg>
 );
 
+// Allowed special chars - used by both the checklist and the validator so they agree
+const SPECIAL_CHAR_REGEX = /[@$!%*?&]/;
 const validatePassword = (password) => {
   const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
   return strongRegex.test(password);
@@ -87,7 +89,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
       upper: /[A-Z]/.test(value),
       lower: /[a-z]/.test(value),
       number: /[0-9]/.test(value),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
+      special: SPECIAL_CHAR_REGEX.test(value),
     });
   };
 
@@ -119,14 +121,11 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
       setLoading(true);
       setError("");
       const result = await signInWithPopup(auth, provider);
-      const user = {
-        firstName: result.user.displayName.split(" ")[0],
-        lastName: result.user.displayName.split(" ")[1] || "",
-        email: result.user.email,
-      };
+      // Send the Firebase ID token; the server reads the name/email from it
+      const idToken = await result.user.getIdToken();
 
       // Use our backend API to authenticate with Google
-      const data = await googleAuth(user);
+      const data = await googleAuth(idToken);
 
       if (data.success) {
         // Save token and user locally

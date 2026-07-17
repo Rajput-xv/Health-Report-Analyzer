@@ -1,7 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const TrendChart = ({ data, reportId }) => {
-  const [selectedParameter, setSelectedParameter] = useState(Object.keys(data)[0]);
+  // Use a function here so Object.keys doesn't run on null data (it would throw)
+  const [selectedParameter, setSelectedParameter] = useState(() =>
+    data && typeof data === 'object' ? Object.keys(data)[0] : undefined
+  );
+
+  // When the data changes (e.g. a different report), pick a valid parameter again
+  useEffect(() => {
+    const keys = data && typeof data === 'object' ? Object.keys(data) : [];
+    setSelectedParameter((prev) => (keys.includes(prev) ? prev : keys[0]));
+  }, [data]);
 
   if (!data || Object.keys(data).length === 0) {
     return (
@@ -94,16 +103,18 @@ const TrendChart = ({ data, reportId }) => {
               <div className="chart-points" style={{ display: 'flex', gap: 12, overflowX: 'auto' }}>
                 {currentTrend.data.map((point, index) => {
                   const statusClass = getStatusClass(point.status);
+                  // Uppercase so 'High'/'Low' from the API match the checks below
+                  const normalizedStatus = (point.status || '').toString().toUpperCase();
                   let bgColor = '#d1e7dd'; // default normal: greenish
                   let textColor = '#0f5132';
 
-                  if (point.status === 'HIGH') {
+                  if (normalizedStatus === 'HIGH') {
                     bgColor = '#f8d7da'; // reddish background
                     textColor = '#842029';
-                  } else if (point.status === 'LOW') {
+                  } else if (normalizedStatus === 'LOW') {
                     bgColor = '#cff4fc'; // light blue background
                     textColor = '#055160';
-                  } else if (point.status === 'UNKNOWN') {
+                  } else if (normalizedStatus === 'UNKNOWN') {
                     bgColor = '#fff3cd'; // yellow background
                     textColor = '#664d03';
                   }
