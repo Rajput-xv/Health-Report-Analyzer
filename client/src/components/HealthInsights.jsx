@@ -170,7 +170,7 @@ export default function HealthInsights({ user, setUser }) {
                     <option value="">{t('insights.select_report')}</option>
                     {reports.map((r) => (
                       <option key={r._id} value={r._id}>
-                        {r.filename} — {new Date(r.createdAt).toLocaleDateString()}
+                        {r.filename} - {new Date(r.createdAt).toLocaleDateString()}
                       </option>
                     ))}
                   </select>
@@ -178,7 +178,7 @@ export default function HealthInsights({ user, setUser }) {
                     <option value="">{t('insights.select_report')}</option>
                     {reports.map((r) => (
                       <option key={r._id} value={r._id}>
-                        {r.filename} — {new Date(r.createdAt).toLocaleDateString()}
+                        {r.filename} - {new Date(r.createdAt).toLocaleDateString()}
                       </option>
                     ))}
                   </select>
@@ -212,7 +212,7 @@ export default function HealthInsights({ user, setUser }) {
                               <td>{c.oldValue} {c.unit}</td>
                               <td>{c.newValue} {c.unit}</td>
                               <td className={c.trend === 'increased' ? 'up' : c.trend === 'decreased' ? 'down' : ''}>
-                                {c.percentChange != null ? `${c.percentChange}%` : '—'}{' '}
+                                {c.percentChange != null ? `${c.percentChange}%` : '-'}{' '}
                                 {c.trend === 'increased' ? '↑' : c.trend === 'decreased' ? '↓' : '→'}
                               </td>
                             </tr>

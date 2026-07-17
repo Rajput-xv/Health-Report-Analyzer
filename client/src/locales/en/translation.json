@@ -362,7 +362,7 @@
   "file_upload": {
     "error_invalid_type": "Please upload a PDF or image file (JPEG, JPG, PNG)",
     "error_too_large": "File size must be less than 10MB",
-    "scanned_manual": "This looks like a scanned document. No health parameters detected — you may need to enter data manually.",
+    "scanned_manual": "This looks like a scanned document. No health parameters detected - you may need to enter data manually.",
     "scanned_verify": "This looks like a scanned document. Some health parameters detected, but verify for completeness.",
     "error_no_text": "No readable text found. Please upload a clearer report.",
     "error_no_parameters": "Could not detect health parameters. Please upload a standard health report.",
