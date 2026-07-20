@@ -30,7 +30,7 @@
 
   <!-- Blog -->
   <url>
-    <loc>https://health-report-analyzer-client.vercel.app/blog/</loc>
+    <loc>https://health-report-analyzer-client.vercel.app/blog</loc>
     <lastmod>2026-06-10</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
