@@ -66,7 +66,7 @@
         "@type": "ListItem",
         "position": 2,
         "name": "Blog",
-        "item": "https://health-report-analyzer-client.vercel.app/blog/"
+        "item": "https://health-report-analyzer-client.vercel.app/blog"
       },
       {
         "@type": "ListItem",
@@ -140,8 +140,7 @@
       --link: #5a4bd1;
       --code-bg: #f0f1f6;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
+    body.dark-mode {
         --bg: #0f1117;
         --fg: #e7e9ee;
         --muted: #a3acbd;
@@ -152,7 +151,6 @@
         --link: #9db0ff;
         --code-bg: #1b1f2a;
       }
-    }
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
@@ -314,22 +312,15 @@
       .site-nav a { margin-left: 12px; }
     }
   </style>
+  <link rel="stylesheet" href="/blog/assets/site-header.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap">
-      <a class="brand" href="https://health-report-analyzer-client.vercel.app/">Health Report Analyzer</a>
-      <nav class="site-nav" aria-label="Primary">
-        <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
-        <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a>
-      </nav>
-    </div>
-  </header>
+    <div id="site-header"></div>
 
   <div class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="https://health-report-analyzer-client.vercel.app/">Home</a> /
-      <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a> /
+      <a href="https://health-report-analyzer-client.vercel.app/blog">Blog</a> /
       <span>How AI Analyzes Your Health Reports</span>
     </nav>
 
@@ -462,5 +453,6 @@
       &copy; 2026 Health Report Analyzer. All rights reserved.
     </div>
   </footer>
+  <script src="/blog/assets/site-header.js" defer></script>
 </body>
 </html>

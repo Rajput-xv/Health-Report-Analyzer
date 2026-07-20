@@ -53,7 +53,7 @@ export default function LanguageSwitcher({ value, className = '', darkMode }) {
         className="language-select"
         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
-        {currentLanguage.flag} {currentLanguage.label} {open ? '▲' : '▼'}
+        {currentLanguage.code.toUpperCase()} {open ? '▲' : '▼'}
       </button>
 
       {open && (

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../utils/api';
-import LoadingSpinner from './LoadingSpinner';
 import '../styles/PaymentCallback.css';
 
 /**
@@ -22,7 +21,6 @@ export default function PaymentCallback() {
     const POLL_INTERVAL = 2000; // 2 seconds
 
     const expectedPlan = searchParams.get('plan');
-    const saleId = searchParams.get('sale_id'); // Gumroad may include this
 
     // Keep the count in a ref so the polling loop reads the current value.
     // (Reading the state variable here would always see 0 and poll forever.)
@@ -110,11 +108,11 @@ export default function PaymentCallback() {
 
     return (
         <div className="payment-callback">
-            <div className="payment-callback-card">
+            <div className="payment-callback-card" role="status" aria-live="polite">
                 {status === 'verifying' && (
                     <>
                         <div className="payment-callback-spinner">
-                            <LoadingSpinner />
+                            <div className="spinner" aria-hidden="true" />
                         </div>
                         <h2>{t('payment.processing_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
@@ -130,7 +128,7 @@ export default function PaymentCallback() {
                 {status === 'success' && (
                     <>
                         <div className="payment-callback-icon success">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                 <polyline points="22 4 12 14.01 9 11.01" />
                             </svg>
@@ -144,7 +142,7 @@ export default function PaymentCallback() {
                 {status === 'pending' && (
                     <>
                         <div className="payment-callback-icon pending">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10" />
                                 <polyline points="12 6 12 12 16 14" />
                             </svg>
@@ -168,7 +166,7 @@ export default function PaymentCallback() {
                 {status === 'error' && (
                     <>
                         <div className="payment-callback-icon error">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10" />
                                 <line x1="12" y1="8" x2="12" y2="12" />
                                 <line x1="12" y1="16" x2="12.01" y2="16" />

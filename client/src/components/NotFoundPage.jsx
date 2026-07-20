@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search, FileQuestion } from 'lucide-react';
+import { Home, ArrowLeft, FileQuestion } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../styles/NotFoundPage.css';
 
@@ -12,7 +12,7 @@ const NotFoundPage = () => {
         <div className="not-found-container">
             <div className="not-found-content">
                 {/* Animated 404 display */}
-                <div className="error-code">
+                <div className="error-code" aria-hidden="true">
                     <span className="digit">4</span>
                     <div className="icon-container">
                         <FileQuestion className="question-icon" />
@@ -26,11 +26,11 @@ const NotFoundPage = () => {
                 </p>
 
                 <div className="not-found-actions">
-                    <button className="btn-primary" onClick={() => navigate('/')}>
+                    <button className="nf-btn-primary" onClick={() => navigate('/')}>
                         <Home size={18} />
                         <span>{t('not_found.go_home')}</span>
                     </button>
-                    <button className="btn-secondary" onClick={() => navigate(-1)}>
+                    <button className="nf-btn-secondary" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
                         <ArrowLeft size={18} />
                         <span>{t('not_found.go_back')}</span>
                     </button>

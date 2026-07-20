@@ -78,11 +78,6 @@ export default function PricingPage({ user }) {
     const paymentStatus = searchParams.get('payment');
     if (paymentStatus === 'success') {
       setMessage({ type: 'success', text: t('pricing.messages.payment_success') });
-
-      // Refresh subscription data immediately
-      if (user) {
-        fetchSubscription();
-      }
     } else if (paymentStatus === 'cancelled') {
       setMessage({ type: 'info', text: t('pricing.messages.payment_cancelled') });
     }
@@ -311,7 +306,7 @@ export default function PricingPage({ user }) {
               {loading === plan.id ? (
                 <span className="loading-spinner"></span>
               ) : (
-                getButtonText(plan)
+                <span>{getButtonText(plan)}</span>
               )}
             </button>
           </div>

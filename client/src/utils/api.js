@@ -118,14 +118,12 @@ export const forgotPassword = async (email) => {
   }
 };
 
-// Reset password function
+// Reset password function.
+// Let HTTP/network errors propagate so the caller can tell an invalid/expired token
+// (non-2xx) from a real success — do NOT swallow the error into a resolved value.
 export const resetPassword = async (token, newPassword) => {
-  try {
-    const response = await api.post(`/auth/reset-password/${token}`, { password: newPassword });
-    return response.data;
-  } catch (error) {
-    return error.response?.data || { success: false, error: 'Failed to reset password' };
-  }
+  const response = await api.post(`/auth/reset-password/${token}`, { password: newPassword });
+  return response.data;
 };
 
 // Get subscription status

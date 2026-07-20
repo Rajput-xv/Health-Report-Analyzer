@@ -35,6 +35,18 @@
     "error": "An error occurred",
     "try_again": "Try Again"
   },
+  "loading": {
+    "title": "🔍 Processing Your Report...",
+    "subtitle": "Extracting health parameters from your document",
+    "step_1": "📄 Reading document...",
+    "step_2": "🔤 Extracting text...",
+    "step_3": "🧬 Analyzing parameters...",
+    "step_4": "📊 Generating insights..."
+  },
+  "backToTop": {
+    "aria": "Scroll back to top",
+    "label": "Back to Top"
+  },
   "homepage": {
     "hero_title": "Analyze Your Health Reports",
     "hero_subtitle": "Upload your medical reports and get instant, comprehensive analysis with personalized insights. Our advanced technology helps you understand your health data like never before.",
@@ -152,7 +164,7 @@
     "a5": "No. The tool provides AI-powered summaries only; for any medical advice, consult a professional."
   },
   "footer": {
-    "copyright": "© 2024 Health Report Analyzer. Empowering better health decisions through technology.",
+    "copyright": "© {{year}} Health Report Analyzer. Empowering better health decisions through technology.",
     "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals.",
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
@@ -225,6 +237,8 @@
     "last_name_placeholder": "Enter your last name",
     "email_placeholder": "Enter your email",
     "password_placeholder": "Enter your password",
+    "show_password": "Show password",
+    "hide_password": "Hide password",
     "signin_description": "Sign in to access your health reports",
     "signup_description": "Join us to start analyzing your health reports",
     "signing_in": "Signing In...",
@@ -362,7 +376,7 @@
   "file_upload": {
     "error_invalid_type": "Please upload a PDF or image file (JPEG, JPG, PNG)",
     "error_too_large": "File size must be less than 10MB",
-    "scanned_manual": "This looks like a scanned document. No health parameters detected — you may need to enter data manually.",
+    "scanned_manual": "This looks like a scanned document. No health parameters detected - you may need to enter data manually.",
     "scanned_verify": "This looks like a scanned document. Some health parameters detected, but verify for completeness.",
     "error_no_text": "No readable text found. Please upload a clearer report.",
     "error_no_parameters": "Could not detect health parameters. Please upload a standard health report.",
@@ -450,6 +464,8 @@
     "trend_title": "Parameter trend over time",
     "need_more_points": "Need at least 2 reports with this parameter to show a trend.",
     "compare_title": "Compare two reports",
+    "compare_from": "Compare from",
+    "compare_to": "Compare to",
     "select_report": "Select a report…",
     "compare": "Compare",
     "comparing": "Comparing…",

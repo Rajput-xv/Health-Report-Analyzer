@@ -127,8 +127,6 @@ const TrendChart = ({ data, reportId }) => {
                         className={`chart-point ${statusClass}`}
                         title={`${point.value} ${currentTrend.unit} - ${point.status}`}
                         style={{
-                          backgroundColor: bgColor,
-                          color: textColor,
                           borderRadius: '50%',
                           width: 36,
                           height: 36,
@@ -188,13 +186,11 @@ const TrendChart = ({ data, reportId }) => {
                       key={index}
                       className={`insight-card insight-${insight.type}`}
                       style={{
-                        backgroundColor: bgColor,
                         padding: '10px 14px',
                         borderRadius: 6,
                         display: 'flex',
                         alignItems: 'center',
                         gap: 8,
-                        color: '#333',
                         boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                       }}
                     >
@@ -209,13 +205,11 @@ const TrendChart = ({ data, reportId }) => {
                 <div
                   className="insight-card insight-info"
                   style={{
-                    backgroundColor: '#e7f3fe',
                     padding: '10px 14px',
                     borderRadius: 6,
                     display: 'flex',
                     alignItems: 'center',
                     gap: 8,
-                    color: '#333',
                     boxShadow: '0 1px 4px rgba(0,0,0,0.1)'
                   }}
                 >

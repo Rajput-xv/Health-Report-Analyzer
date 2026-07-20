@@ -49,6 +49,7 @@
 
 .report-info {
     flex: 1;
+    min-width: 0;
 }
 
 .report-filename {
@@ -56,6 +57,7 @@
     font-size: 15px;
     color: #1f2937;
     margin-bottom: 6px;
+    overflow-wrap: anywhere;
 }
 
 .report-meta {
@@ -124,7 +126,7 @@
 
 /* Themed text classes (replace the old inline colors so they can follow dark mode) */
 .report-detail-title { color: #1f2937; }
-.report-detail-subtitle { color: #374151; }
+.report-detail-subtitle { color: #374151; overflow-wrap: anywhere; }
 .report-section-title { color: #1f2937; }
 .report-category-title { color: #374151; border-bottom: 1px solid #e5e7eb; }
 .reports-empty-title { color: #1f2937; }

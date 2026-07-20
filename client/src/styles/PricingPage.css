@@ -68,6 +68,12 @@
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .message-close:hover {
@@ -576,6 +582,10 @@ body.dark-mode .faq-item {
 
 body.dark-mode .usage-stats {
   background: #1f2937;
+}
+
+body.dark-mode .usage-stats h3 {
+  color: #f1f5f9;
 }
 
 body.dark-mode .subscription-info {

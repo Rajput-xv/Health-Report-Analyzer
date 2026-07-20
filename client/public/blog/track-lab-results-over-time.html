@@ -65,7 +65,7 @@
         "@type": "ListItem",
         "position": 2,
         "name": "Blog",
-        "item": "https://health-report-analyzer-client.vercel.app/blog/"
+        "item": "https://health-report-analyzer-client.vercel.app/blog"
       },
       {
         "@type": "ListItem",
@@ -138,8 +138,7 @@
       --accent2:#764ba2;
       --link:#5a54d6;
     }
-    @media (prefers-color-scheme: dark){
-      :root{
+    body.dark-mode {
         --bg:#0f1218;
         --fg:#e6e9f0;
         --muted:#9aa4b2;
@@ -149,7 +148,6 @@
         --accent2:#a982e0;
         --link:#a5b0ff;
       }
-    }
     *{box-sizing:border-box}
     html{-webkit-text-size-adjust:100%}
     body{
@@ -242,22 +240,15 @@
       font-size:.88rem;padding:22px 0;margin-top:24px;text-align:center;
     }
   </style>
+  <link rel="stylesheet" href="/blog/assets/site-header.css">
 </head>
 <body>
-  <header class="site">
-    <div class="site-inner">
-      <a class="brand" href="https://health-report-analyzer-client.vercel.app/">Health Report Analyzer</a>
-      <nav class="top">
-        <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
-        <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a>
-      </nav>
-    </div>
-  </header>
+    <div id="site-header"></div>
 
   <div class="wrap">
     <nav class="crumbs" aria-label="Breadcrumb">
       <a href="https://health-report-analyzer-client.vercel.app/">Home</a><span>/</span>
-      <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a><span>/</span>
+      <a href="https://health-report-analyzer-client.vercel.app/blog">Blog</a><span>/</span>
       Tracking lab results over time
     </nav>
 
@@ -368,5 +359,6 @@
       &copy; 2026 Health Report Analyzer. All rights reserved.
     </div>
   </footer>
+  <script src="/blog/assets/site-header.js" defer></script>
 </body>
 </html>

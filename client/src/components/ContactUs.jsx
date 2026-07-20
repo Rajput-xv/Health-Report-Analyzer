@@ -1,183 +1,204 @@
-
-import React, { useState, useEffect } from "react";
-import { useTranslation } from 'react-i18next';
+import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "../styles/ContactUs.css";
-import AOS from 'aos';
 import { sendContactMessage } from "../utils/api";
 
-
 const ContactUs = ({ user }) => {
-  const { t } = useTranslation();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
-  const [formData, setFormData] = useState({
-
-    name: user ? `${user.firstName} ${user.lastName}` : "",
-    email: user ? user.email : "",
-    subject: "",
-    message: "",
-  });
-  const [darkMode, setDarkMode] = useState(
-    localStorage.getItem("darkMode") === "true"
-  );
-
-  useEffect(() => {
-    if (darkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-    
-    // Refresh AOS animations
-    AOS.refresh();
-  }, [darkMode]);
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      // Submit through our backend proxy so the Web3Forms key stays server-side.
-      const data = await sendContactMessage({
-        name: formData.name,
-        email: formData.email,
-        subject: formData.subject,
-        message: formData.message,
-      });
-
-      if (data.success) {
-        setShowSuccess(true);
-
+    const { t } = useTranslation();
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+    const [formData, setFormData] = useState({
+        name: user ? `${user.firstName} ${user.lastName}` : "",
+        email: user ? user.email : "",
+        subject: "",
+        message: "",
+    });
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
         setFormData((prev) => ({
-          ...prev,
-          subject: "",
-          message: "",
+            ...prev,
+            [name]: value,
         }));
-      } else {
-        throw new Error(data.error || "Failed to send message");
-      }
-    } catch (error) {
-      console.error("Error sending message:", error);
-      alert(t('contact.error'));
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+    };
 
-  const handleReset = () => {
-    setShowSuccess(false);
-    setFormData((prev) => ({
-      ...prev,
-      subject: "",
-      message: "",
-    }));
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
 
-  return (
-    <div className={`contact-page ${darkMode ? "dark" : ""}`}>
-      <div className={`contact-container ${darkMode ? "dark" : ""}`} data-aos="fade-up" data-aos-duration="800">
-        <div className="contact-form-wrapper" data-aos="fade-up" data-aos-delay="200">
-          {showSuccess ? (
-            <div className="success-container" data-aos="zoom-in">
-              <div className="success-icon" data-aos="flip-left" data-aos-delay="300">✅</div>
-              <h2 data-aos="fade-up" data-aos-delay="400">{t('contact.success')}</h2>
-              <p data-aos="fade-up" data-aos-delay="500">
-                {t('contact.success_body')}
-              </p>
-              <div className="success-actions">
-                <button onClick={handleReset} className="btn-send-another">
-                  {t('contact.send_another')}
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="contact-header">
-                <h2 data-aos="fade-down" data-aos-delay="200">{t('contact.title')}</h2>
-                <p>
-                  {t('contact.feedback_question')}
-                </p>
-              </div>
+        try {
+            // Submit through our backend proxy so the Web3Forms key stays server-side.
+            const data = await sendContactMessage({
+                name: formData.name,
+                email: formData.email,
+                subject: formData.subject,
+                message: formData.message,
+            });
 
-              <div className="form-notice">
-                <p>
-                  <strong>✅</strong> {t('contact.form_notice')}
-                </p>
-              </div>
+            if (data.success) {
+                setShowSuccess(true);
 
-                      <form onSubmit={handleSubmit} className="contact-form" data-aos="fade-up" data-aos-delay="300">
-                <div className="form-group">
-                  <label htmlFor="name">{t('contact.name')}</label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    required
-                    readOnly={!!user}
-                  />
-                </div>
+                setFormData((prev) => ({
+                    ...prev,
+                    subject: "",
+                    message: "",
+                }));
+            } else {
+                throw new Error(data.error || "Failed to send message");
+            }
+        } catch (error) {
+            console.error("Error sending message:", error);
+            alert(t("contact.error"));
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
-                <div className="form-group">
-                  <label htmlFor="email">{t('contact.email')}</label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    readOnly={!!user}
-                  />
-                </div>
+    const handleReset = () => {
+        setShowSuccess(false);
+        setFormData((prev) => ({
+            ...prev,
+            subject: "",
+            message: "",
+        }));
+    };
 
-                <div className="form-group">
-                  <label htmlFor="subject">{t('contact.subject')}</label>
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label htmlFor="message">{t('contact.message')}</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows="5"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    required
-                  ></textarea>
-                </div>
-
-                <button
-                  type="submit"
-                  className="submit-btn"
-                  disabled={isSubmitting}
+    return (
+        <div className="contact-page">
+            <div
+                className="contact-container"
+                data-aos="fade-up"
+                data-aos-duration="800"
+            >
+                <div
+                    className="contact-form-wrapper"
+                    data-aos="fade-up"
+                    data-aos-delay="200"
                 >
-                  {isSubmitting ? t('contact.sending') : t('contact.send')}
-                </button>
-              </form>
-            </>
-          )}
+                    {showSuccess ? (
+                        <div
+                            className="success-container"
+                            data-aos="zoom-in"
+                            role="status"
+                            aria-live="polite"
+                        >
+                            <div
+                                className="success-icon"
+                                data-aos="flip-left"
+                                data-aos-delay="300"
+                            >
+                                ✅
+                            </div>
+                            <h2 data-aos="fade-up" data-aos-delay="400">
+                                {t("contact.success")}
+                            </h2>
+                            <p data-aos="fade-up" data-aos-delay="500">
+                                {t("contact.success_body")}
+                            </p>
+                            <div className="success-actions">
+                                <button
+                                    onClick={handleReset}
+                                    className="btn-send-another"
+                                >
+                                    {t("contact.send_another")}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="contact-header">
+                                <h2 data-aos="fade-down" data-aos-delay="200">
+                                    {t("contact.title")}
+                                </h2>
+                                <p>{t("contact.feedback_question")}</p>
+                            </div>
+
+                            {/* <div className="form-notice">
+                                <p>
+                                    <strong>✅</strong>{" "}
+                                    {t("contact.form_notice")}
+                                </p>
+                            </div> */}
+
+                            <form
+                                onSubmit={handleSubmit}
+                                className="contact-form"
+                                data-aos="fade-up"
+                                data-aos-delay="300"
+                            >
+                                <div className="form-group">
+                                    <label htmlFor="name">
+                                        {t("contact.name")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="name"
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        required
+                                        readOnly={!!user}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="email">
+                                        {t("contact.email")}
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        required
+                                        readOnly={!!user}
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="subject">
+                                        {t("contact.subject")}
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="subject"
+                                        name="subject"
+                                        value={formData.subject}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+
+                                <div className="form-group">
+                                    <label htmlFor="message">
+                                        {t("contact.message")}
+                                    </label>
+                                    <textarea
+                                        id="message"
+                                        name="message"
+                                        rows="5"
+                                        value={formData.message}
+                                        onChange={handleInputChange}
+                                        required
+                                    ></textarea>
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="submit-btn"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting
+                                        ? t("contact.sending")
+                                        : t("contact.send")}
+                                </button>
+                            </form>
+                        </>
+                    )}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ContactUs;

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../utils/api";
 import api from "../utils/api";
 import { useLoading } from "../context/LoadingContext";
+import { toast } from 'react-toastify';
 import AOS from 'aos';
 
 const FileUpload = ({ onFileProcessed, onError }) => {
@@ -123,13 +124,11 @@ const FileUpload = ({ onFileProcessed, onError }) => {
 
       // hideLoading();
       if (result.isScannedDocument) {
+        // The report WAS created — don't route through onError (that wipes the
+        // report view and fires a false error toast). Just nudge the user to verify.
         onFileProcessed(result);
         await fetchSubscription();
-        if (result.requiresManualEntry) {
-          onError(t('file_upload.scanned_manual'));
-        } else {
-          onError(t('file_upload.scanned_verify'));
-        }
+        toast.info(t(result.requiresManualEntry ? 'file_upload.scanned_manual' : 'file_upload.scanned_verify'));
       } else {
         onFileProcessed(result);
         await fetchSubscription();
@@ -169,12 +168,17 @@ const FileUpload = ({ onFileProcessed, onError }) => {
     }
   };
 
+  // Free plan at its report limit: block the picker (mouse + keyboard) and mark disabled.
+  const isAtLimit = subscription?.plan === 'free' && subscription?.reportsUsed >= subscription?.reportsLimit;
+
   const openFileDialog = () => {
+    if (isAtLimit) return;
     fileInputRef.current?.click();
   };
 
   // Handle keyboard activation (Enter or Space)
   const handleKeyPress = (e) => {
+    if (isAtLimit) return;
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       openFileDialog();
@@ -233,14 +237,15 @@ const FileUpload = ({ onFileProcessed, onError }) => {
       )}
 
       <div
-        className={`file-upload-area ${isDragOver ? "drag-over" : ""} ${subscription?.reportsUsed >= subscription?.reportsLimit && subscription?.plan === 'free' ? 'disabled' : ''}`}
+        className={`file-upload-area ${isDragOver ? "drag-over" : ""} ${isAtLimit ? 'disabled' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={openFileDialog}
         onKeyDown={handleKeyPress}
-        tabIndex={0}
+        tabIndex={isAtLimit ? -1 : 0}
         role="button"
+        aria-disabled={isAtLimit}
         aria-label={t('file_upload.aria_label')}
       >
         <div className="upload-icon">📄</div>

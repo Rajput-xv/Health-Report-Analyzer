@@ -63,6 +63,12 @@
   background: #fff;
   color: #1f2937;
   font-size: 0.9rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.insights-compare-controls select {
+  flex: 1 1 160px;
 }
 
 .insights-stats {

@@ -24,7 +24,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
 }
 
-.auth-header {
+.auth-header.desktop-only-auth-header {
   width: 100%;
   height: 4rem;
   position: sticky;
@@ -116,150 +116,20 @@
   transform: translateY(-2px) scale(1.03);
 }
 
-/* ================= MOBILE NAVIGATION FOR AUTH ================= */
-.mobile-menu-button {
-  display: none;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  padding: 8px;
-  color: white;
-  cursor: pointer;
-  backdrop-filter: blur(8px);
-  transition: all 0.3s ease;
-}
-
-.mobile-menu-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-}
-
-.mobile-menu-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-  animation: fadeIn 0.3s ease;
-}
-
+/* Old auth mobile-menu styles removed - the shared Header component (Header.css)
+   owns the navbar and mobile drawer. Keyframes kept in case other rules use them. */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-.mobile-menu {
-  position: fixed;
-  top: 0;
-  right: 0;
-  height: 100vh;
-  width: 300px;
-  max-width: 85vw;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.95) 0%, rgba(118, 75, 162, 0.95) 100%);
-  backdrop-filter: blur(20px);
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
-  box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  animation: slideIn 0.3s ease;
-  overflow-y: auto;
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slideIn {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.mobile-menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.5rem 1.5rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.mobile-menu-title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: white;
-}
-
-.mobile-menu-close {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  padding: 6px;
-  color: white;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.mobile-menu-close:hover {
-  background: rgba(255, 255, 255, 0.2);
-}
-
-.mobile-menu-content {
-  flex: 1;
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.mobile-menu-item {
-  padding: 0.5rem 0;
-}
-
-.mobile-menu-btn {
-  /* width: 100%; */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  /* padding: 1rem 1.5rem; */
-  color: white;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.mobile-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateX(5px);
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
 /* ================= RESPONSIVE BREAKPOINTS FOR AUTH ================= */
 @media (max-width: 768px) {
-  .desktop-nav {
-    display: none !important;
-  }
-
-  .mobile-menu-button {
-    display: block !important;
-  }
-
   .auth-header-content {
     padding: 0 1rem;
     flex-wrap: wrap;
@@ -317,7 +187,7 @@
 }
 
 /* ================= DARK MODE AUTH HEADER ================= */
-.dark-mode .auth-header {
+.dark-mode .auth-header.desktop-only-auth-header {
   background: rgba(17, 24, 39, 0.55);
   border-bottom-color: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(12px);
@@ -376,15 +246,7 @@
   background: rgba(148, 163, 184, 0.2);
 }
 
-.dark-mode .mobile-menu-btn {
-  background: rgba(148, 163, 184, 0.1);
-  border-color: rgba(148, 163, 184, 0.2);
-  color: #e2e8f0;
-}
-
-.dark-mode .mobile-menu-btn:hover {
-  background: rgba(148, 163, 184, 0.2);
-}
+/* (dark-mode mobile-menu-btn removed - handled by Header.css) */
 
 /* ================= ORIGINAL AUTH FORM STYLES ================= */
 .auth-container {
@@ -433,6 +295,24 @@
   font-size: 0.9rem;
   border: 1px solid #fecaca;
   text-align: center;
+}
+
+/* Success confirmation (forgot/reset password) — was referenced but never defined */
+.auth-message {
+  background: #dcfce7;
+  color: #166534;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+  border: 1px solid #bbf7d0;
+  text-align: center;
+}
+
+.dark-mode .auth-message {
+  background: rgba(34, 197, 94, 0.1);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.3);
 }
 
 .auth-form {
@@ -486,13 +366,18 @@
 
 .password-toggle-icon {
   position: absolute;
-  right: 1rem;
+  right: 0.5rem;
   cursor: pointer;
   color: #6b7280;
   transition: color 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  min-width: 44px;
+  min-height: 44px;
 }
 
 .password-toggle-icon:hover {
@@ -626,12 +511,12 @@
 }
 
 .demo-notice {
-  background: #f0f9ff;
-  color: #0369a1;
+  background: #eff6ff;
+  color: #1e40af;
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.85rem;
-  border: 1px solid #e0f2fe;
+  border: 1px solid #bfdbfe;
   margin: 0;
 }
 
@@ -769,8 +654,10 @@
   color: #4ade80;
 }
 
-.dark-mode .demo-notice {
-  background: rgba(56, 189, 248, 0.1);
-  color: #7dd3fc;
+body.dark-mode .demo-notice {
+  /* Solid dark surface so it doesn't composite to a washed light-blue over the
+     semi-transparent dark card. */
+  background: #0f2740;
+  color: #bae6fd;
   border-color: rgba(56, 189, 248, 0.3);
 }

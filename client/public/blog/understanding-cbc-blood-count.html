@@ -65,7 +65,7 @@
         "@type": "ListItem",
         "position": 2,
         "name": "Blog",
-        "item": "https://health-report-analyzer-client.vercel.app/blog/"
+        "item": "https://health-report-analyzer-client.vercel.app/blog"
       },
       {
         "@type": "ListItem",
@@ -139,8 +139,7 @@
       --link: #5a4bd6;
       --code-bg: #f0f1f6;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
+    body.dark-mode {
         --bg: #0f1218;
         --text: #e7e9ee;
         --muted: #a2abbb;
@@ -151,7 +150,6 @@
         --link: #9fb0ff;
         --code-bg: #1b2029;
       }
-    }
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
@@ -323,22 +321,15 @@
       h2 { font-size: 1.25rem; }
     }
   </style>
+  <link rel="stylesheet" href="/blog/assets/site-header.css">
 </head>
 <body>
-  <header class="site-header">
-    <div class="wrap">
-      <a class="brand" href="https://health-report-analyzer-client.vercel.app/">Health Report Analyzer</a>
-      <nav class="site-nav" aria-label="Primary">
-        <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
-        <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a>
-      </nav>
-    </div>
-  </header>
+    <div id="site-header"></div>
 
   <div class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="https://health-report-analyzer-client.vercel.app/">Home</a> /
-      <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a> /
+      <a href="https://health-report-analyzer-client.vercel.app/blog">Blog</a> /
       <span aria-current="page">Understanding Your CBC Results</span>
     </nav>
 
@@ -582,5 +573,6 @@
       &copy; 2026 Health Report Analyzer. All rights reserved.
     </div>
   </footer>
+  <script src="/blog/assets/site-header.js" defer></script>
 </body>
 </html>

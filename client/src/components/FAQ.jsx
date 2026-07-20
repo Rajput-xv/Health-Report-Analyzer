@@ -53,16 +53,19 @@ const FAQ = () => {
           data-aos="fade-up"
           data-aos-delay={300 + (idx * 100)}
         >
-          <div
+          <button
+            type="button"
             className="faq-question"
             onClick={() => toggle(idx)}
+            aria-expanded={openIndex === idx}
+            aria-controls={`faq-answer-${idx}`}
           >
             <h4>{item.question}</h4>
             <FaChevronDown
               className={`arrow ${openIndex === idx ? "rotate" : ""}`}
             />
-          </div>
-          <div className={`faq-answer ${openIndex === idx ? "show" : ""}`}>
+          </button>
+          <div id={`faq-answer-${idx}`} className={`faq-answer ${openIndex === idx ? "show" : ""}`}>
             <p>{item.answer}</p>
           </div>
         </div>

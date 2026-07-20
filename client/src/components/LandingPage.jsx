@@ -26,13 +26,16 @@ export default function LandingPage({ user, setUser }) {
         <div className="landing-hero-content">
           <h1 className="landing-hero-title" data-aos="slide-up-fade" data-aos-delay="100">
             {t('homepage.hero_title')}
-            <span className="landing-hero-subtitle animated-float" data-aos="slide-up-fade" data-aos-delay="300">{t('app.subtitle')}</span>
+            {/* No own data-aos here: the parent <h1> already animates the whole title.
+                A second slide-up-fade fought the infinite `animated-float` transform
+                and got stuck (opacity:0) after client-side navigation. */}
+            <span className="landing-hero-subtitle animated-float">{t('app.subtitle')}</span>
           </h1>
           <p className="landing-hero-description" data-aos="fade-up" data-aos-delay="500">
             {t('homepage.hero_subtitle')}
           </p>
           <div className="landing-hero-button-container" data-aos="zoom-in" data-aos-delay="700">
-            <button className="landing-primary-button" id='highlights' onClick={handleGetStartedClick}>
+            <button className="landing-primary-button cta-gold" onClick={handleGetStartedClick}>
               <span>{user ? t('nav.return_to_dashboard') : t('homepage.get_started')}</span>
             </button>
           </div>
@@ -154,7 +157,7 @@ export default function LandingPage({ user, setUser }) {
             {t('homepage.cta_desc')}
           </p>
           <div className="landing-cta-button-container" data-aos="zoom-in" >
-            <button className="landing-primary-button" id='highlights' onClick={handleGetStartedClick}>
+            <button className="landing-primary-button cta-gold" onClick={handleGetStartedClick}>
               <span>{user ? t('homepage.continue_dashboard') : t('homepage.start_free')}</span>
             </button>
           </div>

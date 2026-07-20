@@ -68,7 +68,7 @@
     margin-bottom: 1rem;
 }
 
-.payment-callback-spinner .loading-spinner {
+.payment-callback-spinner .spinner {
     width: 60px;
     height: 60px;
 }
@@ -226,7 +226,7 @@
     }
 }
 
-/* Light Mode Support — follow the app's dark-mode toggle, not the OS setting.
+/* Light Mode Support - follow the app's dark-mode toggle, not the OS setting.
    The base styles above are dark; these apply whenever the app is NOT in dark mode. */
 body:not(.dark-mode) .payment-callback {
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);

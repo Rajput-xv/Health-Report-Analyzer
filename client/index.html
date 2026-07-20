@@ -104,6 +104,13 @@
       bottom: calc(25vh + 70px) !important;
       margin-right: 15px !important;
     }
+
+    /* Hide the chat bubble while the mobile menu drawer is open so it can't
+       float over it (the drawer can't out-z-index Chatbase's injected widget). */
+    body.menu-open #chatbase-bubble-button,
+    body.menu-open #chatbase-bubble-window {
+      display: none !important;
+    }
   </style>
 </head>
 

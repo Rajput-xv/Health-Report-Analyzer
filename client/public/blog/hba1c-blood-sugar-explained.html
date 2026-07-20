@@ -65,7 +65,7 @@
         "@type": "ListItem",
         "position": 2,
         "name": "Blog",
-        "item": "https://health-report-analyzer-client.vercel.app/blog/"
+        "item": "https://health-report-analyzer-client.vercel.app/blog"
       },
       {
         "@type": "ListItem",
@@ -139,8 +139,7 @@
       --link: #5a4bd0;
       --maxw: 760px;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
+    body.dark-mode {
         --bg: #0f1115;
         --fg: #e7e9ee;
         --muted: #a3abbb;
@@ -148,7 +147,6 @@
         --card: #171a21;
         --link: #a6b0ff;
       }
-    }
     * { box-sizing: border-box; }
     html { -webkit-text-size-adjust: 100%; }
     body {
@@ -310,23 +308,16 @@
       h2 { font-size: 1.25rem; }
     }
   </style>
+  <link rel="stylesheet" href="/blog/assets/site-header.css">
 </head>
 <body>
-  <header class="site">
-    <div class="site-inner">
-      <a class="brand" href="https://health-report-analyzer-client.vercel.app/">Health Report Analyzer</a>
-      <nav class="top" aria-label="Primary">
-        <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
-        <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a>
-      </nav>
-    </div>
-  </header>
+    <div id="site-header"></div>
 
   <div class="wrap">
     <nav class="breadcrumb" aria-label="Breadcrumb">
       <a href="https://health-report-analyzer-client.vercel.app/">Home</a>
       &nbsp;/&nbsp;
-      <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a>
+      <a href="https://health-report-analyzer-client.vercel.app/blog">Blog</a>
       &nbsp;/&nbsp;
       <span>HbA1c Explained</span>
     </nav>
@@ -459,8 +450,9 @@
   <footer class="site">
     <div class="wrap">
       <span>&copy; 2026 Health Report Analyzer</span>
-      <span><a href="https://health-report-analyzer-client.vercel.app/">Home</a> &middot; <a href="https://health-report-analyzer-client.vercel.app/blog/">Blog</a></span>
+      <span><a href="https://health-report-analyzer-client.vercel.app/">Home</a> &middot; <a href="https://health-report-analyzer-client.vercel.app/blog">Blog</a></span>
     </div>
   </footer>
+  <script src="/blog/assets/site-header.js" defer></script>
 </body>
 </html>
