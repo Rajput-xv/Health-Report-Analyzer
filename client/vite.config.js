@@ -41,6 +41,11 @@ export default defineConfig({
         VitePWA({
             registerType: "autoUpdate", // Automatically updates the service worker
 
+            workbox: {
+                navigateFallbackDenylist: [/^\/blog/],
+                globIgnores: ["**/blog/**"],
+            },
+
             // Add the manifest configuration
             manifest: {
                 name: "Health Report Analyzer",

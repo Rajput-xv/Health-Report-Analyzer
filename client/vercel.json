@@ -63,6 +63,10 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
       "source": "/((?!api|_next|static|blog|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
       "destination": "/index.html"
     }
