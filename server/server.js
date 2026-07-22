@@ -11,7 +11,7 @@ require('dotenv').config();
 connectDB().catch((err) => {
   console.error('Fatal: could not establish a database connection.', err.message);
   process.exit(1);
-}); 
+});
 
 const app = express();
 const PORT = process.env.PORT || 5001;
