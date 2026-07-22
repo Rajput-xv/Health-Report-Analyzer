@@ -1,206 +1,98 @@
 # 🩺 Health Report Analyzer
 
-You can take a look at this project at - [Website](https://health-report-analyzer-client.vercel.app/)
+Upload a lab report (PDF or image) and get your results pulled into clean, sortable tables - with trends tracked over time, so you're not copying numbers by hand.
 
-> **Upload your lab reports (PDF/image) and get your health data automatically extracted into organized tables with trend analysis. No more manual data entry!**
+🔗 **Try it:** https://health-report-analyzer-client.vercel.app
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+![Stars](https://img.shields.io/github/stars/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
+![Forks](https://img.shields.io/github/forks/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
+![Issues](https://img.shields.io/github/issues/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
+![Open PRs](https://img.shields.io/github/issues-pr/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
+![License](https://img.shields.io/github/license/Rajput-xv/Health-Report-Analyzer?style=flat)
 
-**📊 Project Insights**
-<table align="center">
-    <thead align="center">
-        <tr>
-            <td><b>🌟 Stars</b></td>
-            <td><b>🍴 Forks</b></td>
-            <td><b>🐛 Issues</b></td>
-            <td><b>🔔 Open PRs</b></td>
-            <td><b>🔕 Closed PRs</b></td>
-            <td><b>🛠️ Languages</b></td>
-        </tr>
-     </thead>
-    <tbody>
-         <tr>
-            <td><img alt="Stars" src="https://img.shields.io/github/stars/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github"/></td>
-            <td><img alt="Forks" src="https://img.shields.io/github/forks/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github"/></td>
-            <td><img alt="Issues" src="https://img.shields.io/github/issues/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github"/></td>
-            <td><img alt="Open PRs" src="https://img.shields.io/github/issues-pr/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github"/></td>
-            <td><img alt="Closed PRs" src="https://img.shields.io/github/issues-pr-closed/Rajput-xv/Health-Report-Analyzer?style=flat&color=critical&logo=github"/></td>
-            <td><img alt="Languages Count" src="https://img.shields.io/github/languages/count/Rajput-xv/Health-Report-Analyzer?style=flat&color=green&logo=github"></td>
-        </tr>
-    </tbody>
-</table>
+---
 
-</div>
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+## What it does
 
-## What It Does
-- Upload lab reports and get instant data extraction
-- View results in clean, sortable tables
-- Track trends over time
-- Secure login and data storage
+- **Reads your reports** - OCR pulls values straight out of a PDF or photo
+- **Organizes them** - everything lands in clean, sortable tables
+- **Shows trends** - see how each marker moves over time with charts
+- **Explains them** - plain-language summaries powered by Google Gemini
+- **Keeps them private** - personal accounts with email or Google sign-in
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+Works with cholesterol/lipid panels, blood sugar (HbA1c), complete blood count (CBC), vitamins, thyroid, and more.
 
-## Supported Tests
-Cholesterol, Blood Sugar, Blood Count, Vitamins, Thyroid, and more.
+## Tech stack
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
+- **Frontend** - React + Vite, React Router, Tailwind, Chart.js, i18next, PWA
+- **Backend** - Node/Express, MongoDB (Mongoose), JWT + Firebase auth
+- **Processing** - Tesseract.js OCR, pdf-parse, Sharp, Google Gemini
 
-## Tech Stack
-React + Node.js + MongoDB + OCR
+## Quick start
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
-
-## Quick Start
-**Prerequisites:** Node.js + MongoDB
+You'll need **Node.js** and a **MongoDB** connection string.
 
 ```bash
-# Install everything
-npm run install-all
-
-# Start the app
-npm run dev
+npm run install-all   # install root + client + server
+npm run dev           # client on :3000, server on :5001
 ```
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
 
-Open http://localhost:3000 and start uploading your reports!
+Open http://localhost:3000 and upload a report.
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
+## Environment variables
 
-## Environment Setup
-When you fork this repository, you'll need to set up the following environment variables:
+**`client/.env`**
 
-### Client (.env file in /client directory)
 ```properties
-# Development API URL - use localhost during development
 VITE_API_URL=http://localhost:5001/api
 
-# Firebase configuration - create your Firebase project at https://console.firebase.google.com/
-VITE_FIREBASE_API_KEY="your-api-key"
-VITE_FIREBASE_AUTH_DOMAIN="your-project-id.firebaseapp.com"
-VITE_FIREBASE_PROJECT_ID="your-project-id"
-VITE_FIREBASE_STORAGE_BUCKET="your-project-id.appspot.com"
-VITE_FIREBASE_MESSAGING_SENDER_ID="your-sender-id"
-VITE_FIREBASE_APP_ID="your-app-id"
-VITE_FIREBASE_MEASUREMENT_ID="your-measurement-id"
+# Firebase - for Google sign-in (https://console.firebase.google.com)
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+VITE_FIREBASE_MEASUREMENT_ID=...
 ```
 
-### Server (.env file in /server directory)
+**`server/.env`**
+
 ```properties
+# Required
 PORT=5001
 NODE_ENV=development
-# Generate a strong random string for JWT_SECRET (use a secure generator)
-JWT_SECRET=your-secure-random-string
+MONGODB_URI=mongodb+srv://user:pass@cluster.mongodb.net/health-report
+JWT_SECRET=a-long-random-string
 SESSION_EXPIRE=7d
-# Create a MongoDB Atlas cluster or use local MongoDB
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/health-report?retryWrites=true&w=majority
-# Set to your frontend URL, use localhost during development
 FRONTEND_URL=http://localhost:3000
+GEMINI_API_KEY=your-gemini-key          # https://aistudio.google.com/apikey
 
-# For password reset functionality
-EMAIL_USER=your-email@gmail.com
-# Create an app password if using Gmail: https://myaccount.google.com/apppasswords
-EMAIL_PASS=your-app-password
+# Optional - enable per feature
+# Google sign-in:   FIREBASE_SERVICE_ACCOUNT (JSON)  - or  FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY
+# Password reset:   EMAIL_USER, EMAIL_PASS           (Gmail app password)
+# Contact form:     WEB3FORMS_ACCESS_KEY
+# Pro plans:        GUMROAD_* keys                   (see server/routes/payments.js)
 ```
 
-### How to get these credentials:
-1. **Firebase**: [Create a Firebase project](https://console.firebase.google.com/) and get your web app credentials
-2. **MongoDB**: [Set up a MongoDB Atlas cluster](https://www.mongodb.com/cloud/atlas/register) or use a local MongoDB instance
-3. **JWT Secret**: Generate a secure random string using a tool like [RandomKeygen](https://randomkeygen.com/)
-4. **Email (for password reset)**: Use your Gmail account and [create an app password](https://myaccount.google.com/apppasswords)
+## Common issues
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
+- **Nothing extracted?** Photos vary a lot - a clear PDF gives the best results.
+- **Can't connect?** Check that MongoDB is running and `MONGODB_URI` is correct.
+- **Google login failing?** The server needs Firebase Admin credentials (see above).
 
-## Common Issues
-- **No data extracted?** Try PDF instead of image
-- **Can't connect?** Make sure MongoDB is running
-- **Slow upload?** Large files take time to process
+## Security & disclaimer
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
+Uploaded files are processed in memory and never written to disk. Passwords are hashed with bcrypt, and sessions use JWT.
 
-## Security
-Your files are processed in memory only - never saved to disk. JWT authentication keeps your data secure.
+> ⚠️ **For informational purposes only.** This is not medical advice - always talk to a healthcare professional about your results.
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
+## License
 
-*Disclaimer: For informational purposes only. Always consult healthcare professionals for medical advice.*
+MIT - see [LICENSE](LICENSE).
 
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
+## Contact
 
-## 📜 License
-Licensed under the [MIT License](https://github.com/Rajput-xv/Health-Report-Analyzer/blob/main/LICENSE).
+Built by **Yash Verma**. Found a bug or have an idea? [Open an issue](https://github.com/Rajput-xv/Health-Report-Analyzer/issues) or say hi on [LinkedIn](https://www.linkedin.com/in/yash-rajput-xv/).
 
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
-
-## 💡 Suggestions & Feedback
-
-If you have ideas for improving Health Report Analyzer, feel free to reach out with feedback or feature suggestions!
-
-***If you find this project helpful, please give it a star! ⭐***
-
-<div align="center">
-  <img src="https://user-images.githubusercontent.com/74038190/212284115-f47cd8ff-2ffb-4b04-b5bf-4d1c14c0247f.gif" width="1000">
-</div>
-
-**📬 Contact**
-For questions, suggestions, or collaboration, reach out via [LinkedIn](https://www.linkedin.com/in/yash-rajput-xv/) or [open an issue](https://github.com/Rajput-xv/Health-Report-Analyzer/issues)!
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-<h1 align="center"><img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Glowing Star" width="25" height="25" /> Give us a Star and let's make magic! <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Travel%20and%20places/Glowing%20Star.png" alt="Glowing Star" width="25" height="25" /></h1>
-<p align="center">
-    <a href="#top">
-        <img src="https://img.shields.io/badge/Back%20to%20Top-000000?style=for-the-badge&logo=github&logoColor=white" alt="Back to Top">
-    </a><br>
-     <img src="https://raw.githubusercontent.com/Tarikul-Islam-Anik/Animated-Fluent-Emojis/master/Emojis/Objects/Mirror%20Ball.png" alt="Mirror Ball" width="150" height="150" />
-</p>
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-<div align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=24&duration=3000&pause=1000&color=00C853&center=true&vCenter=true&width=700&lines=Thanks+for+visiting+Health-Report-Analyzer!+🙌;Star+the+repo+✅;Share+it+with+others+🌍;Happy+Coding+✨!" alt="Thanks Banner Typing SVG" />
-</div>
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-<h2>Project Admin:</h2>
-<table>
-<tr>
-<td align="center">
-<a href="https://github.com/Rajput-xv/Health-Report-Analyzer"><img src="https://avatars.githubusercontent.com/u/114978813?v=4" height="140px" width="140px" alt="Rajput"></a><br><sub><b>YASH VERMA</b><br><a href="https://www.linkedin.com/in/yash-rajput-xv/"><img src="https://github-production-user-asset-6210df.s3.amazonaws.com/73993775/278833250-adb040ea-e3ef-446e-bcd4-3e8d7d4c0176.png" width="45px" height="45px"></a></sub>
-</td>
-</tr>
-</table>
-
-<img src="https://user-images.githubusercontent.com/74038190/212284100-561aa473-3905-4a80-b561-0d28506553ee.gif" width="100%">
-
-**Made with ❤️ by YASH VERMA ❤️**
-[Watch Demo](https://health-report-analyzer-client.vercel.app/)
-
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=65&section=footer"/>
-</p>
-
-<div align="center">
-    <a href="#top">
-        <img src="https://img.shields.io/badge/Back%20to%20Top-000000?style=for-the-badge&logo=github&logoColor=white" alt="Back to Top">
-    </a>
-</div>
-
->Stay consistent. Keep the streak alive. 🔥
+If it saved you some typing, a ⭐ means a lot.

@@ -1,4 +1,5 @@
 {
+  "buildCommand": "npm run build",
   "headers": [
     {
       "source": "/(.*)",
@@ -67,7 +68,7 @@
       "destination": "/blog/index.html"
     },
     {
-      "source": "/((?!api|_next|static|blog|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]

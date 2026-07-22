@@ -63,7 +63,7 @@
     ];
 
     // Matches client/src/components/LanguageSwitcher.jsx (persists to i18nextLng,
-    // which the app's i18n reads on load — so a choice here carries into the app).
+    // which the app's i18n reads on load - so a choice here carries into the app).
     var LANGS = [
         { code: "en", label: "English", flag: "🇺🇸" },
         { code: "hi", label: "हिन्दी", flag: "🇮🇳" },
@@ -296,7 +296,7 @@
             },
         );
 
-        // Language switcher — open/close + persist to i18nextLng (matches the app).
+        // Language switcher - open/close + persist to i18nextLng (matches the app).
         function selectLang(code) {
             try {
                 localStorage.setItem("i18nextLng", code);
