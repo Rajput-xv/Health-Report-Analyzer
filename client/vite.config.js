@@ -99,6 +99,23 @@ function serveBlogStaticInDev() {
     };
 }
 
+// On Vercel's build container the system libraries Chrome needs (libnspr4, …)
+// aren't present, so puppeteer's bundled Chromium can't launch. There we point
+// Puppeteer at @sparticuz/chromium (a serverless Chromium build that carries its
+// own libs, pinned to the same Chrome major puppeteer expects). Locally we use
+// puppeteer's own Chrome unchanged.
+let prerenderPuppeteer = {
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+};
+if (process.env.VERCEL) {
+    const chromium = (await import("@sparticuz/chromium")).default;
+    prerenderPuppeteer = {
+        args: chromium.args,
+        executablePath: await chromium.executablePath(),
+        headless: chromium.headless,
+    };
+}
+
 export default defineConfig({
     plugins: [
         serveBlogStaticInDev(),
@@ -152,10 +169,7 @@ export default defineConfig({
             routes: ["/", "/pricing", "/contact"],
             delay: 3000,
             removeStyle: false, // keep our inline <style> (chatbase positioning)
-            puppeteer: {
-                // required when the build runs as root (Vercel/CI)
-                args: ["--no-sandbox", "--disable-setuid-sandbox"],
-            },
+            puppeteer: prerenderPuppeteer,
             // rewrite canonical/OG + per-page title & description
             callback: applyPrerenderSeo,
         }),
