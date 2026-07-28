@@ -46,7 +46,6 @@ function applyPrerenderSeo(html, route) {
         const d = esc(meta.description);
         html = html
             .replace(/<title>[^<]*<\/title>/i, `<title>${t}</title>`)
-            .replace(/(<meta name="title" content=")[^"]*(")/i, `$1${t}$2`)
             .replace(
                 /(<meta name="description" content=")[^"]*(")/i,
                 `$1${d}$2`,
