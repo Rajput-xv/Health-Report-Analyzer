@@ -7,27 +7,35 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#667eea" />
+  <meta name="theme-color"
+media="(prefers-color-scheme: light)"
+content="#667eea">
+
+<meta name="theme-color"
+media="(prefers-color-scheme: dark)"
+content="#111827">
 
   <!-- Primary Meta Tags -->
-  <title>Health Report Analyzer - AI-Powered Medical Report Analysis</title>
-  <meta name="title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
+  <title>Health Report Analyzer | AI Medical Report Analysis & Blood Test Insights</title>
   <meta name="description"
-    content="Upload your lab reports (PDF/image) and get your health data automatically extracted into organized tables with AI-powered trend analysis. Track your health journey with ease." />
-  <meta name="keywords"
-    content="health report analyzer, medical report analysis, lab report OCR, health tracking, AI health insights, blood test analyzer, medical document scanner" />
+    content="Upload PDF or image medical reports and instantly extract blood test values with AI. Track health trends, understand lab results and generate easy to read health insights for free." />
   <meta name="author" content="Health Report Analyzer" />
-  <meta name="robots" content="index, follow" />
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 
   <!-- Canonical URL -->
   <link rel="canonical" href="https://health-report-analyzer-client.vercel.app/" />
+
+  <meta property="og:image:alt" content="Health Report Analyzer application preview" />
+<meta property="og:image:type" content="image/png" />
+
+<meta name="twitter:image:alt" content="Health Report Analyzer application preview" />
 
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://health-report-analyzer-client.vercel.app/" />
   <meta property="og:title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
   <meta property="og:description"
-    content="Upload your lab reports and get instant AI-powered analysis with trend tracking. Free to start, Pro for unlimited access." />
+    content="Upload PDF or image medical reports and instantly extract blood test values with AI. Track health trends, understand lab results and generate easy to read health insights for free." />
   <meta property="og:image"
     content="https://health-report-analyzer-client.vercel.app/preview.png" />
   <meta property="og:image:width" content="1869" />
@@ -40,7 +48,7 @@
   <meta name="twitter:url" content="https://health-report-analyzer-client.vercel.app/" />
   <meta name="twitter:title" content="Health Report Analyzer - AI-Powered Medical Report Analysis" />
   <meta name="twitter:description"
-    content="Upload your lab reports and get instant AI-powered analysis with trend tracking. Free to start, Pro for unlimited access." />
+    content="Upload PDF or image medical reports and instantly extract blood test values with AI. Track health trends, understand lab results and generate easy to read health insights for free." />
   <meta name="twitter:image"
     content="https://health-report-analyzer-client.vercel.app/preview.png" />
 
@@ -52,7 +60,7 @@
 
   <!-- Favicon -->
   <link rel="shortcut icon" href="/Health Report Analyzer Logo.png" type="image/x-icon" />
-  <link rel="apple-touch-icon" href="/Health Report Analyzer Logo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/Health Report Analyzer Logo.png">
 
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,25 +72,58 @@
   <!-- Google Site Verification -->
   <meta name="google-site-verification" content="V4eqMhokbu6jbcleIrX6VB0qJ9cwTWDKBpKcHLykJuo" />
 
+  <link rel="dns-prefetch" href="//www.googletagmanager.com">
+<link rel="dns-prefetch" href="//fonts.googleapis.com">
+<link rel="dns-prefetch" href="//fonts.gstatic.com">
+<link rel="dns-prefetch" href="//www.chatbase.co">
+<link rel="manifest" href="/manifest.webmanifest">
+
   <!-- Structured Data -->
   <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Health Report Analyzer",
-      "description": "AI-powered medical report analysis tool that extracts health data from lab reports",
-      "url": "https://health-report-analyzer-client.vercel.app/",
-      "applicationCategory": "HealthApplication",
-      "operatingSystem": "Web",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD",
-        "description": "Free tier with 3 reports per month"
-      },
-      "featureList": ["OCR extraction", "AI analysis", "Trend tracking", "PDF export"]
-    }
+  "@context":"https://schema.org",
+  "@type":"WebApplication",
+  "name":"Health Report Analyzer",
+  "description":"AI powered medical report analysis tool that extracts lab values and provides health insights.",
+  "url":"https://health-report-analyzer-client.vercel.app/",
+  "applicationCategory":"HealthApplication",
+  "operatingSystem":"Web",
+  "browserRequirements":"Requires JavaScript",
+  "inLanguage":"en",
+  "image":"https://health-report-analyzer-client.vercel.app/preview.png",
+  "offers":{
+    "@type":"Offer",
+    "price":"0",
+    "priceCurrency":"USD",
+    "description":"Free tier with 3 reports per month"
+  },
+  "featureList":[
+    "OCR extraction",
+    "AI analysis",
+    "Trend tracking",
+    "PDF export"
+  ]
+}
     </script>
+
+  <script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"Organization",
+  "name":"Health Report Analyzer",
+  "url":"https://health-report-analyzer-client.vercel.app/",
+  "logo":"https://health-report-analyzer-client.vercel.app/Health%20Report%20Analyzer%20Logo.png"
+}
+</script>
+
+  <script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "name":"Health Report Analyzer",
+  "url":"https://health-report-analyzer-client.vercel.app/"
+}
+</script>
 
   <!-- Google Analytics -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
