@@ -15,7 +15,7 @@ app.timeout = 300000;
 // Configure CORS for frontend communication
 const corsOptions = {
 	origin: process.env.NODE_ENV === 'production'
-		? ['https://health-report-analyzer.vercel.app', 'https://health-report-analyzer-client.vercel.app', 'https://health-report-analyzer-backend.onrender.com', 'https://health-report-analyzer.onrender.com']
+		? ['https://health-report-analyzer.vercel.app', 'https://health-report-analyzer-client.vercel.app', 'https://health-report-analyzer-backend.onrender.com', 'https://health-report-analyzer.onrender.com', 'https://health-report-analyzer.rajputxv.me']
 		: ['http://localhost:3000', 'http://localhost:5173'],
 	credentials: true
 };
