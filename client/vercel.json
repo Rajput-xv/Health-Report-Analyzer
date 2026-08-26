@@ -1,7 +1,11 @@
 {
   "rewrites": [
     {
-      "source": "/((?!api|_next|static|sitemap\\.xml|robots\\.txt|favicon\\.ico|site.webmanifest|sitemap.xml|.*\\..*).*)",
+      "source": "/blog",
+      "destination": "/blog/index.html"
+    },
+    {
+      "source": "/:path*",
       "destination": "/index.html"
     }
   ]

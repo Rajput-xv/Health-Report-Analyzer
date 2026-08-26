@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { FaArrowUp } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 const BackToTopButton = () => {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
 
@@ -38,12 +40,12 @@ const BackToTopButton = () => {
         onKeyDown={handleKeyPress}
         className="back-to-top"
         tabIndex={0}
-        aria-label="Scroll back to top"
+        aria-label={t('backToTop.aria')}
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
         <FaArrowUp size={28} />
-        {showTooltip && <span className="tooltip">Back to Top</span>}
+        <span className={`tooltip ${showTooltip ? 'show' : ''}`}>{t('backToTop.label')}</span>
       </button>
     </div>
   );

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../styles/Stats.css';
 import { fetchGlobalStats } from '../utils/api';
 
 // Stats Section Component
 function HealthStats() {
+  const { t } = useTranslation();
   const [isVisible, setIsVisible] = useState(false);
   const [stats, setStats] = useState({ totalUsers: 0, totalReports: 0 });
   const [loading, setLoading] = useState(true);
@@ -31,22 +33,33 @@ function HealthStats() {
   }, []);
 
   useEffect(() => {
-    fetchGlobalStats().then((data) => {
-      setStats({
-        totalUsers: data.totalUsers || 0,
-        totalReports: data.totalReports || 0
+    let isMounted = true;
+    fetchGlobalStats()
+      .then((data) => {
+        if (!isMounted) return;
+        setStats({
+          totalUsers: data.totalUsers || 0,
+          totalReports: data.totalReports || 0
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to load global stats:', err);
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
       });
-      setLoading(false);
-    });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
     <section className="health-stats-section" ref={statsRef} data-aos="fade-up">
       <div className="health-stats-container">
         <div className="health-stats-header" data-aos="fade-down">
-          <h2 className="health-stats-title">Our Impact in Numbers</h2>
+          <h2 className="health-stats-title">{t('stats.title')}</h2>
           <p className="health-stats-subtitle">
-            Trusted by thousands for accurate health insights
+            {t('stats.subtitle')}
           </p>
         </div>
 
@@ -55,7 +68,7 @@ function HealthStats() {
             icon="📊"
             end={loading ? 0 : stats.totalReports}
             suffix="+"
-            label="Reports Analyzed"
+            label={t('stats.reports_analyzed')}
             isVisible={isVisible}
             duration={2500}
             delay={0}
@@ -64,7 +77,7 @@ function HealthStats() {
             icon="👥"
             end={loading ? 0 : stats.totalUsers}
             suffix="+"
-            label="Happy Users"
+            label={t('stats.happy_users')}
             isVisible={isVisible}
             duration={2500}
             delay={200}
@@ -73,7 +86,7 @@ function HealthStats() {
             icon="⚡"
             end={98}
             suffix="%"
-            label="Accuracy Rate"
+            label={t('stats.accuracy_rate')}
             isVisible={isVisible}
             duration={2000}
             delay={400}
@@ -91,6 +104,7 @@ function StatCard({ icon, end, suffix, label, isVisible, duration, delay }) {
   useEffect(() => {
     if (!isVisible) return;
 
+    let rafId;
     // Add initial delay
     const delayTimeout = setTimeout(() => {
       let startTime;
@@ -100,22 +114,26 @@ function StatCard({ icon, end, suffix, label, isVisible, duration, delay }) {
       const animate = (currentTime) => {
         if (!startTime) startTime = currentTime;
         const progress = Math.min((currentTime - startTime) / duration, 1);
-        
+
         // Easing function for smooth animation
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
         const currentCount = Math.floor(easeOutQuart * (endValue - startValue) + startValue);
-        
+
         setCount(currentCount);
 
         if (progress < 1) {
-          requestAnimationFrame(animate);
+          rafId = requestAnimationFrame(animate);
         }
       };
 
-      requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(animate);
     }, delay);
 
-    return () => clearTimeout(delayTimeout);
+    // Clean up the timer and animation frame on unmount
+    return () => {
+      clearTimeout(delayTimeout);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [isVisible, end, duration, delay]);
 
   return (

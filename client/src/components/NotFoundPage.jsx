@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowLeft, Search, FileQuestion } from 'lucide-react';
+import { Home, ArrowLeft, FileQuestion } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import '../styles/NotFoundPage.css';
 
@@ -12,7 +12,7 @@ const NotFoundPage = () => {
         <div className="not-found-container">
             <div className="not-found-content">
                 {/* Animated 404 display */}
-                <div className="error-code">
+                <div className="error-code" aria-hidden="true">
                     <span className="digit">4</span>
                     <div className="icon-container">
                         <FileQuestion className="question-icon" />
@@ -20,38 +20,37 @@ const NotFoundPage = () => {
                     <span className="digit">4</span>
                 </div>
 
-                <h1 className="not-found-title">Page Not Found</h1>
+                <h1 className="not-found-title">{t('not_found.title')}</h1>
                 <p className="not-found-description">
-                    Oops! The page you're looking for doesn't exist or has been moved.
-                    Let's get you back on track.
+                    {t('not_found.description')}
                 </p>
 
                 <div className="not-found-actions">
-                    <button className="btn-primary" onClick={() => navigate('/')}>
+                    <button className="nf-btn-primary" onClick={() => navigate('/')}>
                         <Home size={18} />
-                        <span>Go Home</span>
+                        <span>{t('not_found.go_home')}</span>
                     </button>
-                    <button className="btn-secondary" onClick={() => navigate(-1)}>
+                    <button className="nf-btn-secondary" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}>
                         <ArrowLeft size={18} />
-                        <span>Go Back</span>
+                        <span>{t('not_found.go_back')}</span>
                     </button>
                 </div>
 
                 {/* Helpful links */}
                 <div className="helpful-links">
-                    <p className="links-title">You might be looking for:</p>
+                    <p className="links-title">{t('not_found.looking_for')}</p>
                     <div className="links-grid">
                         <button onClick={() => navigate('/dashboard')} className="helpful-link">
-                            📊 Dashboard
+                            📊 {t('nav.dashboard')}
                         </button>
                         <button onClick={() => navigate('/pricing')} className="helpful-link">
-                            💎 Pricing
+                            💎 {t('nav.pricing')}
                         </button>
                         <button onClick={() => navigate('/contact')} className="helpful-link">
-                            📧 Contact Us
+                            📧 {t('nav.contact')}
                         </button>
                         <button onClick={() => navigate('/login')} className="helpful-link">
-                            🔑 Login
+                            🔑 {t('not_found.login')}
                         </button>
                     </div>
                 </div>

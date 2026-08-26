@@ -1,231 +1,246 @@
-/* ================= MAIN HEADER STYLES ================= */
+/* ============================================================
+   Header / Navbar - mobile-first, responsive, themable.
+   Theme colors live in CSS variables on .main-header and are
+   overridden under body.dark-mode, so every child follows the theme.
+   ============================================================ */
+
 .main-header {
+  --hdr-bg: rgba(255, 255, 255, 0.1);
+  --hdr-border: rgba(255, 255, 255, 0.18);
+  --hdr-text: #1f2937;
+  --hdr-muted: #6b7280;
+  --hdr-hover: rgba(255, 255, 255, 0.25);
+  --hdr-accent: #667eea;
+  --hdr-accent-2: #764ba2;
+  --hdr-card: #ffffff;
+  --hdr-card-border: rgba(102, 126, 234, 0.25);
+  --hdr-danger: #dc2626;
+
+  /* Gold CTA - the "get started / sign up" button. High-contrast against the
+     purple brand so it draws the eye (conversion focus). Uses dark text. */
+  --hdr-gold: linear-gradient(135deg, #ffd84d 0%, #f5a623 100%);
+  --hdr-gold-hover: linear-gradient(135deg, #ffe066 0%, #ff9f1c 100%);
+  --hdr-gold-text: #1a1a2e;
+
   position: sticky;
   top: 0;
-  z-index: 10000;
+  z-index: 1000;
   width: 100%;
-  height: 70px;
-  background: rgba(255, 255, 255, 0.08);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, height 0.2s ease;
+}
 
-  /* Enforce Landing Page typography for consistency */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-  line-height: 2.5;
-  box-sizing: border-box;
+/* Glass background lives on a ::before layer, NOT on .main-header itself.
+   backdrop-filter on an element makes it the containing block for fixed-position
+   descendants - that trapped the mobile drawer (.mobile-overlay) inside the 56px
+   header instead of the viewport. Keeping the blur on a child pseudo-element
+   preserves the frosted look while letting the drawer fill the screen. */
+.main-header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--hdr-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: none;
 }
 
 .main-header.scrolled {
-  background: rgba(102, 126, 234, 0.95);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.15);
-  height: 65px;
+  border-bottom-color: var(--hdr-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+}
+
+body.dark-mode .main-header {
+  --hdr-bg: rgba(15, 23, 42, 0.4);
+  --hdr-border: rgba(255, 255, 255, 0.08);
+  --hdr-text: #e5e7eb;
+  --hdr-muted: #9ca3af;
+  --hdr-hover: rgba(255, 255, 255, 0.12);
+  --hdr-card: #0b1220;
+  --hdr-card-border: #1f2937;
+  --hdr-danger: #f87171;
+}
+
+body.dark-mode .main-header.scrolled {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .header-container {
-  max-width: 1400px;
-  height: 100%;
-  margin: 0 auto;
-  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 16px;
+  max-width: 1280px;
+  height: 56px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 32px);
 }
 
-/* ================= LOGO STYLES ================= */
+/* ---------- Logo ---------- */
 .header-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
+  min-width: 0;
+  flex-shrink: 1;
   text-decoration: none;
-  transition: transform 0.3s ease;
-}
-
-.header-logo:hover {
-  transform: scale(1.02);
+  color: var(--hdr-text);
+  overflow: hidden;
 }
 
 .logo-icon-wrapper {
-  width: 42px;
-  height: 42px;
-  border-radius: 12px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.05) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
-}
-
-.header-logo:hover .logo-icon-wrapper {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
-  transform: rotate(-5deg);
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 9px;
+  background: linear-gradient(135deg, var(--hdr-accent), var(--hdr-accent-2));
 }
 
 .logo-icon {
-  width: 24px;
-  height: 24px;
-  color: white;
+  width: 17px;
+  height: 17px;
+  color: #fff;
 }
 
 .logo-text {
-  font-size: 1.4rem;
   font-weight: 700;
-  color: white;
-  letter-spacing: -0.5px;
+  font-size: 1rem;
+  color: var(--hdr-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* ================= DESKTOP NAVIGATION ================= */
+/* ---------- Desktop nav (revealed at >= 1100px) ---------- */
 .desktop-nav {
-  display: flex;
+  display: none;
   align-items: center;
-  gap: 1.5rem;
+  gap: 18px;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 4px;
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
 .nav-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.2rem 1.2rem;
-  border-radius: 50px;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.9rem;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
   font-weight: 500;
+  color: var(--hdr-text);
   text-decoration: none;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-.nav-link::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, rgba(255, 255, 255, 0.05) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.nav-link:hover::before,
-.nav-link.active::before {
-  opacity: 1;
+  white-space: nowrap;
+  transition: color 0.15s ease, background 0.15s ease;
 }
 
 .nav-link:hover {
-  color: white;
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.1);
+  color: var(--hdr-text);
+  background: var(--hdr-hover);
 }
 
+/* Active tab - solid brand pill so the current page is obvious on the glass navbar */
 .nav-link.active {
-  color: white;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Pricing button highlight */
-#highlights {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
-  color: #1a1a2e;
+  color: #fff;
+  background: linear-gradient(135deg, var(--hdr-accent), var(--hdr-accent-2));
   font-weight: 600;
-  box-shadow: 0 4px 15px rgba(255, 179, 0, 0.4);
 }
 
-#highlights:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 6px 25px rgba(255, 179, 0, 0.5);
+.nav-link.active:hover {
+  color: #fff;
 }
 
-#highlights.active {
-  background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
+/* :not(.active) so the active pill's white text always wins over the highlight
+   color when a link is both active and highlighted (e.g. Pricing on /pricing). */
+.nav-link.highlight:not(.active) {
+  color: var(--hdr-text);
+  font-weight: 600;
 }
 
-/* ================= NAV ACTIONS ================= */
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 10px;
 }
 
-/* ================= AUTH BUTTONS ================= */
+/* Language switcher trigger - matches the action buttons so the row is even */
+.language-switcher {
+  position: relative;
+}
+
+/* Scoped to .main-header so it overrides the older .language-select rule in landing.css */
+.main-header .language-select {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 9px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hdr-text);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.main-header .language-select:hover {
+  background: var(--hdr-hover);
+}
+
+/* ---------- Auth buttons (signed out) ---------- */
 .auth-buttons {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
 .btn-signin,
 .btn-signup {
-  padding: 0.5rem 1.25rem;
-  border-radius: 50px;
+  padding: 6px 12px;
+  border-radius: 8px;
   font-size: 0.9rem;
-  font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  border: 1px solid transparent;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
 
 .btn-signin {
-  background: rgba(255, 255, 255, 0.12);
-  color: white;
-  border: 2px solid rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
+  background: transparent;
+  color: var(--hdr-text);
+  border-color: transparent;
+  font-weight: 600;
 }
 
 .btn-signin:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  background: var(--hdr-hover);
 }
 
+/* Primary conversion CTA - gold so it stands out against the purple navbar */
 .btn-signup {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border: none;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-signup::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, #7c8ff5 0%, #9b6dc6 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.btn-signup:hover::before {
-  opacity: 1;
-}
-
-.btn-signup span {
-  position: relative;
-  z-index: 1;
+  color: var(--hdr-gold-text);
+  background: var(--hdr-gold);
+  font-weight: 700;
 }
 
 .btn-signup:hover {
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+  transform: translateY(-1px);
+  background: var(--hdr-gold-hover);
+  box-shadow: 0 8px 18px rgba(245, 166, 35, 0.45);
 }
 
-/* ================= USER DROPDOWN ================= */
+/* ---------- User dropdown (desktop) ---------- */
 .user-dropdown {
   position: relative;
 }
@@ -233,46 +248,46 @@
 .user-trigger {
   display: flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.4rem 0.8rem 0.4rem 0.4rem;
-  border-radius: 50px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: white;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+  border: 1px solid var(--hdr-card-border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--hdr-text);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.15s ease;
 }
 
 .user-trigger:hover {
-  background: rgba(255, 255, 255, 0.18);
-  border-color: rgba(255, 255, 255, 0.3);
+  background: var(--hdr-hover);
 }
 
 .user-avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--hdr-accent), var(--hdr-accent-2));
+  color: #fff;
+  font-weight: 700;
   font-size: 0.85rem;
-  font-weight: 600;
   text-transform: uppercase;
 }
 
 .user-name {
   font-size: 0.9rem;
-  font-weight: 500;
-  max-width: 100px;
+  font-weight: 600;
+  max-width: 120px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .chevron {
-  transition: transform 0.3s ease;
-  opacity: 0.7;
+  color: var(--hdr-muted);
+  transition: transform 0.2s ease;
 }
 
 .chevron.open {
@@ -281,152 +296,120 @@
 
 .dropdown-menu {
   position: absolute;
-  top: calc(100% + 12px);
+  top: calc(100% + 10px);
   right: 0;
   min-width: 240px;
-  background: rgba(30, 30, 50, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  padding: 0.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-  animation: dropdownEnter 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
-  transform-origin: top right;
-  z-index: 100;
+  padding: 8px;
+  background: var(--hdr-card);
+  border: 1px solid var(--hdr-card-border);
+  border-radius: 14px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.16);
+  animation: hdr-fade 0.15s ease;
 }
 
-.dropdown-menu::before {
-  content: '';
-  position: absolute;
-  top: -20px;
-  left: 0;
-  right: 0;
-  height: 20px;
-}
-
-@keyframes dropdownEnter {
-  from {
-    opacity: 0;
-    transform: translateY(-8px) scale(0.96);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
+@keyframes hdr-fade {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .dropdown-header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  margin-bottom: 0.5rem;
+  padding: 8px 10px 12px;
+  border-bottom: 1px solid var(--hdr-card-border);
+  margin-bottom: 6px;
 }
 
 .dropdown-email {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
+  display: block;
+  font-size: 0.85rem;
+  color: var(--hdr-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: block;
 }
 
-/* Subscription Badge */
 .subscription-badge {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 50px;
-  font-size: 0.7rem;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-top: 0.5rem;
-  animation: badgePulse 2s ease-in-out infinite;
 }
 
 .subscription-badge.pro {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
-  color: #1a1a2e;
-  box-shadow: 0 2px 10px rgba(255, 179, 0, 0.3);
+  color: #92400e;
+  background: linear-gradient(135deg, rgba(255, 215, 0, 0.25), rgba(255, 179, 0, 0.2));
 }
 
 .subscription-badge.free {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-@keyframes badgePulse {
-
-  0%,
-  100% {
-    transform: scale(1);
-  }
-
-  50% {
-    transform: scale(1.02);
-  }
+  color: var(--hdr-accent);
+  background: rgba(102, 126, 234, 0.15);
 }
 
 .dropdown-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
   width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  background: transparent;
+  padding: 10px;
   border: none;
-  color: rgba(255, 255, 255, 0.85);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hdr-text);
   font-size: 0.9rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  text-align: left;
   text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .dropdown-item:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  background: var(--hdr-hover);
 }
 
 .dropdown-item.logout {
-  color: #f87171;
-  margin-top: 0.25rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 0 0 10px 10px;
-  padding-top: 1rem;
+  color: var(--hdr-danger);
 }
 
-.dropdown-item.logout:hover {
-  background: rgba(248, 113, 113, 0.15);
-}
-
-/* ================= MOBILE MENU BUTTON ================= */
+/* ---------- Mobile menu button (hidden on desktop) ---------- */
 .mobile-menu-btn {
-  display: none;
-  padding: 0.6rem;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hdr-text);
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .mobile-menu-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--hdr-hover);
 }
 
-/* ================= MOBILE OVERLAY & NAV ================= */
+/* Pin the icon size so it can never be scaled down by the flex row.
+   (The lucide size prop is only an HTML attribute - a rigid sibling logo
+   used to squeeze the button and shrink the icon to a sliver.) */
+.mobile-menu-btn svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* ---------- Mobile drawer ---------- */
 .mobile-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  z-index: 9998;
+  z-index: 1100;
+  background: rgba(0, 0, 0, 0.5);
   opacity: 0;
   visibility: hidden;
-  transition: all 0.3s ease;
+  transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
 .mobile-overlay.open {
@@ -435,19 +418,17 @@
 }
 
 .mobile-nav {
-  position: fixed;
+  position: absolute;
   top: 0;
   right: 0;
-  width: 320px;
-  max-width: 90vw;
-  height: 100vh;
-  background: linear-gradient(180deg, rgba(102, 126, 234, 0.98) 0%, rgba(118, 75, 162, 0.98) 100%);
-  backdrop-filter: blur(20px);
-  z-index: 9999;
   display: flex;
   flex-direction: column;
+  width: min(340px, 86vw);
+  height: 100%;
+  background: var(--hdr-card);
+  box-shadow: -8px 0 30px rgba(0, 0, 0, 0.2);
   transform: translateX(100%);
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.28s ease;
   overflow-y: auto;
 }
 
@@ -459,438 +440,233 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 18px 20px;
+  border-bottom: 1px solid var(--hdr-card-border);
 }
 
 .mobile-logo {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  color: white;
-  text-decoration: none;
-  font-size: 1.2rem;
+  gap: 10px;
   font-weight: 700;
+  color: var(--hdr-text);
+  text-decoration: none;
 }
 
 .mobile-close-btn {
-  padding: 0.5rem;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
   border: none;
-  color: white;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--hdr-text);
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .mobile-close-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--hdr-hover);
 }
 
 .mobile-nav-content {
-  flex: 1;
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  flex: 1;
 }
 
-/* Mobile User Info */
 .mobile-user-info {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  margin-bottom: 1.5rem;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--hdr-hover);
+  margin-bottom: 6px;
 }
 
 .mobile-user-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--hdr-accent), var(--hdr-accent-2));
+  color: #fff;
   font-weight: 700;
-  color: #1a1a2e;
   text-transform: uppercase;
 }
 
 .mobile-user-details {
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .mobile-user-name {
-  color: white;
   font-weight: 600;
-  font-size: 1rem;
+  color: var(--hdr-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .mobile-user-email {
-  color: rgba(255, 255, 255, 0.7);
   font-size: 0.8rem;
+  color: var(--hdr-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-/* Mobile Nav Links */
 .mobile-nav-links {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 2px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .mobile-nav-link {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 12px;
   width: 100%;
-  padding: 1rem 1.25rem;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid transparent;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 1rem;
-  font-weight: 500;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hdr-text);
+  font-size: 0.95rem;
+  text-align: left;
   cursor: pointer;
-  transition: all 0.3s ease;
-  position: relative;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .mobile-nav-link:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateX(5px);
+  background: var(--hdr-hover);
 }
 
 .mobile-nav-link.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: white;
+  color: var(--hdr-accent);
+  background: var(--hdr-hover);
+  font-weight: 600;
 }
 
-/* .mobile-nav-link.highlight {
-  background: linear-gradient(135deg, #ffd700 0%, #ffb300 100%);
-  color: #1a1a2e;
-  font-weight: 600;
-} */
-
-.mobile-nav-link.highlight:hover {
-  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.4);
+.mobile-nav-link.highlight {
+  color: var(--hdr-accent);
 }
 
 .active-indicator {
   position: absolute;
-  right: 1rem;
-  width: 8px;
-  height: 8px;
+  right: 14px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: #ffd700;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+  background: var(--hdr-accent);
 }
 
-/* Mobile Extras */
 .mobile-nav-extras {
-  margin-top: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 6px;
+  margin-top: 8px;
+  border-top: 1px solid var(--hdr-card-border);
 }
 
 .mobile-extra-item {
   display: flex;
   align-items: center;
-  padding: 0.5rem 0;
 }
 
-/* Mobile Footer */
 .mobile-nav-footer {
-  margin-top: 1rem;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .mobile-logout-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 8px;
   width: 100%;
-  padding: 1rem;
-  border-radius: 14px;
-  background: rgba(248, 113, 113, 0.15);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: #fca5a5;
-  font-size: 1rem;
+  padding: 12px;
+  border: 1px solid var(--hdr-card-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hdr-danger);
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
 .mobile-logout-btn:hover {
-  background: rgba(248, 113, 113, 0.25);
-  transform: translateY(-2px);
+  background: var(--hdr-hover);
 }
 
 .mobile-auth-buttons {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 10px;
 }
 
 .mobile-btn-signin,
 .mobile-btn-signup {
   width: 100%;
-  padding: 1rem;
-  border-radius: 14px;
-  font-size: 1rem;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-  border: none;
+  border: 1px solid transparent;
 }
 
 .mobile-btn-signin {
-  background: rgba(255, 255, 255, 0.15);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
+  background: transparent;
+  color: var(--hdr-accent);
+  border-color: var(--hdr-accent);
 }
 
 .mobile-btn-signin:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--hdr-hover);
 }
 
 .mobile-btn-signup {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+  color: var(--hdr-gold-text);
+  background: var(--hdr-gold);
 }
 
-.mobile-btn-signup:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.5);
+/* ---------- Breakpoints ---------- */
+
+/* Small phones: tighten the logo so it never crowds the menu button */
+@media (max-width: 380px) {
+  .logo-text { font-size: 0.92rem; }
+  .logo-icon-wrapper { width: 30px; height: 30px; }
 }
 
-/* ================= RESPONSIVE ================= */
-@media (max-width: 768px) {
-  .desktop-nav {
-    display: none;
-  }
-
-  .mobile-menu-btn {
-    display: flex;
-  }
+/* Tablets and up: a touch more height, still slim */
+@media (min-width: 640px) {
+  .header-container { height: 60px; }
 }
 
-@media (max-width: 480px) {
-  .header-container {
-    padding: 0 1rem;
-  }
-
-  .logo-text {
-    font-size: 1.2rem;
-  }
-
-  .logo-icon-wrapper {
-    width: 38px;
-    height: 38px;
-  }
-
-  .mobile-nav {
-    width: 100%;
-    max-width: 100vw;
-  }
+/* Desktop: show the full nav, hide the hamburger + drawer */
+@media (min-width: 1100px) {
+  .desktop-nav { display: flex; }
+  .mobile-menu-btn { display: none; }
+  .mobile-overlay { display: none; }
 }
 
-/* ================= DARK MODE ================= */
-
-/* ================= DARK MODE ENHANCED ================= */
-.dark-mode .main-header {
-  background: rgba(18, 22, 34, 0.92);
-  border-bottom-color: rgba(80, 80, 120, 0.18);
-}
-
-.dark-mode .main-header.scrolled {
-  background: rgba(28, 32, 54, 0.98);
-}
-
-.dark-mode .header-logo .logo-text,
-.dark-mode .header-logo .logo-icon {
-  color: #f3f4fa;
-}
-
-.dark-mode .nav-link,
-.dark-mode .nav-link.active {
-  color: #e0e7ff;
-  background: rgba(0, 0, 248, 0.18);
-  border-color: rgba(120, 120, 180, 0.18);
-  transition: background 0.2s, color 0.2s;
-}
-.dark-mode .nav-link:hover,
-.dark-mode .nav-link:focus-visible {
-  color: #fff;
-  background: rgba(120, 120, 180, 0.22);
-  border-color: rgba(120, 120, 180, 0.22);
-  outline: none;
-}
-.dark-mode .nav-link.active {
-  color: #fff;
-  background: rgba(80, 80, 120, 0.22);
-  border-color: rgba(120, 120, 180, 0.22);
-}
-.dark-mode .nav-link.highlight {
-  background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
-  color: #1a1a2e;
-}
-.dark-mode .nav-link.highlight:hover,
-.dark-mode .nav-link.highlight:focus-visible {
-  box-shadow: 0 6px 25px rgba(255, 179, 0, 0.5);
-  color: #1a1a2e;
-  outline: none;
-}
-
-.dark-mode .btn-signin {
-  background: rgba(40, 40, 60, 0.22);
-  color: #e0e7ff;
-  border-color: rgba(120, 120, 180, 0.18);
-}
-.dark-mode .btn-signin:hover {
-  background: rgba(80, 80, 120, 0.22);
-  color: #fff;
-}
-.dark-mode .btn-signup {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-}
-.dark-mode .btn-signup:hover {
-  background: linear-gradient(135deg, #7c8ff5 0%, #9b6dc6 100%);
-}
-
-.dark-mode .dropdown-menu {
-  background: rgba(28, 32, 54, 0.99);
-  border-color: rgba(120, 120, 180, 0.12);
-  color: #e0e7ff;
-}
-.dark-mode .dropdown-header {
-  border-bottom: 1px solid rgba(120, 120, 180, 0.12);
-}
-.dark-mode .dropdown-email {
-  color: #b3b8d8;
-}
-
-.dark-mode .dropdown-item {
-  color: #e0e7ff;
-  transition: background 0.2s, color 0.2s;
-}
-.dark-mode .dropdown-item:hover,
-.dark-mode .dropdown-item:focus-visible {
-  background: rgba(120, 120, 180, 0.18);
-  color: #fff;
-  outline: none;
-}
-.dark-mode .dropdown-item.logout {
-  color: #f87171;
-  border-top: 1px solid rgba(120, 120, 180, 0.12);
-}
-.dark-mode .dropdown-item.logout:hover,
-.dark-mode .dropdown-item.logout:focus-visible {
-  background: rgba(248, 113, 113, 0.18);
-  color: #fff;
-  outline: none;
-}
-
-.dark-mode .mobile-nav {
-  background: linear-gradient(180deg, rgba(28, 32, 54, 0.99) 0%, rgba(20, 20, 40, 0.99) 100%);
-}
-.dark-mode .mobile-user-info {
-  background: rgba(40, 40, 60, 0.22);
-}
-.dark-mode .mobile-user-avatar {
-  background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
-  color: #1a1a2e;
-}
-.dark-mode .mobile-user-name {
-  color: #fff;
-}
-.dark-mode .mobile-user-email {
-  color: #b3b8d8;
-}
-
-.dark-mode .mobile-nav-link {
-  background: rgba(72, 72, 241, 0.18);
-  color: #e0e7ff;
-  transition: background 0.2s, color 0.2s;
-}
-.dark-mode .mobile-nav-link:hover,
-.dark-mode .mobile-nav-link:focus-visible {
-  background: rgba(120, 120, 180, 0.22);
-  color: #fff;
-  outline: none;
-}
-.dark-mode .mobile-nav-link.active {
-  background: rgba(80, 80, 120, 0.22);
-  color: #fff;
-  border-color: rgba(120, 120, 180, 0.22);
-}
-.dark-mode .mobile-nav-link.highlight {
-  background: linear-gradient(135deg, #ffe066 0%, #ffc107 100%);
-  color: #1a1a2e;
-}
-.dark-mode .mobile-nav-link.highlight:hover,
-.dark-mode .mobile-nav-link.highlight:focus-visible {
-  box-shadow: 0 4px 20px rgba(255, 179, 0, 0.4);
-  color: #1a1a2e;
-  outline: none;
-}
-.dark-mode .active-indicator {
-  background: #ffe066;
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-}
-.dark-mode .mobile-nav-extras {
-  border-top: 1px solid rgba(120, 120, 180, 0.12);
-}
-.dark-mode .mobile-nav-footer {
-  border-top: 1px solid rgba(120, 120, 180, 0.12);
-}
-.dark-mode .mobile-logout-btn {
-  background: rgba(248, 113, 113, 0.18);
-  border: 1px solid rgba(248, 113, 113, 0.3);
-  color: #fca5a5;
-}
-.dark-mode .mobile-logout-btn:hover {
-  background: rgba(248, 113, 113, 0.28);
-  color: #fff;
-}
-.dark-mode .mobile-btn-signin {
-  background: rgba(95, 95, 255, 0.22);
-  border: 2px solid rgba(120, 120, 180, 0.18);
-  color: #e0e7ff;
-}
-.dark-mode .mobile-btn-signin:hover {
-  background: rgba(255, 255, 255, 0.71);
-  color: #fff;
-}
-.dark-mode .mobile-btn-signup {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: #fff;
-}
-.dark-mode .mobile-btn-signup:hover {
-  background: linear-gradient(135deg, #7c8ff5 0%, #9b6dc6 100%);
-  color: #fff;
-}
-
-/* Show hamburger and mobile nav at 1260px and below */
-@media (max-width: 1260px) {
-  .mobile-menu-btn {
-    display: flex !important;
-  }
-  .desktop-nav {
-    display: none !important;
-  }
+/* Wide desktop: slightly roomier links */
+@media (min-width: 1280px) {
+  .nav-link { padding: 8px 14px; }
+  .nav-links { gap: 6px; }
 }

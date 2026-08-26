@@ -40,7 +40,7 @@
 .health-stats-title {
   font-size: 2.5rem;
   font-weight: 700;
-  color: #2d3748;
+  color: #fff;
   margin-bottom: 1rem;
   position: relative;
   display: inline-block;
@@ -62,7 +62,7 @@
 
 .health-stats-subtitle {
   font-size: 1.15rem;
-  color: #e2e3e4;
+  color: rgba(255,255,255,0.9);
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.8;

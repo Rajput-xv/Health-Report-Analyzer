@@ -68,7 +68,7 @@
     margin-bottom: 1rem;
 }
 
-.payment-callback-spinner .loading-spinner {
+.payment-callback-spinner .spinner {
     width: 60px;
     height: 60px;
 }
@@ -226,55 +226,54 @@
     }
 }
 
-/* Light Mode Support */
-@media (prefers-color-scheme: light) {
-    .payment-callback {
-        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    }
+/* Light Mode Support - follow the app's dark-mode toggle, not the OS setting.
+   The base styles above are dark; these apply whenever the app is NOT in dark mode. */
+body:not(.dark-mode) .payment-callback {
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
 
-    .payment-callback-card {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(0, 0, 0, 0.1);
-        box-shadow:
-            0 25px 50px -12px rgba(0, 0, 0, 0.15),
-            0 0 0 1px rgba(0, 0, 0, 0.05) inset;
-    }
+body:not(.dark-mode) .payment-callback-card {
+    background: rgba(255, 255, 255, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow:
+        0 25px 50px -12px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(0, 0, 0, 0.05) inset;
+}
 
-    .payment-callback-card h2 {
-        color: #1e293b;
-    }
+body:not(.dark-mode) .payment-callback-card h2 {
+    color: #1e293b;
+}
 
-    .payment-callback-message {
-        color: #475569;
-    }
+body:not(.dark-mode) .payment-callback-message {
+    color: #475569;
+}
 
-    .payment-callback-submessage {
-        color: #64748b;
-    }
+body:not(.dark-mode) .payment-callback-submessage {
+    color: #64748b;
+}
 
-    .progress-bar {
-        background: rgba(0, 0, 0, 0.1);
-    }
+body:not(.dark-mode) .progress-bar {
+    background: rgba(0, 0, 0, 0.1);
+}
 
-    .payment-callback-actions .btn-secondary {
-        background: rgba(0, 0, 0, 0.05);
-        color: #1e293b;
-        border-color: rgba(0, 0, 0, 0.1);
-    }
+body:not(.dark-mode) .payment-callback-actions .btn-secondary {
+    background: rgba(0, 0, 0, 0.05);
+    color: #1e293b;
+    border-color: rgba(0, 0, 0, 0.1);
+}
 
-    .payment-callback-actions .btn-secondary:hover {
-        background: rgba(0, 0, 0, 0.1);
-    }
+body:not(.dark-mode) .payment-callback-actions .btn-secondary:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
 
-    .payment-callback-footer {
-        border-top-color: rgba(0, 0, 0, 0.1);
-    }
+body:not(.dark-mode) .payment-callback-footer {
+    border-top-color: rgba(0, 0, 0, 0.1);
+}
 
-    .payment-callback-footer p {
-        color: #94a3b8;
-    }
+body:not(.dark-mode) .payment-callback-footer p {
+    color: #94a3b8;
+}
 
-    .payment-callback-footer strong {
-        color: #64748b;
-    }
+body:not(.dark-mode) .payment-callback-footer strong {
+    color: #64748b;
 }

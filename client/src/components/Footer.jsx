@@ -7,7 +7,7 @@ const Footer = () => {
 
   return (
     <footer className="app-footer">
-      <p>{t('footer.copyright')}</p>
+      <p>{t('footer.copyright', { year: new Date().getFullYear() })}</p>
       <p>{t('footer.disclaimer')}</p>
     </footer>
   );

@@ -49,6 +49,7 @@
 
 .report-info {
     flex: 1;
+    min-width: 0;
 }
 
 .report-filename {
@@ -56,6 +57,7 @@
     font-size: 15px;
     color: #1f2937;
     margin-bottom: 6px;
+    overflow-wrap: anywhere;
 }
 
 .report-meta {
@@ -121,3 +123,37 @@
         padding: 10px;
     }
 }
+
+/* Themed text classes (replace the old inline colors so they can follow dark mode) */
+.report-detail-title { color: #1f2937; }
+.report-detail-subtitle { color: #374151; overflow-wrap: anywhere; }
+.report-section-title { color: #1f2937; }
+.report-category-title { color: #374151; border-bottom: 1px solid #e5e7eb; }
+.reports-empty-title { color: #1f2937; }
+.reports-empty-text { color: #6b7280; }
+.reports-error-title { color: #dc2626; }
+.report-state-text { color: #374151; }
+
+/* ----- Dark mode ----- */
+.dark-mode .reports-title { color: #e5e7eb; }
+
+.dark-mode .report-card {
+    background-color: #0b1220;
+    border-color: #1f2937;
+}
+
+.dark-mode .report-filename { color: #e5e7eb; }
+.dark-mode .report-meta { color: #9ca3af; }
+
+.dark-mode .report-detail-title,
+.dark-mode .report-section-title { color: #e5e7eb; }
+
+.dark-mode .report-detail-subtitle,
+.dark-mode .report-category-title { color: #cbd5e1; }
+
+.dark-mode .report-category-title { border-bottom-color: #374151; }
+
+.dark-mode .reports-empty-title { color: #e5e7eb; }
+.dark-mode .reports-empty-text { color: #9ca3af; }
+.dark-mode .reports-error-title { color: #f87171; }
+.dark-mode .report-state-text { color: #cbd5e1; }

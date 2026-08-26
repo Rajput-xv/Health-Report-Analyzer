@@ -1,28 +1,15 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { FileText, Menu, X, Home } from 'lucide-react';
 import { forgotPassword } from "../utils/api";
-import DarkModeToggle from './DarkModeToggle';
-import LanguageSwitcher from './LanguageSwitcher';
 import Header from './Header';
 import "../styles/AuthForm.css";
 
 const ForgotPassword = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -43,71 +30,8 @@ const ForgotPassword = () => {
 
   return (
     <div className="auth-page">
-      {/* Mobile Only Header (Shared) */}
-      <div className="mobile-only-header">
-        <Header user={null} setUser={() => { }} />
-      </div>
-
-      {/* Auth Page Header (Desktop Only) */}
-      <header className="auth-header desktop-only-auth-header">
-        <div className="auth-header-content">
-          <div className="auth-logo">
-            <FileText className="auth-logo-icon" />
-            <Link to="/" className="auth-logo-text">
-              {t('app.title')}
-            </Link>
-          </div>
-
-          <div className="auth-header-buttons desktop-nav">
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-            <button className="auth-home-button" onClick={() => navigate('/')}>
-              <Home size={16} />
-              {t('nav.home')}
-            </button>
-            <DarkModeToggle />
-          </div>
-
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/');
-                    closeMobileMenu();
-                  }}
-                >
-                  <Home size={16} />
-                  {t('nav.home')}
-                </button>
-
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* The same shared navbar as the rest of the app, on every screen size */}
+      <Header user={null} setUser={() => { }} />
 
       <div className="auth-container">
         <div className="auth-card">
@@ -117,7 +41,7 @@ const ForgotPassword = () => {
           </div>
 
           {message && (
-            <div className={message.includes(t('forgot_password_form.reset_sent_message')) ? "auth-message" : "auth-error"}>
+            <div role="alert" className={message.includes(t('forgot_password_form.reset_sent_message')) ? "auth-message" : "auth-error"}>
               {message.includes(t('forgot_password_form.reset_sent_message')) ? "✅" : "❌"} {message}
             </div>
           )}

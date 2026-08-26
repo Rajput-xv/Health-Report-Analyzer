@@ -5,7 +5,11 @@ const sharp = require('sharp');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
+const crypto = require('crypto');
 const { PDFDocument } = require('pdf-lib');
+
+// Cap pages so a huge PDF can't blow up memory/CPU
+const MAX_PDF_PAGES = 30;
 
 /**
  * Converts a PDF buffer to an array of PNG image buffers (one per page)
@@ -13,32 +17,43 @@ const { PDFDocument } = require('pdf-lib');
  * @returns {Promise<Buffer[]>} Array of PNG buffers
  */
 async function pdfToImages(pdfBuffer) {
-  // Write PDF to a temp file
+  // Unique temp file per request so concurrent uploads don't overwrite each other
   const tempDir = os.tmpdir();
-  const tempPdfPath = path.join(tempDir, `pdf2img_${Date.now()}.pdf`);
+  const tempPdfPath = path.join(tempDir, `pdf2img_${Date.now()}_${crypto.randomUUID()}.pdf`);
   fs.writeFileSync(tempPdfPath, pdfBuffer);
 
-  // Load PDF and get page count
-  const pdfDoc = await PDFDocument.load(pdfBuffer);
-  const pageCount = pdfDoc.getPageCount();
-  const imageBuffers = [];
+  try {
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const totalPages = pdfDoc.getPageCount();
+    const pageCount = Math.min(totalPages, MAX_PDF_PAGES);
+    if (totalPages > MAX_PDF_PAGES) {
+      console.warn(`PDF has ${totalPages} pages; processing only the first ${MAX_PDF_PAGES}.`);
+    }
+    const imageBuffers = [];
 
-  for (let i = 0; i < pageCount; i++) {
-    // sharp can read a specific page: input.pdf[0], input.pdf[1], ...
-    const pagePath = `${tempPdfPath}[${i}]`;
+    for (let i = 0; i < pageCount; i++) {
+      // sharp can read a specific page: input.pdf[0], input.pdf[1], ...
+      const pagePath = `${tempPdfPath}[${i}]`;
+      try {
+        const imgBuffer = await sharp(pagePath)
+          .png()
+          .toBuffer();
+        imageBuffers.push(imgBuffer);
+      } catch (err) {
+        throw new Error(`Failed to convert PDF page ${i + 1} to image: ${err.message}`);
+      }
+    }
+    return imageBuffers;
+  } finally {
+    // Always remove the temp file, even if something above threw
     try {
-      const imgBuffer = await sharp(pagePath)
-        .png()
-        .toBuffer();
-      imageBuffers.push(imgBuffer);
-    } catch (err) {
-      // Clean up temp file and throw
       fs.unlinkSync(tempPdfPath);
-      throw new Error(`Failed to convert PDF page ${i + 1} to image: ${err.message}`);
+    } catch (cleanupErr) {
+      if (cleanupErr.code !== 'ENOENT') {
+        console.error('Failed to remove temp PDF:', cleanupErr.message);
+      }
     }
   }
-  fs.unlinkSync(tempPdfPath);
-  return imageBuffers;
 }
 
 module.exports = pdfToImages;

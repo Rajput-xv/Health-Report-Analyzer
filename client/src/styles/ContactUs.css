@@ -9,7 +9,7 @@
   transition: background 0.4s ease-in-out;
 }
 
-/* .contact-page.dark {
+/* body.dark-mode .contact-page {
   background: linear-gradient(135deg, #0f2027, #203a43, #2c5364) !important;
 } */
 
@@ -24,7 +24,7 @@
   transition: background-color 0.3s, color 0.3s;
 }
 
-.contact-container.dark {
+body.dark-mode .contact-container {
   background-color: #1e1e1e;
   color: #f5f5f5;
 }
@@ -39,7 +39,7 @@
   color: #7f8c8d;
 }
 
-.contact-container.dark .contact-form-wrapper p {
+body.dark-mode .contact-container .contact-form-wrapper p {
   color: #ccc;
 }
 
@@ -53,7 +53,7 @@
 }
 
 
-.contact-container.dark .form-notice {
+body.dark-mode .contact-container .form-notice {
   background-color: #2e2e2e;
   border-color: #444;
 }
@@ -64,7 +64,7 @@
   color: #155724;
 }
 
-.contact-container.dark .form-notice p {
+body.dark-mode .contact-container .form-notice p {
   color: #a0e3a0;
 }
 .contact-form {
@@ -85,7 +85,7 @@
   font-size: 0.9rem;
 }
 
-.contact-container.dark .form-group label {
+body.dark-mode .contact-container .form-group label {
   color: #ddd;
 }
 
@@ -109,8 +109,8 @@
 }
 
 /* Dark mode */
-.contact-container.dark .form-group input,
-.contact-container.dark .form-group textarea {
+body.dark-mode .contact-container .form-group input,
+body.dark-mode .contact-container .form-group textarea {
   background-color: #2e2e2e !important;
   color: #f5f5f5 !important;
   border: 1px solid #555;
@@ -122,8 +122,8 @@
   color: #999;
 }
 
-.contact-container.dark .form-group input::placeholder,
-.contact-container.dark .form-group textarea::placeholder {
+body.dark-mode .contact-container .form-group input::placeholder,
+body.dark-mode .contact-container .form-group textarea::placeholder {
   color: #aaa;
 }
 
@@ -133,7 +133,8 @@
   outline: none;
 }
 
-.form-group input:disabled {
+.form-group input:disabled,
+.form-group input[readonly] {
   background-color: #f5f5f5;
   cursor: not-allowed;
 }
@@ -193,7 +194,7 @@
 }
 
 .success-container h2 {
-  color: #27ae60;
+  color: #1e8449;
   margin-bottom: 1rem;
 }
 
@@ -203,8 +204,9 @@
 }
 
 
-.contact-container.dark .success-container p {
+body.dark-mode .contact-container .success-container p {
   color: #ccc;
+}
 
 .success-details {
   background-color: #f8f9fa;
@@ -282,14 +284,6 @@
 
 
   .btn-send-another {
-    width: 100%;
-    max-width: 300px;
-  }
-}
-
-  
-  .btn-send-another,
-  .btn-view-alternatives {
     width: 100%;
     max-width: 300px;
   }

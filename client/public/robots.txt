@@ -1,4 +1,12 @@
 User-agent: *
+Disallow: /dashboard
+Disallow: /login
+Disallow: /signup
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /payment-callback
+Disallow: /callback
+Disallow: /home
 Allow: /
 
 Sitemap: https://health-report-analyzer-client.vercel.app/sitemap.xml

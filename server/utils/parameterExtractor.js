@@ -17,9 +17,9 @@ function cleanOcrText(text) {
     .replace(/Cholesterol\. Total/gi, 'Cholesterol, Total') // Normalizes parameter names
     .replace(/Trglycendeos/gi, 'Triglycerides') // Corrects common OCR misspellings
     .replace(/Leu ocyte/gi, 'Leukocyte') // Fixes spacing errors in names
-    .replace(/Caiculatea/gi, 'Calculated') // Fix common OCR error
-    // Corrects values where a space is used instead of a decimal point (e.g., "42 20" -> "42.20")
-    .replace(/(\d+)\s+(\d+)/g, '$1.$2');
+    .replace(/Caiculatea/gi, 'Calculated'); // Fix common OCR error
+  // Note: removed a "42 20" -> "42.20" replacement that was corrupting lines like
+  // "Glucose 110 70-99" (turned value 110 into 110.70). The regex below handles it.
 }
 
 // A comprehensive list of health parameters with flexible matching patterns.
@@ -123,43 +123,47 @@ function extractHealthParameters(text) {
   const extracted = new Map(); // Use a map to avoid duplicate parameter entries
 
   for (const line of lines) {
-    let lineProcessed = false; // Flag to check if the line has been processed
+    // Match the longest name on the line so e.g. "MCHC" isn't grabbed by "MCH",
+    // or "Absolute Neutrophils" by "Neutrophils".
+    let best = null; // { param, match }
     for (const param of HEALTH_PARAMETERS) {
       // Skip if parameter has already been found
       if (extracted.has(param.name)) continue;
 
       for (const pattern of param.patterns) {
         const match = line.match(pattern);
-        if (match) {
-          // Remove the matched parameter name to isolate the values
-          const restOfLine = line.substring(match.index + match[0].length).trim();
-
-          // Use a more robust regex to find value, unit, and range
-          const valueMatch = restOfLine.match(EXTRACTION_REGEX);
-
-          if (valueMatch && valueMatch[1]) {
-            const value = parseFloat(valueMatch[1]);
-            const unit = valueMatch[2] ? valueMatch[2].trim() : 'Unknown';
-            const normalRange = valueMatch[3] ? valueMatch[3].trim() : 'Unknown';
-
-            if (!isNaN(value)) {
-              extracted.set(param.name, {
-                name: param.name,
-                value: value,
-                unit: unit,
-                normalRange: normalRange,
-                status: getStatus(value, normalRange),
-                category: 'Lab Result',
-                parameterType: 'numeric', // Required per schema - OCR extracts numeric lab values
-                textValue: null // For categorical values - not applicable for numeric OCR extractions
-              });
-              lineProcessed = true; // Mark line as processed
-              break; // Exit the pattern loop
-            }
-          }
+        if (match && (!best || match[0].length > best.match[0].length)) {
+          best = { param, match };
         }
       }
-      if (lineProcessed) break; // If line is processed, move to the next line
+    }
+
+    if (!best) continue;
+
+    const { param, match } = best;
+    // Remove the matched parameter name to isolate the values
+    const restOfLine = line.substring(match.index + match[0].length).trim();
+
+    // Use a more robust regex to find value, unit, and range
+    const valueMatch = restOfLine.match(EXTRACTION_REGEX);
+
+    if (valueMatch && valueMatch[1]) {
+      const value = parseFloat(valueMatch[1]);
+      const unit = valueMatch[2] ? valueMatch[2].trim() : 'Unknown';
+      const normalRange = valueMatch[3] ? valueMatch[3].trim() : 'Unknown';
+
+      if (!isNaN(value)) {
+        extracted.set(param.name, {
+          name: param.name,
+          value: value,
+          unit: unit,
+          normalRange: normalRange,
+          status: getStatus(value, normalRange),
+          category: 'Lab Result',
+          parameterType: 'numeric', // Required per schema - OCR extracts numeric lab values
+          textValue: null // For categorical values - not applicable for numeric OCR extractions
+        });
+      }
     }
   }
 

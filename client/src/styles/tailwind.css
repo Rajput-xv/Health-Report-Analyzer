@@ -10,6 +10,7 @@
   background-color: #e5e7eb; /* gray-200 */
 }
 
+.dark-mode .skeleton-base,
 .dark .skeleton-base {
   background-color: #374151; /* gray-700 in dark mode */
 }

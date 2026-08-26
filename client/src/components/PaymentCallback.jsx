@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import api from '../utils/api';
-import LoadingSpinner from './LoadingSpinner';
 import '../styles/PaymentCallback.css';
 
 /**
@@ -11,19 +11,28 @@ import '../styles/PaymentCallback.css';
  */
 export default function PaymentCallback() {
     const navigate = useNavigate();
+    const { t } = useTranslation();
     const [searchParams] = useSearchParams();
     const [status, setStatus] = useState('verifying'); // verifying, success, pending, error
-    const [message, setMessage] = useState('Verifying your payment...');
+    const [message, setMessage] = useState(t('payment.verifying'));
     const [attempts, setAttempts] = useState(0);
+    const [retryCount, setRetryCount] = useState(0); // bump to restart polling
     const MAX_ATTEMPTS = 10;
     const POLL_INTERVAL = 2000; // 2 seconds
 
     const expectedPlan = searchParams.get('plan');
-    const saleId = searchParams.get('sale_id'); // Gumroad may include this
+
+    // Keep the count in a ref so the polling loop reads the current value.
+    // (Reading the state variable here would always see 0 and poll forever.)
+    const attemptsRef = useRef(0);
 
     useEffect(() => {
         let timeoutId;
         let isMounted = true;
+
+        // Reset the counter whenever polling starts again
+        attemptsRef.current = 0;
+        setAttempts(0);
 
         const verifyPayment = async () => {
             try {
@@ -34,7 +43,7 @@ export default function PaymentCallback() {
                 if (response.data.isUpdated) {
                     // Payment was successful and subscription updated
                     setStatus('success');
-                    setMessage('🎉 Payment successful! Your subscription is now active.');
+                    setMessage(t('payment.success_message'));
 
                     // Wait a moment then redirect to dashboard
                     setTimeout(() => {
@@ -42,29 +51,31 @@ export default function PaymentCallback() {
                             navigate('/dashboard?payment=success', { replace: true });
                         }
                     }, 2000);
-                } else if (attempts < MAX_ATTEMPTS) {
+                } else if (attemptsRef.current < MAX_ATTEMPTS) {
                     // Not yet updated, might be webhook delay
-                    setAttempts(prev => prev + 1);
-                    setMessage(`Confirming your payment... (${attempts + 1}/${MAX_ATTEMPTS})`);
+                    attemptsRef.current += 1;
+                    setAttempts(attemptsRef.current);
+                    setMessage(t('payment.confirming', { current: attemptsRef.current, max: MAX_ATTEMPTS }));
 
                     // Poll again after interval
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
                 } else {
                     // Max attempts reached, show pending status
                     setStatus('pending');
-                    setMessage('Your payment is being processed. This may take a few moments.');
+                    setMessage(t('payment.pending_message'));
                 }
             } catch (error) {
                 console.error('Payment verification error:', error);
 
                 if (!isMounted) return;
 
-                if (attempts < MAX_ATTEMPTS) {
-                    setAttempts(prev => prev + 1);
+                if (attemptsRef.current < MAX_ATTEMPTS) {
+                    attemptsRef.current += 1;
+                    setAttempts(attemptsRef.current);
                     timeoutId = setTimeout(verifyPayment, POLL_INTERVAL);
                 } else {
                     setStatus('error');
-                    setMessage('Unable to verify payment. Please check your email for confirmation.');
+                    setMessage(t('payment.error_message'));
                 }
             }
         };
@@ -76,7 +87,9 @@ export default function PaymentCallback() {
             isMounted = false;
             if (timeoutId) clearTimeout(timeoutId);
         };
-    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+        // Re-runs (restarts polling) when handleRetry bumps retryCount
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [retryCount, expectedPlan]);
 
     const handleContinue = () => {
         navigate('/dashboard?payment=success', { replace: true });
@@ -84,8 +97,9 @@ export default function PaymentCallback() {
 
     const handleRetry = () => {
         setStatus('verifying');
-        setAttempts(0);
-        setMessage('Verifying your payment...');
+        setMessage(t('payment.verifying'));
+        // Bumping this re-runs the effect and restarts polling
+        setRetryCount((c) => c + 1);
     };
 
     const handleContactSupport = () => {
@@ -94,13 +108,13 @@ export default function PaymentCallback() {
 
     return (
         <div className="payment-callback">
-            <div className="payment-callback-card">
+            <div className="payment-callback-card" role="status" aria-live="polite">
                 {status === 'verifying' && (
                     <>
                         <div className="payment-callback-spinner">
-                            <LoadingSpinner />
+                            <div className="spinner" aria-hidden="true" />
                         </div>
-                        <h2>Processing Payment</h2>
+                        <h2>{t('payment.processing_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <div className="progress-bar">
                             <div
@@ -114,36 +128,36 @@ export default function PaymentCallback() {
                 {status === 'success' && (
                     <>
                         <div className="payment-callback-icon success">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
                                 <polyline points="22 4 12 14.01 9 11.01" />
                             </svg>
                         </div>
-                        <h2>Payment Successful!</h2>
+                        <h2>{t('payment.success_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
-                        <p className="payment-callback-submessage">Redirecting to dashboard...</p>
+                        <p className="payment-callback-submessage">{t('payment.redirecting')}</p>
                     </>
                 )}
 
                 {status === 'pending' && (
                     <>
                         <div className="payment-callback-icon pending">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10" />
                                 <polyline points="12 6 12 12 16 14" />
                             </svg>
                         </div>
-                        <h2>Payment Processing</h2>
+                        <h2>{t('payment.pending_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <p className="payment-callback-submessage">
-                            You'll receive an email confirmation shortly. Your subscription will be activated automatically.
+                            {t('payment.pending_submessage')}
                         </p>
                         <div className="payment-callback-actions">
                             <button className="btn-primary" onClick={handleContinue}>
-                                Continue to Dashboard
+                                {t('homepage.continue_dashboard')}
                             </button>
                             <button className="btn-secondary" onClick={handleRetry}>
-                                Check Again
+                                {t('payment.check_again')}
                             </button>
                         </div>
                     </>
@@ -152,30 +166,30 @@ export default function PaymentCallback() {
                 {status === 'error' && (
                     <>
                         <div className="payment-callback-icon error">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                                 <circle cx="12" cy="12" r="10" />
                                 <line x1="12" y1="8" x2="12" y2="12" />
                                 <line x1="12" y1="16" x2="12.01" y2="16" />
                             </svg>
                         </div>
-                        <h2>Verification Issue</h2>
+                        <h2>{t('payment.error_title')}</h2>
                         <p className="payment-callback-message">{message}</p>
                         <p className="payment-callback-submessage">
-                            If you completed the payment, your subscription should be activated within a few minutes.
+                            {t('payment.error_submessage')}
                         </p>
                         <div className="payment-callback-actions">
                             <button className="btn-primary" onClick={handleContinue}>
-                                Continue to Dashboard
+                                {t('homepage.continue_dashboard')}
                             </button>
                             <button className="btn-secondary" onClick={handleContactSupport}>
-                                Contact Support
+                                {t('payment.contact_support')}
                             </button>
                         </div>
                     </>
                 )}
 
                 <div className="payment-callback-footer">
-                    <p>Secure payment powered by <strong>Gumroad</strong></p>
+                    <p>{t('payment.footer_secure')} <strong>Gumroad</strong></p>
                 </div>
             </div>
         </div>

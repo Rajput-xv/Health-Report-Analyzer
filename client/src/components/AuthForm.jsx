@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
 import { login, register, googleAuth } from "../utils/api";
 import { toast } from 'react-toastify';
-import { FileText, Menu, X, Home } from 'lucide-react';
 import "../styles/AuthForm.css";
 import GoogleButton from "react-google-button";
 import { auth, provider, signInWithPopup } from "./firebase.jsx";
-import DarkModeToggle from './DarkModeToggle';
-import LanguageSwitcher from './LanguageSwitcher';
 import Header from './Header';
-import AOS from 'aos';
 
 // SVG Icon for password visibility toggle
 const EyeIcon = ({ size = 20, color = "#6b7280" }) => (
@@ -20,7 +16,7 @@ const EyeIcon = ({ size = 20, color = "#6b7280" }) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke={color}
+    stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -37,7 +33,7 @@ const EyeOffIcon = ({ size = 20, color = "#6b7280" }) => (
     height={size}
     viewBox="0 0 24 24"
     fill="none"
-    stroke={color}
+    stroke="currentColor"
     strokeWidth="2"
     strokeLinecap="round"
     strokeLinejoin="round"
@@ -47,6 +43,8 @@ const EyeOffIcon = ({ size = 20, color = "#6b7280" }) => (
   </svg>
 );
 
+// Allowed special chars - used by both the checklist and the validator so they agree
+const SPECIAL_CHAR_REGEX = /[@$!%*?&]/;
 const validatePassword = (password) => {
   const strongRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
   return strongRegex.test(password);
@@ -55,7 +53,6 @@ const validatePassword = (password) => {
 const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
   const { t } = useTranslation();
   const [isLogin, setIsLogin] = useState(isLoginProp);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -76,6 +73,10 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
   });
 
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Where to go after a successful auth: honor ?redirect=, else home.
+  const rp = searchParams.get('redirect');
+  const redirectTo = rp ? (rp.startsWith('/') ? rp : '/' + rp) : '/';
 
   // Track password changes live
   const handlePasswordChange = (e) => {
@@ -87,7 +88,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
       upper: /[A-Z]/.test(value),
       lower: /[a-z]/.test(value),
       number: /[0-9]/.test(value),
-      special: /[!@#$%^&*(),.?":{}|<>]/.test(value),
+      special: SPECIAL_CHAR_REGEX.test(value),
     });
   };
 
@@ -106,46 +107,35 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
     });
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
   const handleGoogleSignIn = async () => {
     try {
       setLoading(true);
       setError("");
       const result = await signInWithPopup(auth, provider);
-      const user = {
-        firstName: result.user.displayName.split(" ")[0],
-        lastName: result.user.displayName.split(" ")[1] || "",
-        email: result.user.email,
-      };
+      // Send the Firebase ID token; the server reads the name/email from it
+      const idToken = await result.user.getIdToken();
 
       // Use our backend API to authenticate with Google
-      const data = await googleAuth(user);
+      const data = await googleAuth(idToken);
 
       if (data.success) {
         // Save token and user locally
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
 
-        toast.success(t('toast.login_success').replace('Welcome back!', `Welcome, ${data.user.firstName}!`));
+        toast.success(t('toast.login_success_google', { name: data.user.firstName }));
         onLogin(data.user, data.token);
-        navigate("/");
+        navigate(redirectTo);
       } else {
-        const errorMsg = data.error || "Google sign-in failed. Please try again.";
+        const errorMsg = data.error || t('toast.google_failed');
         setError(errorMsg);
         toast.error(errorMsg);
       }
     } catch (error) {
       console.error("Google sign-in error:", error);
-      const errorMsg = "Google sign-in failed. Please try again.";
+      const errorMsg = t('toast.google_failed');
       setError(errorMsg);
-      toast.error("Google authentication failed. Please try again.");
+      toast.error(t('toast.google_auth_failed'));
     } finally {
       setLoading(false);
     }
@@ -196,20 +186,20 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
 
         // Success toasts
         if (isLogin) {
-          toast.success(t('toast.login_success').replace('Welcome back!', `Welcome back, ${data.user.firstName}!`));
+          toast.success(t('toast.login_success_named', { name: data.user.firstName }));
         } else {
-          toast.success(t('toast.signup_success').replace('Account created successfully!', `Account created successfully! Welcome, ${data.user.firstName}!`));
+          toast.success(t('toast.signup_success_named', { name: data.user.firstName }));
         }
 
         onLogin(data.user, data.token);
-        navigate("/");
+        navigate(redirectTo);
       } else {
-        const errorMessage = data.error || "Authentication failed";
+        const errorMessage = data.error || t('toast.auth_failed');
         setError(errorMessage);
         toast.error(errorMessage);
       }
     } catch (error) {
-      const errorMessage = error.message || "Network error. Please try again.";
+      const errorMessage = error.message || t('toast.network_error');
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -231,71 +221,8 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
 
   return (
     <div className="auth-page">
-      {/* Mobile Only Header (Shared) */}
-      <div className="mobile-only-header">
-        <Header user={null} setUser={() => { }} />
-      </div>
-
-      {/* Auth Page Header (Desktop Only) */}
-      <header className="auth-header desktop-only-auth-header">
-        <div className="auth-header-content">
-          <div className="auth-logo">
-            <FileText className="auth-logo-icon" />
-            <Link to="/" className="auth-logo-text">
-              {t('app.title')}
-            </Link>
-          </div>
-
-          <div className="auth-header-buttons desktop-nav">
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-            <button className="auth-home-button" onClick={() => navigate('/')}>
-              <Home size={16} />
-              Home
-            </button>
-            <DarkModeToggle />
-          </div>
-
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/');
-                    closeMobileMenu();
-                  }}
-                >
-                  <Home size={16} />
-                  Home
-                </button>
-
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* The same shared navbar as the rest of the app, on every screen size */}
+      <Header user={null} setUser={() => { }} />
 
       <div className="auth-container">
         <div className="auth-card">
@@ -320,6 +247,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                     type="text"
                     id="firstName"
                     name="firstName"
+                    autoComplete="given-name"
                     value={formData.firstName}
                     onChange={handleChange}
                     required={!isLogin}
@@ -332,6 +260,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                     type="text"
                     id="lastName"
                     name="lastName"
+                    autoComplete="family-name"
                     value={formData.lastName}
                     onChange={handleChange}
                     required={!isLogin}
@@ -347,6 +276,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                 type="email"
                 id="email"
                 name="email"
+                autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
@@ -361,18 +291,21 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   name="password"
+                  autoComplete={isLogin ? "current-password" : "new-password"}
                   value={formData.password}
                   onChange={handlePasswordChange}
                   required
                   placeholder={t('auth_form.password_placeholder')}
                   minLength={8}
                 />
-                <span
+                <button
+                  type="button"
                   className="password-toggle-icon"
+                  aria-label={t(showPassword ? 'auth_form.hide_password' : 'auth_form.show_password')}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOffIcon /> : <EyeIcon />}
-                </span>
+                </button>
               </div>
               {!isLogin && (
                 <ul className="password-checklist">
@@ -393,18 +326,21 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
                     type={showConfirmPassword ? "text" : "password"}
                     id="confirmPassword"
                     name="confirmPassword"
+                    autoComplete="new-password"
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
                     placeholder={t('validation.confirm_password_placeholder')}
                     minLength={8}
                   />
-                  <span
+                  <button
+                    type="button"
                     className="password-toggle-icon"
+                    aria-label={t(showConfirmPassword ? 'auth_form.hide_password' : 'auth_form.show_password')}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
-                  </span>
+                  </button>
                 </div>
               </div>
             )}
@@ -427,10 +363,8 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
               <div style={{ marginTop: "1rem", textAlign: "right" }}>
                 <Link
                   to="/forgot-password"
-                  style={{
-                    color: "#007bff",
-                    textDecoration: "none",
-                  }}
+                  className="btn-toggle"
+                  style={{ textDecoration: "none" }}
                 >
                   {t('auth.forgot_password')}
                 </Link>
@@ -439,7 +373,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
           </form>
 
           <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
-            <GoogleButton onClick={handleGoogleSignIn} />
+            <GoogleButton onClick={handleGoogleSignIn} disabled={loading} />
           </div>
 
           <div className="auth-toggle">

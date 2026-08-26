@@ -102,7 +102,7 @@ a:active {
 
 /* ================= GLOBAL BUTTON STYLES ================= */
 /* Note: nav-link buttons are styled separately in Header.css */
-button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):not(.mobile-menu-btn):not(.mobile-close-btn):not(.mobile-menu-btn) {
+button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):not(.mobile-menu-btn):not(.mobile-close-btn):not(.btn-signin):not(.btn-signup):not(.language-select) {
   border: none;
   border-radius: 12px;
   cursor: pointer;
@@ -286,21 +286,6 @@ button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):active {
   font-style: italic;
 }
 
-.progress-bar {
-  background-color: #e2e8f0;
-  border-radius: 9999px;
-  height: 0.75rem;
-  overflow: hidden;
-  margin: 0.5rem 0;
-}
-
-.progress-fill {
-  background: linear-gradient(90deg, #3182ce, #805ad5);
-  height: 100%;
-  border-radius: 9999px;
-  transition: width 0.5s ease;
-}
-
 /* Animation for OCR processing */
 @keyframes pulse {
   0% {
@@ -473,16 +458,41 @@ button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):active {
   align-items: center;
   z-index: 99999;
   /* high value to appear above everything */
-}
-
-/* Smooth fade for loading overlay */
-.global-loading-overlay {
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
 }
 
 .global-loading-overlay.show {
   opacity: 1;
+}
+
+.dark-mode .global-loading-overlay {
+  background-color: rgba(15, 23, 42, 0.8);
+}
+
+/* Gold "Get Started" CTA - same yellow-gold as the navbar Sign Up button, so the
+   main conversion action is consistent and eye-catching in both themes. */
+.landing-primary-button.cta-gold,
+.dark-mode .landing-primary-button.cta-gold {
+  background: linear-gradient(135deg, #ffd84d 0%, #f5a623 100%);
+  color: #1a1a2e;
+  border: none;
+}
+
+/* The base button has a purple ::before overlay that fades in on hover - kill it
+   on the gold CTA so hovering doesn't flash purple over the gold. */
+.landing-primary-button.cta-gold::before {
+  display: none;
+}
+
+.landing-primary-button.cta-gold span {
+  color: #1a1a2e;
+}
+
+.landing-primary-button.cta-gold:hover,
+.dark-mode .landing-primary-button.cta-gold:hover {
+  background: linear-gradient(135deg, #ffe066 0%, #ff9f1c 100%);
+  box-shadow: 0 8px 22px rgba(245, 166, 35, 0.5);
 }
 
 .hamburger-btn {
@@ -556,25 +566,4 @@ button.btn-pill:active {
   }
 }
 
-/* Always hide hamburger on desktop */
-.mobile-menu-btn {
-  display: none !important;
-}
-
-/* Show hamburger on tablet/mobile */
-@media (max-width: 768px) {
-  .mobile-menu-btn {
-    display: flex !important;
-  }
-}
-
-/* Show hamburger and mobile nav at 1260px and below */
-@media (max-width: 1260px) {
-  .mobile-menu-btn {
-    display: flex !important;
-  }
-
-  .desktop-nav {
-    display: none !important;
-  }
-}
+/* Hamburger + desktop-nav visibility is handled in Header.css (breakpoint 1100px). */

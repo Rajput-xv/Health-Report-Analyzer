@@ -7,40 +7,9 @@
   /* overflow: visible; */
 }
 
-.app-header {
-  text-align: center;
-  padding: 3rem 2rem 2rem;
-  background: transparent;
-  width: 100%;
-}
-
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-  width: 100%;
-  flex-wrap: wrap;
-  padding: 0 20px;
-}
-
-.header-text {
-  text-align: left;
-  flex: 1;
-  min-width: 300px;
-  margin-right: 30px;
-  padding-left: 10px;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: flex-end;
-  flex-wrap: nowrap;
-  margin-left: auto;
-  padding-right: 10px;
+/* Dark mode: match the dark body gradient instead of the light purple one */
+.dark-mode .app {
+  background: linear-gradient(135deg, #0f172a 0%, #1f2937 100%);
 }
 
 /* Dashboard specific navbar styling */
@@ -1227,47 +1196,6 @@
   transform: translateY(-1px);
 }
 
-/* Header with Auth */
-.header-content {
-  display: flex;
-  justify-content: space-between;
-  /* text center-ish, button right */
-  align-items: center;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 2rem;
-  position: relative;
-}
-
-.header-text {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.header-text::after {
-  content: "";
-  display: block;
-  width: 620px;
-  /* length of the gradient line */
-  height: 4px;
-  /* thickness */
-  margin: 10px auto 0;
-  /* spacing from text */
-  border-radius: 2px;
-  background: linear-gradient(90deg, #6EE7F9, #A855F7, #F472B6);
-  /* gradient colors */
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-
 /* ---------- Dashboard Buttons ---------- */
 .btn-home,
 .btn-contact {
@@ -1630,6 +1558,9 @@
   color: #94a3b8;
 }
 
+.dark-mode .loading-text h3{color:#e5e7eb}
+.dark-mode .loading-text p, .dark-mode .loading-steps .step{color:#cbd5e1}
+
 .dark-mode .table-header,
 .dark-mode .trend-header,
 .dark-mode .chart-area {
@@ -1688,7 +1619,8 @@
   color: #e5e7eb;
 }
 
-.dark-mode .chart-unit {
+.dark-mode .chart-unit,
+.dark-mode .point-date {
   color: #9ca3af;
 }
 
@@ -1715,6 +1647,11 @@
 .dark-mode .insight-info {
   background: rgba(59, 130, 246, 0.08);
   color: #bfdbfe;
+}
+
+.dark-mode .insight-critical {
+  background: rgba(239, 68, 68, 0.08);
+  color: #fecaca;
 }
 
 .dark-mode .trend-disclaimer {
@@ -1764,18 +1701,14 @@
   background: linear-gradient(90deg, #6366f1, #8b5cf6);
 }
 
-/* App header width + alignment */
-.app-header {
-  width: 100%;
+/* Upload quota indicator */
+.dark-mode .upload-quota-indicator {
+  background: rgba(17, 24, 39, 0.85);
+  border-color: #334155;
 }
 
-.header-content {
-  display: flex;
-  align-items: center;
-}
-
-.header-actions {
-  margin-left: auto;
+.dark-mode .quota-text {
+  color: #cbd5e1;
 }
 
 /* Dark mode app-header visuals */
@@ -1787,28 +1720,28 @@
 }
 
 /* Highlight focus for keyboard navigation */
-:focus {
+:focus-visible {
   outline: 3px solid #ffeb3b;
   /* Bright yellow outline for visibility */
   outline-offset: 2px;
 }
 
 /* Specific styling for file upload area */
-.file-upload-area:focus {
+.file-upload-area:focus-visible {
   outline: 3px dashed #ffeb3b;
   /* Dashed outline for the upload area */
   outline-offset: 4px;
 }
 
 /* Buttons focus style */
-button:focus,
-a:focus {
+button:focus-visible,
+a:focus-visible {
   outline: 2px solid #ffeb3b;
   outline-offset: 2px;
   box-shadow: 0 0 5px #ffeb3b;
 }
 
 /* Optional: smooth transition for focus */
-:focus {
+:focus-visible {
   transition: outline 0.2s ease, box-shadow 0.2s ease;
 }

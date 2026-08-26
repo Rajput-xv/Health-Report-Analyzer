@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../utils/api';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'react-toastify';
+import api, { fetchTrendData, regenerateInsights } from '../utils/api';
+import TrendChart from './TrendChart';
 import '../styles/ReportList.css';
 
 export const ReportsList = ({ onSelectReport }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [reports, setReports] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -20,7 +24,7 @@ export const ReportsList = ({ onSelectReport }) => {
             const response = await api.get('/reports');
             setReports(response.data);
         } catch (err) {
-            setError('Failed to load reports');
+            setError(t('reports_detail.load_reports_error'));
             console.error(err);
         } finally {
             setLoading(false);
@@ -28,12 +32,12 @@ export const ReportsList = ({ onSelectReport }) => {
     };
 
     const handleDelete = async (reportId) => {
-        if (window.confirm('Delete this report?')) {
+        if (window.confirm(t('reports_detail.confirm_delete'))) {
             try {
                 await api.delete(`/reports/${reportId}`);
                 setReports(reports.filter(report => report._id !== reportId));
             } catch (err) {
-                alert('Failed to delete report');
+                alert(t('reports_detail.delete_error'));
             }
         }
     };
@@ -42,7 +46,7 @@ export const ReportsList = ({ onSelectReport }) => {
     if (loading) {
         return (
             <div className="reports-container">
-                <h2 className="reports-title" style={{ marginBottom: '20px' }}>My Reports</h2>
+                <h2 className="reports-title" style={{ marginBottom: '20px' }}>{t('reports_detail.my_reports')}</h2>
                 <div className="reports-grid">
                     {[1, 2, 3].map((i) => (
                         <div key={i} style={{
@@ -70,8 +74,8 @@ export const ReportsList = ({ onSelectReport }) => {
                 border: '1px solid rgba(239, 68, 68, 0.2)',
                 margin: '20px 0'
             }}>
-                <h3 style={{ color: '#dc2626' }}>{error}</h3>
-                <button onClick={fetchReports} className="btn-delete" style={{ marginTop: '10px' }}>Try Again</button>
+                <h3 className="reports-error-title">{error}</h3>
+                <button onClick={fetchReports} className="btn-delete" style={{ marginTop: '10px' }}>{t('app.try_again')}</button>
             </div>
         );
     }
@@ -87,14 +91,14 @@ export const ReportsList = ({ onSelectReport }) => {
                 border: '1px dashed rgba(102, 126, 234, 0.3)',
                 margin: '20px 0'
             }}>
-                <h3 style={{ fontSize: '1.5rem', color: '#1f2937', marginBottom: '0.75rem' }}>No Reports Yet</h3>
-                <p style={{ color: '#6b7280', marginBottom: '1.5rem' }}>Upload your first health report to get started.</p>
+                <h3 className="reports-empty-title" style={{ fontSize: '1.5rem', marginBottom: '0.75rem' }}>{t('reports_detail.no_reports_title')}</h3>
+                <p className="reports-empty-text" style={{ marginBottom: '1.5rem' }}>{t('reports_detail.no_reports_text')}</p>
                 <button
                     onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} // Assuming upload is at top
                     className="btn-view"
                     style={{ borderRadius: '50px', padding: '12px 24px', fontSize: '1rem' }}
                 >
-                    Upload Report
+                    {t('reports_detail.upload_report')}
                 </button>
             </div>
         );
@@ -104,7 +108,7 @@ export const ReportsList = ({ onSelectReport }) => {
         <div className="reports-container">
             <div className="reports-header">
                 <h2 className="reports-title">
-                    My Reports
+                    {t('reports_detail.my_reports')}
                     <span className="report-count-badge">
                         {reports.length}
                     </span>
@@ -122,7 +126,7 @@ export const ReportsList = ({ onSelectReport }) => {
                                 {reportItem.filename}
                             </div>
                             <div className="report-meta">
-                                📅 {new Date(reportItem.createdAt).toLocaleDateString()} • 📊 {reportItem.healthParameters.length} parameters
+                                📅 {new Date(reportItem.createdAt).toLocaleDateString()} • 📊 {t('reports_detail.parameters_count', { count: reportItem.healthParameters?.length || 0 })}
                             </div>
                             <div>
                                 <span
@@ -137,7 +141,7 @@ export const ReportsList = ({ onSelectReport }) => {
                                 >
                                     {reportItem.aiInsights?.riskLevel === 'High' ? '⚠️' :
                                         reportItem.aiInsights?.riskLevel === 'Moderate' ? '⚡' : '✓'}
-                                    {' '}{reportItem.aiInsights?.riskLevel || 'Analyzed'}
+                                    {' '}{reportItem.aiInsights?.riskLevel || t('reports_detail.status_analyzed')}
                                 </span>
                             </div>
                         </div>
@@ -146,13 +150,13 @@ export const ReportsList = ({ onSelectReport }) => {
                                 onClick={() => onSelectReport(reportItem._id)}
                                 className="btn-view"
                             >
-                                View
+                                {t('reports_detail.view')}
                             </button>
                             <button
                                 onClick={() => handleDelete(reportItem._id)}
                                 className="btn-delete"
                             >
-                                Delete
+                                {t('common.delete')}
                             </button>
                         </div>
                     </div>
@@ -164,12 +168,16 @@ export const ReportsList = ({ onSelectReport }) => {
 
 // Report Detail Component
 export const ReportDetail = ({ reportId, onBack }) => {
+    const { t } = useTranslation();
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [trends, setTrends] = useState(null);
+    const [regenerating, setRegenerating] = useState(false);
 
     useEffect(() => {
         fetchReport();
+        loadTrends();
     }, [reportId]);
 
     const fetchReport = async () => {
@@ -179,15 +187,40 @@ export const ReportDetail = ({ reportId, onBack }) => {
             setReport(response.data);
             setError(null);
         } catch (err) {
-            setError('Failed to load report');
+            setError(t('reports_detail.load_report_error'));
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
+    const loadTrends = async () => {
+        const data = await fetchTrendData(reportId);
+        // fetchTrendData returns the trend map on success, or an error object on failure
+        if (data && !data.error && typeof data === 'object') {
+            setTrends(data);
+        }
+    };
+
+    const handleRegenerate = async () => {
+        setRegenerating(true);
+        try {
+            const result = await regenerateInsights(reportId);
+            if (result.success && result.insights) {
+                setReport((prev) => ({ ...prev, aiInsights: result.insights }));
+                toast.success(t('reports_detail.insights_regenerated'));
+            } else {
+                toast.error(result.error || t('reports_detail.insights_error'));
+            }
+        } catch (err) {
+            toast.error(t('reports_detail.insights_error'));
+        } finally {
+            setRegenerating(false);
+        }
+    };
+
     if (loading) {
-        return <div style={{ padding: '20px', textAlign: 'center' }}>Loading report...</div>;
+        return <div className="report-state-text" style={{ padding: '20px', textAlign: 'center' }}>{t('reports_detail.loading')}</div>;
     }
 
     if (error) {
@@ -195,7 +228,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
     }
 
     if (!report) {
-        return <div style={{ padding: '20px' }}>Report not found</div>;
+        return <div className="report-state-text" style={{ padding: '20px' }}>{t('reports_detail.not_found')}</div>;
     }
 
     const getStatusColor = (status) => {
@@ -218,7 +251,8 @@ export const ReportDetail = ({ reportId, onBack }) => {
         }
     };
 
-    const groupedParams = report.healthParameters.reduce((accumulator, param) => {
+    const healthParameters = report.healthParameters || [];
+    const groupedParams = healthParameters.reduce((accumulator, param) => {
         const category = param.category || 'Other';
         if (!accumulator[category]) accumulator[category] = [];
         accumulator[category].push(param);
@@ -226,7 +260,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
     }, {});
 
     const categories = Object.keys(groupedParams).sort();
-    const abnormalParams = report.healthParameters.filter(p => ['High', 'Low', 'Abnormal'].includes(p.status));
+    const abnormalParams = healthParameters.filter(p => ['High', 'Low', 'Abnormal'].includes(p.status));
 
     return (
         <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
@@ -243,56 +277,65 @@ export const ReportDetail = ({ reportId, onBack }) => {
                     marginBottom: '20px'
                 }}
             >
-                ← Back to Reports
+                ← {t('reports_detail.back')}
             </button>
 
             <div style={{ borderBottom: '1px solid #e5e7eb', paddingBottom: '20px', marginBottom: '20px' }}>
-                <h1 style={{ margin: '0 0 10px 0', fontSize: '28px', color: '#1f2937' }}>Medical Report</h1>
-                <p style={{ margin: '0', color: '#000000', fontSize: '14px' }}>
+                <h1 className="report-detail-title" style={{ margin: '0 0 10px 0', fontSize: '28px' }}>{t('reports_detail.medical_report')}</h1>
+                <p className="report-detail-subtitle" style={{ margin: '0', fontSize: '14px' }}>
                     {new Date(report.createdAt).toLocaleDateString()} | {report.filename}
                 </p>
             </div>
 
             {report.patientInfo && (
                 <div style={{ backgroundColor: '#f3f4f6', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-                    <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#1f2937' }}>Patient Information</h3>
+                    <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#1f2937' }}>{t('reports_detail.patient_info')}</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', fontSize: '14px' }}>
-                        {report.patientInfo.name && <div><strong>Name:</strong> {report.patientInfo.name}</div>}
-                        {report.patientInfo.age && <div><strong>Age:</strong> {report.patientInfo.age}</div>}
-                        {report.patientInfo.gender && <div><strong>Gender:</strong> {report.patientInfo.gender}</div>}
-                        {report.patientInfo.testDate && <div><strong>Test Date:</strong> {report.patientInfo.testDate}</div>}
-                        {report.patientInfo.hospital && <div><strong>Hospital:</strong> {report.patientInfo.hospital}</div>}
+                        {report.patientInfo.name && <div><strong>{t('reports_detail.label_name')}:</strong> {report.patientInfo.name}</div>}
+                        {report.patientInfo.age && <div><strong>{t('reports_detail.label_age')}:</strong> {report.patientInfo.age}</div>}
+                        {report.patientInfo.gender && <div><strong>{t('reports_detail.label_gender')}:</strong> {report.patientInfo.gender}</div>}
+                        {report.patientInfo.testDate && <div><strong>{t('reports_detail.label_test_date')}:</strong> {report.patientInfo.testDate}</div>}
+                        {report.patientInfo.hospital && <div><strong>{t('reports_detail.label_hospital')}:</strong> {report.patientInfo.hospital}</div>}
                     </div>
                 </div>
             )}
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '20px' }}>
                 <div style={{ backgroundColor: '#e0f2fe', padding: '15px', borderRadius: '4px', textAlign: 'center' }}>
-                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0369a1' }}>{report.healthParameters.length}</div>
-                    <div style={{ fontSize: '12px', color: '#0c4a6e' }}>Total Parameters</div>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#0369a1' }}>{healthParameters.length}</div>
+                    <div style={{ fontSize: '12px', color: '#0c4a6e' }}>{t('reports_detail.total_parameters')}</div>
                 </div>
                 {report.aiInsights && (
                     <div style={{ backgroundColor: '#fef3c7', padding: '15px', borderRadius: '4px', textAlign: 'center' }}>
                         <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>{report.aiInsights.riskLevel || 'N/A'}</div>
-                        <div style={{ fontSize: '12px', color: '#b45309' }}>Risk Level</div>
+                        <div style={{ fontSize: '12px', color: '#b45309' }}>{t('reports_detail.risk_level')}</div>
                     </div>
                 )}
             </div>
 
             {report.aiInsights && (
                 <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fcd34d', padding: '15px', borderRadius: '4px', marginBottom: '20px' }}>
-                    <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#1f2937' }}>AI Insights</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '10px' }}>
+                        <h3 style={{ margin: 0, fontSize: '16px', color: '#1f2937' }}>{t('reports_detail.ai_insights')}</h3>
+                        <button
+                            onClick={handleRegenerate}
+                            disabled={regenerating}
+                            style={{ padding: '6px 14px', fontSize: '12px', fontWeight: 600, color: '#fff', background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '6px', cursor: regenerating ? 'not-allowed' : 'pointer', opacity: regenerating ? 0.7 : 1 }}
+                        >
+                            {regenerating ? t('reports_detail.regenerating') : t('reports_detail.regenerate')}
+                        </button>
+                    </div>
 
                     {report.aiInsights.summary && (
                         <div style={{ marginBottom: '15px' }}>
-                            <strong style={{ fontSize: '14px' }}>Summary:</strong>
+                            <strong style={{ fontSize: '14px' }}>{t('reports_detail.summary')}:</strong>
                             <p style={{ margin: '5px 0 0 0', fontSize: '14px', color: '#4b5563' }}>{report.aiInsights.summary}</p>
                         </div>
                     )}
 
                     {report.aiInsights.outliers && report.aiInsights.outliers.length > 0 && (
                         <div style={{ marginBottom: '15px' }}>
-                            <strong style={{ fontSize: '14px' }}>Outliers:</strong>
+                            <strong style={{ fontSize: '14px' }}>{t('reports_detail.outliers')}:</strong>
                             <div style={{ marginTop: '8px' }}>
                                 {report.aiInsights.outliers.map((outlier, index) => {
                                     const isNumeric = typeof outlier.value === 'number' && outlier.value !== 0;
@@ -301,7 +344,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
                                             <div><strong>{outlier.parameter}</strong></div>
                                             {isNumeric && (
                                                 <div style={{ marginBottom: '8px', fontSize: '14px', fontWeight: 'bold', color: '#1f2937' }}>
-                                                    {outlier.value} {outlier.normalRange && `(Normal: ${outlier.normalRange})`}
+                                                    {outlier.value} {outlier.normalRange && `(${t('reports_detail.normal_label')}: ${outlier.normalRange})`}
                                                 </div>
                                             )}
                                             <div style={{ color: '#6b7280' }}>{outlier.concern}</div>
@@ -315,7 +358,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
 
                     {report.aiInsights.recommendations && report.aiInsights.recommendations.length > 0 && (
                         <div style={{ marginBottom: '15px' }}>
-                            <strong style={{ fontSize: '14px' }}>Recommendations:</strong>
+                            <strong style={{ fontSize: '14px' }}>{t('reports_detail.recommendations')}:</strong>
                             <ul style={{ margin: '8px 0 0 20px', fontSize: '13px', paddingLeft: '10px' }}>
                                 {report.aiInsights.recommendations.map((recommendation, index) => (
                                     <li key={index} style={{ marginBottom: '4px' }}>{recommendation}</li>
@@ -326,7 +369,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
 
                     {report.aiInsights.positiveFindings && report.aiInsights.positiveFindings.length > 0 && (
                         <div>
-                            <strong style={{ fontSize: '14px' }}>Positive Findings:</strong>
+                            <strong style={{ fontSize: '14px' }}>{t('reports_detail.positive_findings')}:</strong>
                             <ul style={{ margin: '8px 0 0 20px', fontSize: '13px', color: '#15803d', paddingLeft: '10px' }}>
                                 {report.aiInsights.positiveFindings.map((finding, index) => (
                                     <li key={index} style={{ marginBottom: '4px' }}>✓ {finding}</li>
@@ -337,12 +380,25 @@ export const ReportDetail = ({ reportId, onBack }) => {
                 </div>
             )}
 
+            {!report.aiInsights && healthParameters.length > 0 && (
+                <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fcd34d', padding: '15px', borderRadius: '4px', marginBottom: '20px', textAlign: 'center' }}>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#92400e' }}>{t('reports_detail.no_insights')}</p>
+                    <button
+                        onClick={handleRegenerate}
+                        disabled={regenerating}
+                        style={{ padding: '8px 18px', fontSize: '13px', fontWeight: 600, color: '#fff', background: 'linear-gradient(135deg,#667eea,#764ba2)', border: 'none', borderRadius: '6px', cursor: regenerating ? 'not-allowed' : 'pointer', opacity: regenerating ? 0.7 : 1 }}
+                    >
+                        {regenerating ? t('reports_detail.regenerating') : t('reports_detail.generate_insights')}
+                    </button>
+                </div>
+            )}
+
             <div>
-                <h3 style={{ margin: '20px 0 15px 0', fontSize: '16px', color: '#1f2937' }}>Health Parameters</h3>
+                <h3 className="report-section-title" style={{ margin: '20px 0 15px 0', fontSize: '16px' }}>{t('reports_detail.health_parameters')}</h3>
 
                 {categories.map(category => (
                     <div key={category} style={{ marginBottom: '20px' }}>
-                        <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#374151', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+                        <h4 className="report-category-title" style={{ margin: '0 0 10px 0', fontSize: '14px', paddingBottom: '8px' }}>
                             {category}
                         </h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
@@ -381,7 +437,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
 
                                     {param.normalRange && param.normalRange !== 'N/A' && (
                                         <div style={{ color: '#6b7280', fontSize: '12px', marginBottom: '4px' }}>
-                                            Normal: {param.normalRange}
+                                            {t('reports_detail.normal_label')}: {param.normalRange}
                                         </div>
                                     )}
 
@@ -398,11 +454,17 @@ export const ReportDetail = ({ reportId, onBack }) => {
                 ))}
             </div>
 
+            {trends && Object.keys(trends).length > 0 && (
+                <div style={{ marginTop: '24px' }}>
+                    <TrendChart data={trends} reportId={reportId} />
+                </div>
+            )}
+
             <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f9fafb', borderRadius: '4px', fontSize: '12px', color: '#6b7280' }}>
                 <p style={{ margin: '0' }}>
                     {/* Extraction Method: <strong>{report.extractionMethod}</strong> | */}
-                    Processed: {new Date(report.createdAt).toLocaleString()}
-                    {report.geminiMetadata && ` | Confidence: ${(report.geminiMetadata.confidence * 100).toFixed(0)}%`}
+                    {t('reports_detail.processed')}: {new Date(report.createdAt).toLocaleString()}
+                    {report.geminiMetadata && ` | ${t('reports_detail.confidence')}: ${(report.geminiMetadata.confidence * 100).toFixed(0)}%`}
                 </p>
             </div>
         </div>

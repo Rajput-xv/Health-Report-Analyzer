@@ -68,6 +68,12 @@
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s;
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .message-close:hover {
@@ -554,7 +560,7 @@
 
 /* Dark Mode */
 /* Dark Mode Visibility Improvements */
-[data-theme="dark"] .pricing-card {
+body.dark-mode .pricing-card {
   background: rgba(30, 41, 59, 0.7);
   /* Semi-transparent dark blue-gray */
   backdrop-filter: blur(16px);
@@ -562,33 +568,49 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-[data-theme="dark"] .pricing-card.popular {
+body.dark-mode .pricing-card.popular {
   background: linear-gradient(180deg, rgba(102, 126, 234, 0.15) 0%, rgba(30, 41, 59, 0.8) 100%);
   border: 2px solid rgba(102, 126, 234, 0.5);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
 }
 
-[data-theme="dark"] .faq-item {
+body.dark-mode .faq-item {
   background: rgba(30, 41, 59, 0.7);
   backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-[data-theme="dark"] .usage-stats {
+body.dark-mode .usage-stats {
   background: #1f2937;
 }
 
-[data-theme="dark"] .subscription-info {
+body.dark-mode .usage-stats h3 {
+  color: #f1f5f9;
+}
+
+body.dark-mode .subscription-info {
   background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%);
   border-color: rgba(102, 126, 234, 0.4);
 }
 
-[data-theme="dark"] .manage-btn {
+body.dark-mode .manage-btn {
   background: #1f2937;
 }
 
-[data-theme="dark"] .enterprise-cta {
+body.dark-mode .enterprise-cta {
   background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+}
+
+/* Text elements the global .dark-mode heading/paragraph rules don't cover,
+   so they stay readable now that the cards go dark. */
+body.dark-mode .price,
+body.dark-mode .faq-item h4,
+body.dark-mode .feature-item {
+  color: #f1f5f9;
+}
+
+body.dark-mode .subscription-renews {
+  color: #cbd5e1;
 }
 
 /* Responsive */

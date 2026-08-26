@@ -6,9 +6,14 @@ const languages = [
   { code: 'hi', label: 'हिन्दी', flag: '🇮🇳' }
 ];
 
-export default function LanguageSwitcher({ value, className = '', darkMode = true }) {
+export default function LanguageSwitcher({ value, className = '', darkMode }) {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+
+  // Follow the real app theme unless a caller explicitly passes darkMode
+  const isDark = darkMode !== undefined
+    ? darkMode
+    : (typeof document !== 'undefined' && document.body.classList.contains('dark-mode'));
 
   const getCurrent = () => {
     const langFromI18n = i18n.language ? i18n.language.split('-')[0] : 'en';
@@ -35,10 +40,10 @@ export default function LanguageSwitcher({ value, className = '', darkMode = tru
   }, []);
 
   // Dynamic background & text color for dark/light mode
-  const dropdownBg = darkMode ? 'rgba(32, 28, 28, 0.88)' : '#f1f1f1';
-  const dropdownText = darkMode ? '#fff' : '#000';
-  const hoverBg = darkMode ? 'rgba(50, 50, 50, 0.88)' : '#ddd';
-  const selectedBg = darkMode ? 'rgba(70, 70, 70, 0.88)' : '#ccc';
+  const dropdownBg = isDark ? 'rgba(32, 28, 28, 0.88)' : '#f1f1f1';
+  const dropdownText = isDark ? '#fff' : '#000';
+  const hoverBg = isDark ? 'rgba(50, 50, 50, 0.88)' : '#ddd';
+  const selectedBg = isDark ? 'rgba(70, 70, 70, 0.88)' : '#ccc';
 
   return (
     <div className={`language-switcher ${className}`} ref={dropdownRef} style={{ position: 'relative' }}>
@@ -48,7 +53,7 @@ export default function LanguageSwitcher({ value, className = '', darkMode = tru
         className="language-select"
         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
-        {currentLanguage.flag} {currentLanguage.label} {open ? '▲' : '▼'}
+        {currentLanguage.code.toUpperCase()} {open ? '▲' : '▼'}
       </button>
 
       {open && (
@@ -64,7 +69,7 @@ export default function LanguageSwitcher({ value, className = '', darkMode = tru
             borderRadius: '8px',
             overflow: 'hidden',
             zIndex: 10,
-            boxShadow: darkMode
+            boxShadow: isDark
               ? '0 4px 12px rgba(0,0,0,0.5)'
               : '0 4px 12px rgba(0,0,0,0.15)'
           }}

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useTranslation } from 'react-i18next';
-import { FileText, Menu, X, Home } from 'lucide-react';
 import { resetPassword } from "../utils/api";
-import DarkModeToggle from './DarkModeToggle';
-import LanguageSwitcher from './LanguageSwitcher';
 import Header from './Header';
 import "../styles/AuthForm.css";
+
+// Same password rules as signup
+const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 
 const ResetPassword = () => {
   const { t } = useTranslation();
@@ -17,15 +17,6 @@ const ResetPassword = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,6 +24,12 @@ const ResetPassword = () => {
 
     if (password !== confirmPassword) {
       setMessage(t('validation.passwords_no_match'));
+      return;
+    }
+
+    // Enforce the same password rules as signup
+    if (!STRONG_PASSWORD_REGEX.test(password)) {
+      setMessage(t('auth_form.password_requirements_text'));
       return;
     }
 
@@ -46,7 +43,8 @@ const ResetPassword = () => {
         navigate('/login');
       }, 3000);
     } catch (error) {
-      setMessage(error.message);
+      setMessage(error.response?.data?.message || error.message);
+      setSuccess(false);
     } finally {
       setLoading(false);
     }
@@ -54,77 +52,14 @@ const ResetPassword = () => {
 
   return (
     <div className="auth-page">
-      {/* Mobile Only Header (Shared) */}
-      <div className="mobile-only-header">
-        <Header user={null} setUser={() => { }} />
-      </div>
-
-      {/* Auth Page Header (Desktop Only) */}
-      <header className="auth-header desktop-only-auth-header">
-        <div className="auth-header-content">
-          <div className="auth-logo">
-            <FileText className="auth-logo-icon" />
-            <Link to="/" className="auth-logo-text">
-              {t('app.title')}
-            </Link>
-          </div>
-
-          <div className="auth-header-buttons desktop-nav">
-            <div className="language-switcher-wrapper">
-              <LanguageSwitcher />
-            </div>
-            <button className="auth-home-button" onClick={() => navigate('/')}>
-              <Home size={16} />
-              {t('nav.home')}
-            </button>
-            <DarkModeToggle />
-          </div>
-
-          <button className="mobile-menu-button" onClick={toggleMobileMenu}>
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-
-        {isMobileMenuOpen && (
-          <div className="mobile-menu-overlay" onClick={closeMobileMenu}>
-            <div className="mobile-menu" onClick={(e) => e.stopPropagation()}>
-              <div className="mobile-menu-header">
-                <span className="mobile-menu-title">{t('app.title')}</span>
-                <button className="mobile-menu-close" onClick={closeMobileMenu}>
-                  <X size={20} />
-                </button>
-              </div>
-
-              <div className="mobile-menu-content">
-                <div className="mobile-menu-item">
-                  <LanguageSwitcher />
-                </div>
-
-                <button
-                  className="mobile-menu-btn"
-                  onClick={() => {
-                    navigate('/');
-                    closeMobileMenu();
-                  }}
-                >
-                  <Home size={16} />
-                  {t('nav.home')}
-                </button>
-
-                <div className="mobile-menu-item">
-                  <DarkModeToggle />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </header>
+      {/* The same shared navbar as the rest of the app, on every screen size */}
+      <Header user={null} setUser={() => { }} />
 
       <div className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
             <h2>{t('auth.reset_password')}</h2>
-            <p>Enter your new password below</p>
+            <p>{t('reset_password.subtitle')}</p>
           </div>
 
           {message && (
@@ -132,7 +67,7 @@ const ResetPassword = () => {
               {success ? "✅" : "❌"} {message}
               {success && (
                 <div style={{ fontSize: "0.9em", marginTop: "0.5rem" }}>
-                  Redirecting to login in 3 seconds...
+                  {t('reset_password.redirecting', { seconds: 3 })}
                 </div>
               )}
             </div>
@@ -149,7 +84,7 @@ const ResetPassword = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 placeholder={t('validation.new_password_placeholder')}
-                minLength={6}
+                minLength={8}
               />
               <small className="form-hint">
                 {t('validation.password_min_length')}
@@ -166,7 +101,7 @@ const ResetPassword = () => {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 placeholder={t('validation.confirm_password_placeholder')}
-                minLength={6}
+                minLength={8}
               />
             </div>
 
@@ -178,7 +113,7 @@ const ResetPassword = () => {
               {loading ? (
                 <span>
                   <span className="spinner-small"></span>
-                  Resetting...
+                  {t('reset_password.resetting')}
                 </span>
               ) : (
                 t('auth.reset_password')
@@ -204,7 +139,7 @@ const ResetPassword = () => {
 
           <div className="auth-demo">
             <p className="demo-notice">
-              🔒 <strong>Secure Platform:</strong> Your new password will be encrypted and stored securely.
+              🔒 <strong>{t('auth_form.secure_platform')}:</strong> {t('reset_password.secure_notice')}
             </p>
           </div>
         </div>
