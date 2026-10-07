@@ -2,20 +2,26 @@
  * @fileoverview Local lab-report extraction engine (no external APIs).
  *
  * Pipeline per report:
- *   1. normalize   - fix OCR character confusions, unify dashes/commas,
- *                    rewrite verbal ranges ("Upto 40" -> "<40")
+ *   1. normalize   - fix OCR character confusions, strip table pipes, unify
+ *                    dashes/commas, rewrite verbal ranges ("Upto 40" -> "<40")
  *   2. match       - find the analyte on each line via hard word-boundary
  *                    alias regexes (longest alias wins, so "MCHC" is never
  *                    captured by "MCH" and "fasting" never triggers "AST")
- *   3. tokenize    - split the rest of the line into value / unit / range,
- *                    joining the next line when a report wraps columns
- *   4. validate    - reject values outside per-analyte plausibility bounds
- *                    (kills dates, sample IDs and phone numbers), re-route
- *                    percent vs absolute differential counts by magnitude
- *   5. grade       - compute status from the report's own printed range,
- *                    an explicit H/L flag, or the knowledge-base fallback
- *
- * Exports the same signature the rest of the server already uses.
+ *   3. tokenize    - split the rest of the line into value / unit / range;
+ *                    units may precede the value ("WBC (x10^3/uL) 7.2");
+ *                    a wrapped value line is joined only when the header
+ *                    line names exactly ONE analyte (panel headers like
+ *                    "T3  T4  TSH" are skipped rather than misattributed)
+ *   4. validate    - reject tokens glued to words ("25-Hydroxy", "B12"),
+ *                    values outside per-analyte plausibility bounds (dates,
+ *                    sample IDs), re-route percent vs absolute differential
+ *                    counts by magnitude BEFORE any repair is considered
+ *   5. repair      - decimal-loss repair ("11.4" OCR'd as "114") only when
+ *                    a printed reference range on the same line corroborates
+ *                    the repaired magnitude; otherwise the token is dropped.
+ *                    Missing a value is safe; inventing one is not.
+ *   6. grade       - status from the report's own printed range, an explicit
+ *                    H/L flag, or the knowledge-base fallback range
  */
 
 const { ANALYTES, UNIT_LEXICON } = require('./labKnowledgeBase');
@@ -23,9 +29,7 @@ const { ANALYTES, UNIT_LEXICON } = require('./labKnowledgeBase');
 const BY_KEY = new Map(ANALYTES.map(a => [a.key, a]));
 
 // ---------------------------------------------------------------------------
-// 1. Alias index: compiled once, longest alias first.
-//    Boundary = "not adjacent to a letter or digit", which is stricter than
-//    \b for tokens like "a/g ratio" or "lp(a)".
+// Alias index: compiled once, longest alias first.
 // ---------------------------------------------------------------------------
 function escapeRegex(s) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -46,7 +50,7 @@ for (const analyte of ANALYTES) {
 ALIAS_INDEX.sort((a, b) => b.length - a.length);
 
 // ---------------------------------------------------------------------------
-// 2. Text normalization
+// Text normalization
 // ---------------------------------------------------------------------------
 function normalizeText(text) {
   let t = text
@@ -57,6 +61,7 @@ function normalizeText(text) {
     .replace(/[·•]/g, '.')
     .replace(/≤/g, '<')
     .replace(/≥/g, '>')
+    .replace(/\|/g, ' ')             // table rules; never part of a value
     .replace(/ /g, ' ');
 
   // Common OCR word-level fixes seen on real reports
@@ -65,7 +70,7 @@ function normalizeText(text) {
     .replace(/mg\/di\b/gi, 'mg/dL')
     .replace(/Trglycendeos|Triglycendes|Trig[il]ycerides/gi, 'Triglycerides')
     .replace(/Leu ?[o0]cyte/gi, 'Leukocyte')
-    .replace(/Ha?emog[lt1|][o0]bin/gi, 'Hemoglobin')
+    .replace(/Ha?emog[lt1][o0]bin/gi, 'Hemoglobin')
     .replace(/Chol?esterol/gi, 'Cholesterol')
     .replace(/Crea[tl][i1]nine/gi, 'Creatinine')
     .replace(/Caiculatea|Calcuiated/gi, 'Calculated');
@@ -78,11 +83,10 @@ function normalizeText(text) {
   return t;
 }
 
-// Fix digit-lookalike OCR errors inside numeric tokens only ("l2.5" -> "12.5",
-// "1O0" -> "100"). Never applied to words, so names stay intact.
+// Fix digit-lookalike OCR errors inside numeric tokens only ("l2.5" -> "12.5")
 function fixNumericToken(tok) {
   if (!/\d/.test(tok)) return tok;
-  return tok.replace(/[OoIl|]/g, ch => (ch === 'O' || ch === 'o' ? '0' : '1'));
+  return tok.replace(/[OoIl]/g, ch => (ch === 'O' || ch === 'o' ? '0' : '1'));
 }
 
 // Strip thousands separators: "1,23,000" (Indian) and "123,000" -> plain digits
@@ -91,7 +95,7 @@ function stripNumberCommas(line) {
 }
 
 // ---------------------------------------------------------------------------
-// 3. Range / value / unit tokenizers
+// Range / value / unit tokenizers
 // ---------------------------------------------------------------------------
 const RANGE_BETWEEN = /(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)/i;
 const RANGE_LT = /<\s*=?\s*(\d+(?:\.\d+)?)/;
@@ -113,6 +117,7 @@ function findRange(text) {
   return null;
 }
 
+// Unit directly AFTER a value ("118 mg/dL")
 function findUnit(text, fromIndex) {
   const slice = text.slice(fromIndex, fromIndex + 24).trimStart();
   for (const entry of UNIT_LEXICON) {
@@ -124,9 +129,18 @@ function findUnit(text, fromIndex) {
   return null;
 }
 
+// Unit ANYWHERE in a text span - for header-style layouts where the unit
+// precedes the value: "WBC (x10^3/uL)  7.2"
+function findUnitLoose(text) {
+  for (const entry of UNIT_LEXICON) {
+    if (entry.re.test(text)) return { canon: entry.canon, scale: entry.scale };
+  }
+  return null;
+}
+
 function numericTokens(text) {
   const tokens = [];
-  const re = /[\dOoIl|]*\d[\dOoIl|]*(?:\.\d+)?/g;
+  const re = /[\dOoIl]*\d[\dOoIl]*(?:\.\d+)?/g;
   let m;
   while ((m = re.exec(text)) !== null) {
     const fixed = fixNumericToken(m[0]);
@@ -138,13 +152,27 @@ function numericTokens(text) {
   return tokens;
 }
 
-// --- OCR decimal-loss repair -------------------------------------------------
-// Low-res scans drop decimal points ("0.6 - 1.3" reads as "06 - 13",
-// "11.4" as "114"). The knowledge base acts as a magnitude prior: a number
-// is "credible" for an analyte when it sits within 3x of the expected
-// bound, so dividing by 10/100 is only accepted when the raw number is NOT
-// credible and the shifted one is. Genuine extreme values (glucose 450)
-// pass the raw check first and are never touched.
+// A token glued to a word is part of a name ("25-Hydroxy", "B12", "x10^3"),
+// not a result - unless what follows is a recognized unit ("118mg/dL").
+function isWordAttached(text, tok) {
+  const before = text[tok.index - 1];
+  if (before && /[A-Za-z^_]/.test(before)) return true;
+  const after = text.slice(tok.end, tok.end + 10);
+  if (/^[-/]?[A-Za-z]{3,}/.test(after) && !findUnit(text, tok.end)) return true;
+  return false;
+}
+
+function fits(value, sanity) {
+  return value >= sanity.min && value <= sanity.max;
+}
+
+// ---------------------------------------------------------------------------
+// Knowledge-base-guided repair of printed range bounds. A bound is
+// "credible" when it sits within 3x of the KB prior; dividing by 10/100 is
+// only accepted when the raw bound is NOT credible and the shifted one is
+// ("06 - 13" for creatinine -> 0.6 - 1.3). Genuine lab ranges that merely
+// differ from the KB (70-110 vs 70-99) are credible as printed and untouched.
+// ---------------------------------------------------------------------------
 function credible(value, anchor) {
   if (anchor === null || anchor === undefined) return true;
   if (anchor === 0) return value <= 2;
@@ -161,7 +189,7 @@ function repairRangeBound(raw, kbBound) {
 }
 
 // ---------------------------------------------------------------------------
-// 4. Status
+// Status
 // ---------------------------------------------------------------------------
 function statusFromBounds(value, low, high) {
   if (low !== null && low !== undefined && value < low) return 'Low';
@@ -178,7 +206,7 @@ function formatKbRange(analyte) {
 }
 
 // ---------------------------------------------------------------------------
-// 5. Per-line extraction
+// Per-line extraction
 // ---------------------------------------------------------------------------
 const SERUM_PREFIX = /^(?:s\.|sr\.?|serum|plasma|blood|whole blood)\s+/i;
 
@@ -190,6 +218,72 @@ function matchAnalyte(line) {
   return null;
 }
 
+// How many DISTINCT analytes does this line name? Matched spans are consumed
+// so overlapping aliases of one analyte ("ldl cholesterol" + "cholesterol")
+// count once, while a panel header "T3  T4  TSH" counts three.
+function countDistinctAnalytes(line) {
+  let text = line;
+  const keys = new Set();
+  for (let i = 0; i < 6; i++) {
+    const hit = matchAnalyte(text);
+    if (!hit) break;
+    keys.add(hit.analyte.key);
+    text = text.slice(0, hit.index) + ' '.repeat(hit.matched.length) + text.slice(hit.index + hit.matched.length);
+  }
+  return keys.size;
+}
+
+function selectValue(rest, analyteIn, range) {
+  const tokens = numericTokens(rest).filter(tok =>
+    !range || tok.index < range.index || tok.index >= range.index + range.raw.length
+  );
+
+  let analyte = analyteIn;
+
+  // Pass 1: raw plausibility, with percent<->absolute reroute BEFORE repair
+  for (const tok of tokens) {
+    if (isWordAttached(rest, tok)) continue;
+
+    const unitHit = findUnit(rest, tok.end) || findUnitLoose(rest.slice(0, tok.index));
+    let value = tok.value;
+    if (unitHit && unitHit.scale !== 1 && analyte.scale) value *= unitHit.scale;
+
+    if (fits(value, analyte.sanity)) {
+      return { analyte, chosen: { ...tok, value }, unit: unitHit };
+    }
+
+    if (analyte.siblingAbs) {
+      const sib = BY_KEY.get(analyte.siblingAbs);
+      const sv = tok.value * (unitHit && sib.scale ? unitHit.scale : 1);
+      if (sv > 100 && fits(sv, sib.sanity)) {
+        return { analyte: sib, chosen: { ...tok, value: sv }, unit: unitHit };
+      }
+    }
+  }
+
+  // Pass 2: decimal-loss repair, ONLY corroborated by a printed range on the
+  // same line ("Hemoglobin 114 g/dL 13.0 - 17.0" -> 11.4). Without that
+  // corroboration the token is dropped - no value is better than a wrong one.
+  if (range) {
+    const lo = range.low;
+    const hi = range.high;
+    const floor = (lo !== null ? lo : hi) / 3;
+    const ceil = (hi !== null ? hi : lo) * 3;
+    for (const tok of tokens) {
+      if (isWordAttached(rest, tok)) continue;
+      if (/\./.test(tok.raw) || tok.value < 100) continue;
+      for (const d of [10, 100]) {
+        const v = tok.value / d;
+        if (fits(v, analyte.sanity) && v >= floor && v <= ceil) {
+          return { analyte, chosen: { ...tok, value: v }, unit: findUnit(rest, tok.end) };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
 function extractFromLine(line, nextLine) {
   const cleanLine = stripNumberCommas(line.replace(SERUM_PREFIX, ''));
   const hit = matchAnalyte(cleanLine);
@@ -197,70 +291,27 @@ function extractFromLine(line, nextLine) {
 
   let rest = cleanLine.slice(hit.index + hit.matched.length).replace(/^[\s:.\-]+/, '');
 
-  // Column wrap: name on one line, numbers on the next
+  // Column wrap: name line + values line. Only safe when this line names
+  // exactly one analyte; panel headers ("T3  T4  TSH") are skipped entirely.
   if (!/\d/.test(rest) && nextLine && /\d/.test(nextLine)) {
+    if (countDistinctAnalytes(cleanLine) > 1) return null;
     rest = stripNumberCommas(nextLine.trim());
   }
   if (!/\d/.test(rest)) return null;
 
-  // Identify the printed reference range first, then exclude its numbers
-  // from value candidates.
   const range = findRange(rest);
-  const tokens = numericTokens(rest).filter(tok =>
-    !range || tok.index < range.index || tok.index >= range.index + range.raw.length
-  );
-  if (tokens.length === 0) return null;
+  const selection = selectValue(rest, hit.analyte, range);
+  if (!selection) return null;
 
-  // Pick the first token that is plausible for this analyte; allow a
-  // unit-driven rescale, and re-route percent<->absolute differential pairs.
-  let analyte = hit.analyte;
-  let chosen = null;
-  let unit = null;
-
-  for (const tok of tokens) {
-    const unitHit = findUnit(rest, tok.end);
-    let value = tok.value;
-    if (unitHit && unitHit.scale !== 1 && analyte.scale) value *= unitHit.scale;
-
-    const fits = value >= analyte.sanity.min && value <= analyte.sanity.max;
-    if (fits) { chosen = { ...tok, value }; unit = unitHit; break; }
-
-    // Decimal-loss repair for values: only for dot-less tokens that fail
-    // sanity outright ("114" for hemoglobin -> 11.4). Must also be credible
-    // against the KB range so we never invent plausible-looking data.
-    if (!/\./.test(tok.raw) && tok.value >= 100) {
-      const anchor = analyte.range.high !== null ? analyte.range.high : analyte.range.low;
-      for (const d of [10, 100]) {
-        const v = value / d;
-        if (v >= analyte.sanity.min && v <= analyte.sanity.max && credible(v, anchor)) {
-          chosen = { ...tok, value: v };
-          unit = unitHit;
-          break;
-        }
-      }
-      if (chosen) break;
-    }
-
-    // Differential count written as absolute next to a % analyte (or vice versa)
-    if (analyte.siblingAbs) {
-      const sib = BY_KEY.get(analyte.siblingAbs);
-      let sv = tok.value * (unitHit && sib.scale ? unitHit.scale : 1);
-      if (sv >= sib.sanity.min && sv <= sib.sanity.max && sv > 100) {
-        analyte = sib;
-        chosen = { ...tok, value: sv };
-        unit = unitHit;
-        break;
-      }
-    }
-  }
-  if (!chosen) return null;
+  const { analyte, chosen, unit } = selection;
 
   // Explicit H/L flag straight after the value ("5.9 H", "132 L")
   const afterValue = rest.slice(chosen.end, chosen.end + 12);
   const flag = afterValue.match(/^\s*(?:\*\s*)?(H|L)(?![a-zA-Z])/);
 
-  // Printed range must also be plausible as a range for this analyte -
-  // a date like "12-04" next to glucose should not become its range.
+  // Printed range: scale count-style ranges to match a scaled value, repair
+  // decimal-lost bounds against the KB prior, and reject implausible leftovers
+  // (a date "12-04" next to glucose must not become its range).
   let printedRange = null;
   if (range) {
     const scaleForRange =
@@ -270,9 +321,6 @@ function extractFromLine(line, nextLine) {
     let lo = range.low === null ? null : range.low * scaleForRange;
     let hi = range.high === null ? null : range.high * scaleForRange;
 
-    // Repair decimal-loss in printed bounds against the KB prior
-    // ("06 - 13" for creatinine -> 0.6 - 1.3), reverting if the repair
-    // breaks range ordering.
     const rLo = repairRangeBound(lo, analyte.range.low);
     const rHi = repairRangeBound(hi, analyte.range.high);
     const repaired = rLo !== lo || rHi !== hi;
@@ -297,18 +345,23 @@ function extractFromLine(line, nextLine) {
 
   let status;
   let normalRange;
+  let bounds;
   if (printedRange) {
     status = statusFromBounds(chosen.value, printedRange.low, printedRange.high);
     normalRange = printedRange.text;
+    bounds = { low: printedRange.low, high: printedRange.high };
   } else if (flag) {
     status = flag[1] === 'H' ? 'High' : 'Low';
     normalRange = formatKbRange(analyte);
+    bounds = { low: analyte.range.low, high: analyte.range.high };
   } else if (analyte.range.low !== null || analyte.range.high !== null) {
     status = statusFromBounds(chosen.value, analyte.range.low, analyte.range.high);
     normalRange = formatKbRange(analyte);
+    bounds = { low: analyte.range.low, high: analyte.range.high };
   } else {
     status = 'Unknown';
     normalRange = 'N/A';
+    bounds = { low: null, high: null };
   }
 
   return {
@@ -323,6 +376,9 @@ function extractFromLine(line, nextLine) {
       category: analyte.category,
       parameterType: 'numeric',
       textValue: null,
+      // Numeric bounds for the insights engine (not persisted by the schema)
+      rangeLow: bounds.low,
+      rangeHigh: bounds.high,
     },
   };
 }

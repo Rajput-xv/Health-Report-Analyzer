@@ -10,9 +10,12 @@ const { ANALYTES, CATEGORY_ADVICE } = require('../utils/labKnowledgeBase');
 
 const BY_NAME = new Map(ANALYTES.map(a => [a.name, a]));
 
+// Fallback only: parameters coming from this repo's extractor carry numeric
+// rangeLow/rangeHigh, so the text is never re-parsed for them. This keeps
+// working for parameters from other sources (manual entry, Gemini).
 function parseRange(rangeText) {
   if (!rangeText || rangeText === 'N/A' || rangeText === 'Unknown') return null;
-  const between = rangeText.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
+  const between = rangeText.match(/(\d+(?:\.\d+)?)\s*(?:-|to)\s*(\d+(?:\.\d+)?)/i);
   if (between) return { low: parseFloat(between[1]), high: parseFloat(between[2]) };
   const lt = rangeText.match(/<\s*(\d+(?:\.\d+)?)/);
   if (lt) return { low: null, high: parseFloat(lt[1]) };
@@ -21,8 +24,17 @@ function parseRange(rangeText) {
   return null;
 }
 
-function gradeSeverity(value, rangeText) {
-  const range = parseRange(rangeText);
+function boundsOf(param) {
+  if (typeof param.rangeLow === 'number' || typeof param.rangeHigh === 'number') {
+    return {
+      low: typeof param.rangeLow === 'number' ? param.rangeLow : null,
+      high: typeof param.rangeHigh === 'number' ? param.rangeHigh : null,
+    };
+  }
+  return parseRange(param.normalRange);
+}
+
+function gradeSeverity(value, range) {
   if (!range || typeof value !== 'number' || isNaN(value)) return 'Unknown';
 
   let boundary = null;
@@ -63,7 +75,7 @@ function generateInsights(healthParameters) {
     parameter: p.name,
     value: p.value,
     normalRange: p.normalRange || '',
-    severity: gradeSeverity(p.value, p.normalRange),
+    severity: gradeSeverity(p.value, boundsOf(p)),
     concern: concernFor(p),
     recommendation: recommendationFor(p),
   }));

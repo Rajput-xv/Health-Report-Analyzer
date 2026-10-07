@@ -20,11 +20,16 @@ const pdfToImages = require('../utils/pdfToImages');
  *    which loves to re-order table cells.
  */
 
+// '+' is needed for electrolyte labels (K+, Na+); '|' is excluded - it is
+// only ever a table rule and corrupts adjacent digits. Note: under LSTM the
+// whitelist is advisory (the engine may ignore it), so the parser never
+// relies on it - it is a hint, not a guarantee.
 const CHAR_WHITELIST =
-    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,()-/:%<>=±^|*µμ ';
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,()-/:%<>=±^+*µμ ';
 
 let workerPromise = null;
 let recognizeQueue = Promise.resolve();
+let consecutiveFailures = 0;
 
 async function getWorker() {
     if (!workerPromise) {
@@ -50,11 +55,18 @@ function recognizeWith(buffer, params = {}) {
                 ...params,
             });
             const { data } = await worker.recognize(buffer);
+            consecutiveFailures = 0;
             return data;
         } catch (error) {
-            // Worker may be corrupted - force a rebuild on next call
-            try { (await workerPromise).terminate(); } catch (_) { /* ignore */ }
-            workerPromise = null;
+            // A single failure is usually a bad input buffer, not a dead
+            // worker - keep the (expensive) worker alive. Two consecutive
+            // failures suggest real corruption: rebuild on the next call.
+            consecutiveFailures++;
+            if (consecutiveFailures >= 2) {
+                try { (await workerPromise).terminate(); } catch (_) { /* ignore */ }
+                workerPromise = null;
+                consecutiveFailures = 0;
+            }
             throw error;
         }
     });
@@ -104,13 +116,19 @@ async function deskewImage(buffer) {
 }
 
 // Quality scoring - how much lab-report signal did a pass produce?
-// Uses the knowledge base's alias list instead of a 5-word hardcoded sample.
-const SCORING_TERMS = ANALYTES.flatMap(a => a.aliases.filter(al => al.length >= 4)).slice(0, 120);
+// One representative (longest) alias per analyte, ALL analytes, and each
+// analyte counts at most once - so a thyroid panel scores as well as a lipid
+// panel and near-duplicate aliases cannot inflate one analyte's weight.
+const SCORING_GROUPS = ANALYTES.map(a =>
+    a.aliases.filter(al => al.length >= 3).sort((x, y) => y.length - x.length)
+).filter(g => g.length > 0);
 
 function calculateQualityScore(text, confidence) {
     const lower = text.toLowerCase();
     const charCount = text.length;
-    const medicalTermCount = SCORING_TERMS.filter(term => lower.includes(term)).length;
+    const medicalTermCount = SCORING_GROUPS.filter(group =>
+        group.some(term => lower.includes(term))
+    ).length;
     const unitPatterns = (text.match(/\d+\.?\d*\s*(mg\/dl|mmol\/l|g\/dl|u\/l|ng\/ml|pg\/ml|meq\/l|fl|%)/gi) || []).length;
     const tablePatterns = (text.match(/\w+\s*[:\-]?\s+\d+\.?\d*/g) || []).length;
 

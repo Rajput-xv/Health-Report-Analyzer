@@ -26,7 +26,7 @@ const ANALYTES = [
   // ---------- Lipid Panel ----------
   A('cholesterol_total', 'Total Cholesterol', 'Lipid Panel',
     ['total cholesterol', 'cholesterol total', 'cholesterol, total', 'serum cholesterol', 'cholesterol'],
-    'mg/dL', { low: null, high: 200 }, { min: 50, max: 600 },
+    'mg/dL', { low: null, high: 200 }, { min: 50, max: 1200 },
     { notes: { high: 'raises cardiovascular risk; diet, exercise and sometimes medication help bring it down' } }),
   A('hdl', 'HDL Cholesterol', 'Lipid Panel',
     ['hdl cholesterol', 'hdl-c', 'hdl'],
@@ -44,7 +44,7 @@ const ANALYTES = [
     'mg/dL', { low: null, high: 130 }, { min: 20, max: 500 }),
   A('triglycerides', 'Triglycerides', 'Lipid Panel',
     ['triglycerides', 'triglyceride', 'serum triglycerides'],
-    'mg/dL', { low: null, high: 150 }, { min: 20, max: 2000 },
+    'mg/dL', { low: null, high: 150 }, { min: 20, max: 10000 },
     { notes: { high: 'often responds well to cutting sugar/refined carbs and alcohol' } }),
   A('chol_hdl_ratio', 'Cholesterol/HDL Ratio', 'Lipid Panel',
     ['cholesterol/hdl ratio', 'chol/hdl ratio', 'tc/hdl ratio', 'tc/hdl'],
@@ -59,14 +59,14 @@ const ANALYTES = [
   // ---------- Diabetes ----------
   A('glucose_fasting', 'Glucose (Fasting)', 'Diabetes',
     ['fasting blood sugar', 'fasting blood glucose', 'fasting plasma glucose', 'glucose fasting', 'glucose, fasting', 'glucose - fasting', 'fasting glucose', 'fbs', 'fpg'],
-    'mg/dL', { low: 70, high: 99 }, { min: 20, max: 800 },
+    'mg/dL', { low: 70, high: 99 }, { min: 20, max: 1500 },
     { notes: { high: 'in the 100-125 range suggests prediabetes; 126+ suggests diabetes', low: 'can cause dizziness and shakiness (hypoglycemia)' } }),
   A('glucose_pp', 'Glucose (Post-Prandial)', 'Diabetes',
     ['post prandial blood sugar', 'postprandial blood sugar', 'post prandial glucose', 'glucose post prandial', 'glucose pp', 'ppbs', 'pp blood sugar', 'glucose (pp)', '2 hour post prandial'],
-    'mg/dL', { low: 70, high: 140 }, { min: 20, max: 800 }),
+    'mg/dL', { low: 70, high: 140 }, { min: 20, max: 1500 }),
   A('glucose_random', 'Glucose (Random)', 'Diabetes',
     ['random blood sugar', 'random blood glucose', 'random glucose', 'glucose random', 'rbs', 'blood sugar', 'blood glucose', 'glucose'],
-    'mg/dL', { low: 70, high: 140 }, { min: 20, max: 800 }),
+    'mg/dL', { low: 70, high: 140 }, { min: 20, max: 1500 }),
   A('hba1c', 'Hemoglobin A1c', 'Diabetes',
     ['hemoglobin a1c', 'glycosylated hemoglobin', 'glycated hemoglobin', 'glyco hb', 'hba1c', 'hb a1c', 'a1c'],
     '%', { low: 4, high: 5.6 }, { min: 3, max: 20 },
@@ -251,7 +251,7 @@ const ANALYTES = [
 
   // ---------- Vitamins & Iron ----------
   A('vitamin_d', 'Vitamin D (25-OH)', 'Vitamins & Iron',
-    ['25-hydroxy vitamin d', '25 hydroxy vitamin d', '25-oh vitamin d', 'vitamin d (25-oh)', 'vitamin d total', 'vitamin d3', 'vitamin d', 'vit d'],
+    ['vitamin d, 25-hydroxy', 'vitamin d (25-hydroxy)', '25-hydroxy vitamin d', '25 hydroxy vitamin d', '25-oh vitamin d', 'vitamin d (25-oh)', 'vitamin d total', 'vitamin d3', 'vitamin d', 'vit d'],
     'ng/mL', { low: 30, high: 100 }, { min: 1, max: 300 },
     { notes: { low: 'is extremely common; sunlight exposure and supplementation (under guidance) usually correct it' } }),
   A('vitamin_b12', 'Vitamin B12', 'Vitamins & Iron',
@@ -319,8 +319,10 @@ const ANALYTES = [
     'ng/mL', { low: null, high: 4 }, { min: 0, max: 1000 }),
 
   // ---------- Coagulation ----------
+  // NOTE: no bare "pt" alias - "Pt." is the patient-header abbreviation on
+  // most reports and would fabricate a coagulation result from demographics.
   A('pt', 'Prothrombin Time', 'Coagulation',
-    ['prothrombin time', 'pt'],
+    ['prothrombin time', 'pt time'],
     'sec', { low: 11, high: 13.5 }, { min: 5, max: 120 }),
   A('inr', 'INR', 'Coagulation',
     ['international normalized ratio', 'inr'],

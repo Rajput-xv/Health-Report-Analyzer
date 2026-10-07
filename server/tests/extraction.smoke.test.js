@@ -141,10 +141,57 @@ check('Every outlier has a recommendation', insights.outliers.every(o => o.recom
 check('Summary names the outliers', insights.summary.includes('Vitamin D'), true);
 
 // ---------------------------------------------------------------------------
-// 5. Schema compliance - every parameter must satisfy the Report model
+// 5. Adversarial regressions - every case here previously fabricated or
+//    corrupted a value (found by code review). Missing a value is acceptable;
+//    inventing one never is.
 // ---------------------------------------------------------------------------
-console.log('\n[5] Schema compliance');
-const all = [...p1, ...p2, ...p3];
+const adversarialReport = `
+CITY LAB   Pt. Age: 45 Yrs   Sex: M
+Report Date: Glucose test done (12/04/2026)
+Neutrophils            4500   /cumm      2000 - 7000
+Triglycerides          2500   mg/dL      < 150
+Hemoglobin             114    g/dL       13.0 - 17.0
+Vitamin D, 25-Hydroxy  14.2   ng/mL      30 - 100
+WBC (x10^3/uL)         7.2               4.0 to 11.0
+T3    T4    TSH
+150   8.2   2.5
+Potassium  5.9 H  mEq/L
+`;
+
+console.log('\n[5] Adversarial regressions');
+const p5 = extractHealthParameters(adversarialReport);
+
+check('"Pt. Age: 45" does NOT fabricate Prothrombin Time', find(p5, 'Prothrombin Time'), undefined);
+check('Date "(12/04/2026)" does NOT fabricate a glucose value', find(p5, 'Glucose (Random)'), undefined);
+check('Absolute count rerouted, not shrunk to a fake %', (find(p5, 'Absolute Neutrophil Count') || {}).value, 4500);
+check('No fake Neutrophils % from the absolute row', find(p5, 'Neutrophils'), undefined);
+check('Extreme-but-real Triglycerides 2500 preserved', (find(p5, 'Triglycerides') || {}).value, 2500);
+check('Triglycerides still graded High', (find(p5, 'Triglycerides') || {}).status, 'High');
+check('Decimal-loss 114 repaired to 11.4 (range corroborates)', (find(p5, 'Hemoglobin') || {}).value, 11.4);
+check('Vitamin D value is 14.2, not the 25 from its own name', (find(p5, 'Vitamin D (25-OH)') || {}).value, 14.2);
+check('Unit-before-value WBC scaled to 7200', (find(p5, 'White Blood Cell Count') || {}).value, 7200);
+check('WBC Normal (header range scaled)', (find(p5, 'White Blood Cell Count') || {}).status, 'Normal');
+check('Panel header row does NOT misattribute T3 value to TSH', find(p5, 'TSH'), undefined);
+check('H flag honored for Potassium', (find(p5, 'Potassium') || {}).status, 'High');
+
+// Pipe-table layout: separators must not corrupt digits
+const pipeReport = `
+Glucose     |108|   mg/dL   |70 - 99|
+Hemoglobin  |14.2|  g/dL    |13.0 - 17.0|
+`;
+const p5b = extractHealthParameters(pipeReport);
+check('Pipe-wrapped value 108 intact', (find(p5b, 'Glucose (Random)') || {}).value, 108);
+check('Pipe-wrapped 14.2 intact', (find(p5b, 'Hemoglobin') || {}).value, 14.2);
+
+// Insights must use numeric bounds (no re-parsing drift)
+const sev = generateInsights(p5).outliers.find(o => o.parameter === 'Triglycerides');
+check('Severity graded from numeric bounds (TG 2500 vs <150 = Severe)', (sev || {}).severity, 'Severe');
+
+// ---------------------------------------------------------------------------
+// 6. Schema compliance - every parameter must satisfy the Report model
+// ---------------------------------------------------------------------------
+console.log('\n[6] Schema compliance');
+const all = [...p1, ...p2, ...p3, ...p5, ...p5b];
 check('All have required name', all.every(p => typeof p.name === 'string' && p.name.length > 0), true);
 check('All numeric values', all.every(p => typeof p.value === 'number' && !isNaN(p.value)), true);
 check('All status in enum', all.every(p => ['Normal', 'High', 'Low', 'Abnormal', 'Unknown', 'Present', 'Absent', 'N/A'].includes(p.status)), true);

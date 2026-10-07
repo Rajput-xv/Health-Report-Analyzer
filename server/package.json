@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node --max-old-space-size=384 --optimize-for-size server.js",
     "dev": "nodemon server.js",
+    "test": "node tests/extraction.smoke.test.js",
     "build": "echo 'No build step needed for server'"
   },
   "dependencies": {
