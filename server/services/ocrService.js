@@ -2,34 +2,88 @@ const pdfParse = require('pdf-parse');
 const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
 const { extractHealthParameters } = require('../utils/parameterExtractor');
+const { ANALYTES } = require('../utils/labKnowledgeBase');
 const pdfToImages = require('../utils/pdfToImages');
 
 /**
- * Extract text and parameters using traditional OCR (Tesseract)
- * This is the fallback when Gemini fails or is unavailable
+ * Local OCR engine (no external APIs).
+ *
+ * Design:
+ *  - One persistent Tesseract worker per process. The old code spawned a
+ *    fresh worker (and re-loaded the language model) for EVERY recognize
+ *    call - 4-6 model loads per upload. The singleton cuts OCR latency
+ *    dramatically and keeps memory flat on small dynos.
+ *  - All recognize calls are serialized through a promise queue, because a
+ *    single worker cannot run two recognitions concurrently.
+ *  - Lab reports are tables: PSM SINGLE_COLUMN (4) and SINGLE_BLOCK (6)
+ *    preserve "name value unit range" line structure far better than AUTO,
+ *    which loves to re-order table cells.
  */
 
-// Auto-rotate detection
+const CHAR_WHITELIST =
+    '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,()-/:%<>=±^|*µμ ';
+
+let workerPromise = null;
+let recognizeQueue = Promise.resolve();
+
+async function getWorker() {
+    if (!workerPromise) {
+        workerPromise = Tesseract.createWorker('eng', Tesseract.OEM.LSTM_ONLY, {
+            logger: () => { },
+        });
+    }
+    return workerPromise;
+}
+
+/**
+ * Serialized recognition through the shared worker.
+ * If the worker dies, it is discarded so the next call rebuilds it.
+ */
+function recognizeWith(buffer, params = {}) {
+    const run = recognizeQueue.then(async () => {
+        try {
+            const worker = await getWorker();
+            await worker.setParameters({
+                preserve_interword_spaces: '1',
+                tessedit_char_whitelist: CHAR_WHITELIST,
+                tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
+                ...params,
+            });
+            const { data } = await worker.recognize(buffer);
+            return data;
+        } catch (error) {
+            // Worker may be corrupted - force a rebuild on next call
+            try { (await workerPromise).terminate(); } catch (_) { /* ignore */ }
+            workerPromise = null;
+            throw error;
+        }
+    });
+    recognizeQueue = run.catch(() => { });
+    return run;
+}
+
+// Auto-rotate detection: probe rotations on a small copy (fast), apply the
+// winning rotation to the full-size image.
 async function deskewImage(buffer) {
     try {
-        const { data: { text } } = await Tesseract.recognize(buffer, 'eng', {
-            logger: () => { },
+        const probe = await sharp(buffer)
+            .resize({ width: 1200, height: 1200, fit: 'inside' })
+            .grayscale()
+            .toBuffer();
+
+        const { text } = await recognizeWith(probe, {
             tessedit_pageseg_mode: Tesseract.PSM.AUTO_ONLY,
-            tessedit_ocr_engine_mode: Tesseract.OEM.DEFAULT
         });
 
         if (text.length < 50) {
-            const rotations = [90, 180, 270];
             let bestRotation = 0;
             let bestLength = text.length;
 
-            for (const angle of rotations) {
-                const rotatedBuffer = await sharp(buffer).rotate(angle).toBuffer();
-                const { data: { text: rotatedText } } = await Tesseract.recognize(rotatedBuffer, 'eng', {
-                    logger: () => { },
-                    tessedit_pageseg_mode: Tesseract.PSM.AUTO_ONLY
+            for (const angle of [90, 180, 270]) {
+                const rotated = await sharp(probe).rotate(angle).toBuffer();
+                const { text: rotatedText } = await recognizeWith(rotated, {
+                    tessedit_pageseg_mode: Tesseract.PSM.AUTO_ONLY,
                 });
-
                 if (rotatedText.length > bestLength) {
                     bestLength = rotatedText.length;
                     bestRotation = angle;
@@ -49,20 +103,23 @@ async function deskewImage(buffer) {
     }
 }
 
-// Quality scoring
+// Quality scoring - how much lab-report signal did a pass produce?
+// Uses the knowledge base's alias list instead of a 5-word hardcoded sample.
+const SCORING_TERMS = ANALYTES.flatMap(a => a.aliases.filter(al => al.length >= 4)).slice(0, 120);
+
 function calculateQualityScore(text, confidence) {
+    const lower = text.toLowerCase();
     const charCount = text.length;
-    const medicalTerms = ['glucose', 'cholesterol', 'hemoglobin', 'triglyceride', 'creatinine'];
-    const medicalTermCount = medicalTerms.filter(term => text.toLowerCase().includes(term)).length;
-    const unitPatterns = (text.match(/\d+\.?\d*\s*(mg\/dl|mmol\/l|g\/dl|%)/gi) || []).length;
-    const tablePatterns = (text.match(/\w+\s*[:\-]\s*\d+/g) || []).length;
+    const medicalTermCount = SCORING_TERMS.filter(term => lower.includes(term)).length;
+    const unitPatterns = (text.match(/\d+\.?\d*\s*(mg\/dl|mmol\/l|g\/dl|u\/l|ng\/ml|pg\/ml|meq\/l|fl|%)/gi) || []).length;
+    const tablePatterns = (text.match(/\w+\s*[:\-]?\s+\d+\.?\d*/g) || []).length;
 
     const score = {
         content: charCount > 100 ? 50 : charCount * 0.3,
-        structure: tablePatterns * 8,
-        medicalContent: medicalTermCount * 15,
-        units: unitPatterns * 12,
-        confidence: confidence * 0.4
+        structure: Math.min(tablePatterns * 4, 80),
+        medicalContent: Math.min(medicalTermCount * 12, 180),
+        units: Math.min(unitPatterns * 10, 120),
+        confidence: (confidence || 0) * 0.4
     };
 
     return {
@@ -72,29 +129,32 @@ function calculateQualityScore(text, confidence) {
     };
 }
 
-// Preprocessing methods
-const PREPROCESSING_METHODS = [
+// Preprocessing variants - each paired with the page-segmentation mode that
+// suits it. Hard binarization (threshold) was removed: it destroys faint
+// scans; normalize + CLAHE handle contrast without data loss.
+const OCR_PASSES = [
     {
-        name: 'High-Quality Medical',
+        name: 'High-Res Linear',
+        psm: () => Tesseract.PSM.SINGLE_COLUMN,
         process: async (buffer) => sharp(buffer)
-            .resize({ width: 3000, height: 3000, fit: 'inside', withoutEnlargement: false })
+            .resize({ width: 2600, height: 2600, fit: 'inside', withoutEnlargement: false })
             .grayscale()
             .normalize()
-            .linear(1.4, -40)
-            .sharpen({ sigma: 1.5 })
-            .threshold(120)
-            .png({ compressionLevel: 6 })
+            .linear(1.3, -25)
+            .sharpen({ sigma: 1.2 })
+            .png({ compressionLevel: 4 })
             .toBuffer()
     },
     {
         name: 'Adaptive CLAHE',
+        psm: () => Tesseract.PSM.SINGLE_BLOCK,
         process: async (buffer) => sharp(buffer)
-            .resize({ width: 3000, height: 3000, fit: 'inside' })
+            .resize({ width: 2600, height: 2600, fit: 'inside' })
             .grayscale()
             .clahe({ width: 64, height: 64, maxSlope: 3 })
-            .gamma(1.3)
+            .gamma(1.2)
             .sharpen({ sigma: 1 })
-            .png({ compressionLevel: 6 })
+            .png({ compressionLevel: 4 })
             .toBuffer()
     }
 ];
@@ -108,70 +168,49 @@ async function extractTextFromImageBuffer(buffer) {
     try {
         console.log('🔍 Starting OCR extraction...');
 
-        // Auto-rotate
         const deskewedBuffer = await deskewImage(buffer);
 
-        // Quick scan first
+        // Quick pass: moderate resolution, column-preserving segmentation
         const quickBuffer = await sharp(deskewedBuffer)
-            .resize({ width: 1500, height: 1500, fit: 'inside' })
+            .resize({ width: 1600, height: 1600, fit: 'inside' })
             .grayscale()
             .normalize()
             .toBuffer();
 
-        const { data: { text: quickText, confidence: quickConf } } = await Tesseract.recognize(
-            quickBuffer, 'eng', {
-            logger: () => { },
-            tessedit_pageseg_mode: Tesseract.PSM.AUTO_ONLY
-        }
-        );
-
-        const quickScore = calculateQualityScore(quickText, quickConf);
-        console.log(`Quick scan: ${quickScore.total.toFixed(1)} pts`);
-
-        // If quick scan is good, use it
-        if (quickScore.total > 150 && quickScore.metrics.medicalTermCount > 3) {
-            console.log(`✅ OCR quick scan successful in ${Date.now() - startTime}ms`);
-            return quickText;
-        }
-
-        // Enhanced processing
-        console.log('Running enhanced OCR preprocessing...');
-        const processingPromises = PREPROCESSING_METHODS.slice(0, 2).map(async (method) => {
-            try {
-                const processedBuffer = await method.process(deskewedBuffer);
-
-                const { data: { text, confidence } } = await Tesseract.recognize(
-                    processedBuffer, 'eng', {
-                    logger: (m) => {
-                        if (m.status === 'recognizing text' && m.progress === 0) {
-                            console.log(`OCR: ${method.name}`);
-                        }
-                    },
-                    tessedit_pageseg_mode: Tesseract.PSM.AUTO,
-                    tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
-                    preserve_interword_spaces: '1',
-                    tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,()-/:% <>=±μ'
-                }
-                );
-
-                const score = calculateQualityScore(text, confidence);
-                return { text, score, method: method.name };
-
-            } catch (error) {
-                console.error(`Method ${method.name} failed:`, error.message);
-                return { text: '', score: { total: 0 }, method: method.name };
-            }
+        const quick = await recognizeWith(quickBuffer, {
+            tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
         });
 
-        const results = await Promise.all(processingPromises);
-        const bestResult = results.reduce((best, current) =>
-            current.score.total > best.score.total ? current : best
-        );
+        const quickScore = calculateQualityScore(quick.text, quick.confidence);
+        console.log(`Quick scan: ${quickScore.total.toFixed(1)} pts`);
 
-        const elapsedTime = Date.now() - startTime;
-        console.log(`✅ OCR complete: ${bestResult.method}, ${elapsedTime}ms`);
+        if (quickScore.total > 180 && quickScore.metrics.medicalTermCount > 3) {
+            console.log(`✅ OCR quick scan successful in ${Date.now() - startTime}ms`);
+            return quick.text;
+        }
 
-        return bestResult.text.length > 10 ? bestResult.text : ' ';
+        // Enhanced passes - sequential (single shared worker), best score wins.
+        // The quick result stays in the running so we never regress.
+        let best = { text: quick.text, score: quickScore, method: 'Quick' };
+
+        for (const pass of OCR_PASSES) {
+            try {
+                console.log(`OCR pass: ${pass.name}`);
+                const processed = await pass.process(deskewedBuffer);
+                const { text, confidence } = await recognizeWith(processed, {
+                    tessedit_pageseg_mode: pass.psm(),
+                });
+                const score = calculateQualityScore(text, confidence);
+                if (score.total > best.score.total) {
+                    best = { text, score, method: pass.name };
+                }
+            } catch (error) {
+                console.error(`Pass ${pass.name} failed:`, error.message);
+            }
+        }
+
+        console.log(`✅ OCR complete: ${best.method}, ${Date.now() - startTime}ms`);
+        return best.text.length > 10 ? best.text : ' ';
 
     } catch (error) {
         console.error('❌ OCR extraction error:', error);
@@ -184,20 +223,18 @@ async function extractTextFromImageBuffer(buffer) {
  */
 async function extractTextFromPDFBuffer(buffer) {
     try {
-        // Try text extraction first
+        // Digital PDFs carry a text layer - extracting it is instant and
+        // 100% accurate, so OCR is only for scanned documents.
         const data = await pdfParse(buffer);
         console.log(`📄 PDF text extracted: ${data.text.length} chars`);
         if (data.text.trim().length > 100) {
             return data.text;
         }
 
-        // If not enough text, try OCR on each page
         console.log('PDF appears to be scanned, using OCR on each page...');
         let ocrText = '';
-        let pageCount = 0;
         try {
             const imageBuffers = await pdfToImages(buffer);
-            pageCount = imageBuffers.length;
             for (let i = 0; i < imageBuffers.length; i++) {
                 try {
                     const pageText = await extractTextFromImageBuffer(imageBuffers[i]);
@@ -228,7 +265,7 @@ async function extractWithOCR(fileBuffer, mimeType) {
     const startTime = Date.now();
 
     try {
-        console.log('🔍 Starting OCR fallback extraction...');
+        console.log('🔍 Starting local extraction (no external API)...');
 
         let extractedText = '';
 
@@ -252,7 +289,7 @@ async function extractWithOCR(fileBuffer, mimeType) {
             : [];
 
         const processingTime = Date.now() - startTime;
-        console.log(`✅ OCR extraction complete: ${healthParameters.length} parameters in ${processingTime}ms`);
+        console.log(`✅ Local extraction complete: ${healthParameters.length} parameters in ${processingTime}ms`);
 
         return {
             success: healthParameters.length > 0 || isScannedDocument,
@@ -269,7 +306,7 @@ async function extractWithOCR(fileBuffer, mimeType) {
         };
 
     } catch (error) {
-        console.error('❌ OCR extraction failed:', error.message);
+        console.error('❌ Local extraction failed:', error.message);
 
         return {
             success: false,

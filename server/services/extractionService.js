@@ -1,5 +1,6 @@
 const { extractWithGemini } = require('./geminiService');
 const { extractWithOCR } = require('./ocrService');
+const { generateInsights } = require('./insightsService');
 
 /**
  * Smart hybrid extraction service
@@ -140,39 +141,12 @@ async function extractHealthData(fileBuffer, mimeType, options = {}) {
 }
 
 /**
- * Generate basic insights when OCR is used (no AI)
- * This provides minimal insights for OCR extractions
+ * Generate insights when OCR is used (no AI API involved).
+ * Delegates to the local knowledge-base-driven insights engine, which
+ * grades severity and writes per-analyte concerns/recommendations.
  */
 function generateBasicInsights(healthParameters) {
-    const outliers = healthParameters.filter(p =>
-        p.status === 'High' || p.status === 'Low'
-    );
-
-    const recommendations = [];
-    if (outliers.length > 0) {
-        recommendations.push('Some parameters are outside normal range - consult your healthcare provider');
-    } else if (healthParameters.length > 0) {
-        recommendations.push('All measured parameters appear to be within normal ranges');
-    }
-
-    return {
-        summary: outliers.length > 0
-            ? `${outliers.length} parameter(s) outside normal range detected`
-            : 'All parameters within normal ranges',
-        outliers: outliers.map(p => ({
-            parameter: p.name,
-            value: p.value,
-            normalRange: p.normalRange,
-            severity: 'Unknown',
-            concern: `${p.name} is ${p.status.toLowerCase()}`,
-            recommendation: `Consult your healthcare provider about your ${p.status.toLowerCase()} ${p.name} levels`
-        })),
-        recommendations: recommendations,
-        riskLevel: outliers.length > 2 ? 'Moderate' : outliers.length > 0 ? 'Low' : 'Low',
-        positiveFindings: healthParameters
-            .filter(p => p.status === 'Normal')
-            .map(p => `${p.name} is within normal range`)
-    };
+    return generateInsights(healthParameters || []);
 }
 
 /**
