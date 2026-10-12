@@ -12,7 +12,7 @@ import { fileURLToPath } from "node:url";
 // every prerendered route would otherwise declare itself a duplicate of "/".
 // This rewrites canonical + social URLs to be self-referential and gives the
 // public pages unique <title>/description for indexing.
-const PRERENDER_SITE = "https://health-report-analyzer-client.vercel.app";
+const PRERENDER_SITE = "https://health-report-analyzer.rajputxv.me";
 const PRERENDER_SEO = {
     "/": {
         title: "Health Report Analyzer - AI-Powered Medical Report Analysis",
@@ -106,7 +106,10 @@ function serveBlogStaticInDev() {
 let prerenderPuppeteer = {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
 };
-if (process.env.VERCEL) {
+const shouldPrerender =
+    process.env.VERCEL === "1" || process.env.ENABLE_SEO_PRERENDER === "true";
+
+if (process.env.VERCEL === "1") {
     const chromium = (await import("@sparticuz/chromium")).default;
     prerenderPuppeteer = {
         args: chromium.args,
@@ -176,14 +179,18 @@ export default defineConfig({
         // (navigator/window/localStorage, i18n, AOS) executes normally.
         // `delay` waits for App.jsx's loading gate to open before snapshotting
         // (waitForSelector('body') alone fires instantly and would bake the spinner).
-        seoPrerender({
-            routes: ["/", "/pricing", "/contact"],
-            delay: 3000,
-            removeStyle: false, // keep our inline <style> (chatbase positioning)
-            puppeteer: prerenderPuppeteer,
-            // rewrite canonical/OG + per-page title & description
-            callback: applyPrerenderSeo,
-        }),
+        ...(shouldPrerender
+            ? [
+                  seoPrerender({
+                      routes: ["/", "/pricing", "/contact"],
+                      delay: 3000,
+                      removeStyle: false, // keep our inline <style> (chatbase positioning)
+                      puppeteer: prerenderPuppeteer,
+                      // rewrite canonical/OG + per-page title & description
+                      callback: applyPrerenderSeo,
+                  }),
+              ]
+            : []),
     ],
     server: {
         port: 3000,
