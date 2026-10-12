@@ -2,7 +2,7 @@
 
 Upload a lab report (PDF or image) and get your results pulled into clean, sortable tables - with trends tracked over time, so you're not copying numbers by hand.
 
-🔗 **Try it:** https://health-report-analyzer-client.vercel.app
+🔗 **Try it:** https://health-report-analyzer.rajputxv.me
 
 ![Stars](https://img.shields.io/github/stars/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
 ![Forks](https://img.shields.io/github/forks/Rajput-xv/Health-Report-Analyzer?style=flat&logo=github)
