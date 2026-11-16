@@ -55,10 +55,10 @@ const ResetPassword = () => {
       {/* The same shared navbar as the rest of the app, on every screen size */}
       <Header user={null} setUser={() => { }} />
 
-      <div className="auth-container">
+      <main className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <h2>{t('auth.reset_password')}</h2>
+            <h1>{t('auth.reset_password')}</h1>
             <p>{t('reset_password.subtitle')}</p>
           </div>
 
@@ -143,7 +143,7 @@ const ResetPassword = () => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

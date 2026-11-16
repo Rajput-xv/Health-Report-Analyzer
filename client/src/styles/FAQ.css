@@ -41,7 +41,7 @@
   cursor: pointer;
 }
 
-.faq-question h4 {
+.faq-question h3 {
   margin: 0;
   color: #333;
   font-size: 18px;
@@ -95,7 +95,7 @@ body.dark-mode .faq-item {
   border: 1px solid rgba(255,255,255,.05);
 }
 
-body.dark-mode .faq-question h4 {
+body.dark-mode .faq-question h3 {
   color: #f1f5f9;
 }
 

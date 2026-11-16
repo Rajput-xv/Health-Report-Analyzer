@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaChevronDown } from "react-icons/fa";
+import { ChevronDown } from "lucide-react";
 import { useTranslation } from 'react-i18next';
 import "../styles/FAQ.css";
 import AOS from 'aos';
@@ -60,8 +60,9 @@ const FAQ = () => {
             aria-expanded={openIndex === idx}
             aria-controls={`faq-answer-${idx}`}
           >
-            <h4>{item.question}</h4>
-            <FaChevronDown
+            <h3>{item.question}</h3>
+            <ChevronDown
+              size="1em"
               className={`arrow ${openIndex === idx ? "rotate" : ""}`}
             />
           </button>

@@ -29,9 +29,18 @@ body.dark-mode .contact-container {
   color: #f5f5f5;
 }
 
+.contact-form-wrapper h1,
 .contact-form-wrapper h2 {
   font-size: 1.8rem;
   margin-bottom: 0.5rem;
+}
+
+.contact-form-wrapper h1 {
+  color: #2d3748;
+}
+
+body.dark-mode .contact-form-wrapper h1 {
+  color: #f3f4f6;
 }
 
 .contact-form-wrapper p {

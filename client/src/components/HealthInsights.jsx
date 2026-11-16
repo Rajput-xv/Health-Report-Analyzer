@@ -1,12 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Line } from "react-chartjs-2";
-import "chart.js/auto";
+import {
+    Chart,
+    CategoryScale,
+    Filler,
+    Legend,
+    LinearScale,
+    LineController,
+    LineElement,
+    PointElement,
+    Tooltip,
+} from "chart.js";
 import { useTranslation } from "react-i18next";
 import api, { getHealthSummary, compareReports } from "../utils/api";
 import Header from "./Header";
 import Footer from "./Footer";
 import "../styles/Insights.css";
+
+Chart.register(
+    CategoryScale,
+    Filler,
+    Legend,
+    LinearScale,
+    LineController,
+    LineElement,
+    PointElement,
+    Tooltip,
+);
 
 export default function HealthInsights({ user, setUser }) {
     const { t } = useTranslation();
@@ -15,6 +36,8 @@ export default function HealthInsights({ user, setUser }) {
     const [reports, setReports] = useState([]);
     const [summary, setSummary] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState(false);
+    const [attempt, setAttempt] = useState(0);
     const [selectedParam, setSelectedParam] = useState("");
     const [cmpA, setCmpA] = useState("");
     const [cmpB, setCmpB] = useState("");
@@ -25,6 +48,7 @@ export default function HealthInsights({ user, setUser }) {
         let alive = true;
         (async () => {
             setLoading(true);
+            setLoadError(false);
             try {
                 const [rRes, sRes] = await Promise.all([
                     api.get("/reports"),
@@ -39,6 +63,7 @@ export default function HealthInsights({ user, setUser }) {
                 setSummary(sRes);
             } catch (e) {
                 console.error("Failed to load insights:", e);
+                if (alive) setLoadError(true);
             } finally {
                 if (alive) setLoading(false);
             }
@@ -46,7 +71,7 @@ export default function HealthInsights({ user, setUser }) {
         return () => {
             alive = false;
         };
-    }, []);
+    }, [attempt]);
 
     const isNumeric = (p) =>
         (p.parameterType
@@ -133,6 +158,16 @@ export default function HealthInsights({ user, setUser }) {
 
                 {loading ? (
                     <p className="insights-muted">{t("insights.loading")}</p>
+                ) : loadError ? (
+                    <div className="insights-empty" role="alert">
+                        <p>{t("insights.load_error")}</p>
+                        <button
+                            className="insights-btn"
+                            onClick={() => setAttempt((n) => n + 1)}
+                        >
+                            {t("app.try_again")}
+                        </button>
+                    </div>
                 ) : reports.length === 0 ? (
                     <div className="insights-empty">
                         <p>{t("insights.no_reports")}</p>
@@ -167,7 +202,10 @@ export default function HealthInsights({ user, setUser }) {
                                     </div>
                                     <div className="insights-stat">
                                         <span>
-                                            {summary.summary.overallRisk}
+                                            {t(
+                                                `status.${summary.summary.overallRisk}`,
+                                                summary.summary.overallRisk,
+                                            )}
                                         </span>
                                         <label>
                                             {t("insights.overall_risk")}

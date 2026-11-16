@@ -12,32 +12,6 @@ export const refreshAnimations = () => {
 };
 
 /**
- * Adds staggered animations to a group of elements
- * @param {string} selector - CSS selector for the elements to animate
- * @param {string} animation - Animation name (e.g., 'fade-up', 'zoom-in')
- * @param {number} baseDelay - Starting delay in ms
- * @param {number} increment - Delay increment per element in ms
- */
-export const addStaggeredAnimations = (
-    selector,
-    animation = "fade-up",
-    baseDelay = 100,
-    increment = 50,
-) => {
-    setTimeout(() => {
-        const elements = document.querySelectorAll(selector);
-        elements.forEach((el, index) => {
-            el.setAttribute("data-aos", animation);
-            el.setAttribute(
-                "data-aos-delay",
-                (baseDelay + index * increment).toString(),
-            );
-        });
-        AOS.refresh();
-    }, 100);
-};
-
-/**
  * Updates AOS configuration at runtime by re-initializing with new settings
  * @param {Object} config - AOS configuration object
  */
@@ -65,17 +39,4 @@ export const checkPerformance = () => {
             offset: 50,
         });
     }
-};
-
-/**
- * Apply animation to dynamically loaded content
- * @param {HTMLElement} container - Container element with new content
- */
-export const animateDynamicContent = (container) => {
-    if (!container) return;
-
-    const elements = container.querySelectorAll("[data-aos]");
-    elements.forEach((el) => {
-        el.classList.add("aos-animate");
-    });
 };

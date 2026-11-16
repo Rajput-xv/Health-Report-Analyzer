@@ -9,7 +9,7 @@ const NotFoundPage = () => {
     const { t } = useTranslation();
 
     return (
-        <div className="not-found-container">
+        <main className="not-found-container">
             <div className="not-found-content">
                 {/* Animated 404 display */}
                 <div className="error-code" aria-hidden="true">
@@ -62,7 +62,7 @@ const NotFoundPage = () => {
                 <div className="floating-shape shape-2"></div>
                 <div className="floating-shape shape-3"></div>
             </div>
-        </div>
+        </main>
     );
 };
 

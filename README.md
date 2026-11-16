@@ -72,7 +72,8 @@ GEMINI_API_KEY=your-gemini-key          # https://aistudio.google.com/apikey
 # Google sign-in:   FIREBASE_SERVICE_ACCOUNT (JSON)  - or  FIREBASE_PROJECT_ID / FIREBASE_CLIENT_EMAIL / FIREBASE_PRIVATE_KEY
 # Password reset:   EMAIL_USER, EMAIL_PASS           (Gmail app password)
 # Contact form:     WEB3FORMS_ACCESS_KEY
-# Pro plans:        GUMROAD_* keys                   (see server/routes/payments.js)
+# Pro plans:        GUMROAD_* keys                   (see server/.env.example)
+#                   GUMROAD_WEBHOOK_SECRET           (set the Gumroad Ping URL to <api>/api/payments/webhook?secret=<value>)
 ```
 
 ## Common issues

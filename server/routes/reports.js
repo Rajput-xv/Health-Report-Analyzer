@@ -1,6 +1,5 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const { generateTrendData } = require('../utils/trendGenerator');
 const authMiddleware = require('../utils/authMiddleware');
 const Report = require('../models/Report');
 
@@ -42,31 +41,6 @@ router.get('/:id', authMiddleware, async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch report details');
     res.status(500).json({ error: 'Failed to fetch report' });
-  }
-});
-
-// Get trend data for specific parameters
-router.get('/:id/trends', authMiddleware, async (req, res) => {
-  try {
-    if (!mongoose.isValidObjectId(req.params.id)) {
-      return res.status(404).json({ error: 'Report not found' });
-    }
-    const currentReport = await Report.findOne({
-      _id: req.params.id,
-      userId: req.user.id
-    }).lean();
-
-    if (!currentReport) {
-      return res.status(404).json({ error: 'Report not found' });
-    }
-
-    // Generate trend data with dummy historical data
-    const trendData = generateTrendData(currentReport.healthParameters);
-
-    res.json(trendData);
-  } catch (error) {
-    console.error('Failed to generate trend data');
-    res.status(500).json({ error: 'Failed to generate trend data' });
   }
 });
 

@@ -102,7 +102,7 @@ a:active {
 
 /* ================= GLOBAL BUTTON STYLES ================= */
 /* Note: nav-link buttons are styled separately in Header.css */
-button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):not(.mobile-menu-btn):not(.mobile-close-btn):not(.btn-signin):not(.btn-signup):not(.language-select) {
+button:not(.nav-link):not(.user-trigger):not(.mobile-nav-link):not(.mobile-menu-btn):not(.mobile-close-btn):not(.btn-signin):not(.btn-signup):not(.language-select):not(.google-signin-btn) {
   border: none;
   border-radius: 12px;
   cursor: pointer;

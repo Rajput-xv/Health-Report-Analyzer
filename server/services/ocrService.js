@@ -3,7 +3,6 @@ const Tesseract = require('tesseract.js');
 const sharp = require('sharp');
 const { extractHealthParameters } = require('../utils/parameterExtractor');
 const { ANALYTES } = require('../utils/labKnowledgeBase');
-const pdfToImages = require('../utils/pdfToImages');
 
 /**
  * Local OCR engine (no external APIs).
@@ -27,6 +26,9 @@ const pdfToImages = require('../utils/pdfToImages');
 const CHAR_WHITELIST =
     '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,()-/:%<>=±^+*µμ ';
 
+const RECOGNIZE_TIMEOUT_MS = 60000;
+const PDF_PARSE_TIMEOUT_MS = 30000;
+
 let workerPromise = null;
 let recognizeQueue = Promise.resolve();
 let consecutiveFailures = 0;
@@ -40,32 +42,50 @@ async function getWorker() {
     return workerPromise;
 }
 
+function resetWorker() {
+    workerPromise?.then(worker => worker.terminate()).catch(() => { });
+    workerPromise = null;
+    consecutiveFailures = 0;
+}
+
+function withTimeout(promise, ms, label) {
+    let timer;
+    const timeout = new Promise((_, reject) => {
+        timer = setTimeout(() => reject(Object.assign(new Error(`${label} timed out after ${ms}ms`), { timedOut: true })), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
+async function recognize(buffer, params) {
+    const worker = await getWorker();
+    await worker.setParameters({
+        preserve_interword_spaces: '1',
+        tessedit_char_whitelist: CHAR_WHITELIST,
+        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
+        ...params,
+    });
+    const { data } = await worker.recognize(buffer);
+    return data;
+}
+
 /**
  * Serialized recognition through the shared worker.
- * If the worker dies, it is discarded so the next call rebuilds it.
+ * If the worker dies or hangs, it is discarded so the next call rebuilds it.
  */
 function recognizeWith(buffer, params = {}) {
     const run = recognizeQueue.then(async () => {
         try {
-            const worker = await getWorker();
-            await worker.setParameters({
-                preserve_interword_spaces: '1',
-                tessedit_char_whitelist: CHAR_WHITELIST,
-                tessedit_pageseg_mode: Tesseract.PSM.SINGLE_COLUMN,
-                ...params,
-            });
-            const { data } = await worker.recognize(buffer);
+            const data = await withTimeout(recognize(buffer, params), RECOGNIZE_TIMEOUT_MS, 'OCR');
             consecutiveFailures = 0;
             return data;
         } catch (error) {
             // A single failure is usually a bad input buffer, not a dead
             // worker - keep the (expensive) worker alive. Two consecutive
-            // failures suggest real corruption: rebuild on the next call.
+            // failures suggest real corruption, and a timed-out worker is
+            // still busy and would stall the queue: rebuild on the next call.
             consecutiveFailures++;
-            if (consecutiveFailures >= 2) {
-                try { (await workerPromise).terminate(); } catch (_) { /* ignore */ }
-                workerPromise = null;
-                consecutiveFailures = 0;
+            if (error.timedOut || consecutiveFailures >= 2) {
+                resetWorker();
             }
             throw error;
         }
@@ -237,39 +257,19 @@ async function extractTextFromImageBuffer(buffer) {
 }
 
 /**
- * PDF text extraction with OCR fallback
+ * PDF text-layer extraction. Scanned PDFs have no usable text layer; Gemini
+ * reads those from the PDF itself (extractionService tries it first).
  */
 async function extractTextFromPDFBuffer(buffer) {
     try {
-        // Digital PDFs carry a text layer - extracting it is instant and
-        // 100% accurate, so OCR is only for scanned documents.
-        const data = await pdfParse(buffer);
+        const data = await withTimeout(pdfParse(buffer), PDF_PARSE_TIMEOUT_MS, 'PDF parsing');
         console.log(`📄 PDF text extracted: ${data.text.length} chars`);
         if (data.text.trim().length > 100) {
             return data.text;
         }
 
-        console.log('PDF appears to be scanned, using OCR on each page...');
-        let ocrText = '';
-        try {
-            const imageBuffers = await pdfToImages(buffer);
-            for (let i = 0; i < imageBuffers.length; i++) {
-                try {
-                    const pageText = await extractTextFromImageBuffer(imageBuffers[i]);
-                    ocrText += `\n--- Page ${i + 1} ---\n` + pageText;
-                } catch (ocrErr) {
-                    ocrText += `\n--- Page ${i + 1} OCR failed: ${ocrErr.message} ---\n`;
-                }
-            }
-        } catch (imgErr) {
-            console.error('PDF to image conversion failed:', imgErr.message);
-            throw new Error('Failed to convert PDF pages to images for OCR.');
-        }
-        if (ocrText.trim().length > 0) {
-            return ocrText;
-        } else {
-            throw new Error('No text could be extracted from PDF via OCR.');
-        }
+        console.log('PDF has no usable text layer (scanned document)');
+        return ' ';
     } catch (error) {
         console.error('PDF extraction error:', error);
         return ' ';

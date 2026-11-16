@@ -107,7 +107,7 @@ export default function PaymentCallback() {
     };
 
     return (
-        <div className="payment-callback">
+        <main className="payment-callback">
             <div className="payment-callback-card" role="status" aria-live="polite">
                 {status === 'verifying' && (
                     <>
@@ -192,6 +192,6 @@ export default function PaymentCallback() {
                     <p>{t('payment.footer_secure')} <strong>Gumroad</strong></p>
                 </div>
             </div>
-        </div>
+        </main>
     );
 }

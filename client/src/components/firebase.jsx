@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 
 // Firebase configuration using environment variables
 const firebaseConfig = {
@@ -29,4 +29,4 @@ try {
   // Provide fallbacks or handle error states
 }
 
-export { auth, provider, signInWithPopup };
+export { auth, provider, signInWithPopup, signOut };

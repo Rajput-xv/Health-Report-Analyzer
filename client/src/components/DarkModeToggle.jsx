@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 // Read the current theme from the source of truth: the body.dark-mode class,
 // falling back to the persisted preference.
@@ -15,6 +16,7 @@ const applyTheme = (on) => {
 };
 
 const DarkModeToggle = () => {
+    const { t } = useTranslation();
     const [darkMode, setDarkMode] = useState(readIsDark);
 
     useEffect(() => {
@@ -47,7 +49,11 @@ const DarkModeToggle = () => {
     };
 
     return (
-        <label
+        <button
+            type="button"
+            onClick={handleToggle}
+            aria-pressed={darkMode}
+            aria-label={t("header.dark_mode")}
             style={{
                 position: "relative",
                 display: "inline-block",
@@ -55,15 +61,11 @@ const DarkModeToggle = () => {
                 height: "26px",
                 cursor: "pointer",
                 margin: "0",
+                padding: "0",
+                border: "none",
+                background: "none",
             }}
         >
-            <input
-                type="checkbox"
-                checked={darkMode}
-                onChange={handleToggle}
-                style={{ display: "none" }}
-            />
-
             {/* Track */}
             <span
                 style={{
@@ -112,7 +114,7 @@ const DarkModeToggle = () => {
                     transition: "0.3s",
                 }}
             ></span>
-        </label>
+        </button>
     );
 };
 

@@ -3,8 +3,6 @@ import { useTranslation } from "react-i18next";
 import { useSubscription } from "../context/SubscriptionContext";
 import { useNavigate } from "react-router-dom";
 import { uploadFile } from "../utils/api";
-import api from "../utils/api";
-import { useLoading } from "../context/LoadingContext";
 import { toast } from "react-toastify";
 import AOS from "aos";
 
@@ -12,24 +10,24 @@ const FileUpload = ({ onFileProcessed, onError }) => {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const [isDragOver, setIsDragOver] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
-    const [processingOcr, setProcessingOcr] = useState(false);
     const [ocrProgress, setOcrProgress] = useState(0);
     const { subscription, fetchSubscription } = useSubscription();
     const ocrTimerRef = useRef(null);
     const fileInputRef = useRef(null);
+    const isAtLimit = subscription?.canUpload === false;
+    const disabled = isAtLimit || uploading;
 
     //Reset state helper
     const resetProgress = () => {
+        setUploading(false);
         setUploadProgress(0);
-        setProcessingOcr(false);
         setOcrProgress(0);
         if (ocrTimerRef.current) {
             clearInterval(ocrTimerRef.current);
         }
     };
-
-    const { showLoading, hideLoading } = useLoading();
 
     // Fetch subscription status
     useEffect(() => {
@@ -56,12 +54,14 @@ const FileUpload = ({ onFileProcessed, onError }) => {
     const handleDrop = (e) => {
         e.preventDefault();
         setIsDragOver(false);
+        if (disabled) return;
         const files = e.dataTransfer.files;
         if (files.length > 0) handleFileUpload(files[0]);
     };
 
     const handleFileSelect = (e) => {
         const file = e.target.files[0];
+        e.target.value = "";
         if (file) handleFileUpload(file);
     };
 
@@ -82,52 +82,29 @@ const FileUpload = ({ onFileProcessed, onError }) => {
             return;
         }
 
-        try {
-            // showLoading();
-            setUploadProgress(0);
-
-            if (
-                file.type === "application/pdf" ||
-                file.name.toLowerCase().endsWith(".pdf")
-            ) {
-                setProcessingOcr(true);
-                setOcrProgress(0);
-
-                if (ocrTimerRef.current) clearInterval(ocrTimerRef.current);
-
-                ocrTimerRef.current = setInterval(() => {
-                    setOcrProgress((prev) => {
-                        if (prev >= 95) return 95;
-                        const increment =
-                            prev < 20
-                                ? 0.8
-                                : prev < 40
-                                  ? 0.5
-                                  : prev < 60
-                                    ? 0.3
-                                    : prev < 80
-                                      ? 0.2
-                                      : 0.1;
-                        return prev + increment;
-                    });
-                }, 1000);
-            }
-
-            const result = await uploadFile(file, (progress) => {
-                if (!processingOcr) setUploadProgress(progress);
+        setUploading(true);
+        ocrTimerRef.current = setInterval(() => {
+            setOcrProgress((prev) => {
+                if (prev >= 95) return 95;
+                const increment =
+                    prev < 20
+                        ? 0.8
+                        : prev < 40
+                          ? 0.5
+                          : prev < 60
+                            ? 0.3
+                            : prev < 80
+                              ? 0.2
+                              : 0.1;
+                return prev + increment;
             });
+        }, 1000);
 
-            if (ocrTimerRef.current) {
-                clearInterval(ocrTimerRef.current);
-                setOcrProgress(100);
-            }
-
-            // hideLoading();
+        try {
+            const result = await uploadFile(file, setUploadProgress);
+            onFileProcessed(result);
+            fetchSubscription();
             if (result.isScannedDocument) {
-                // The report WAS created - don't route through onError (that wipes the
-                // report view and fires a false error toast). Just nudge the user to verify.
-                onFileProcessed(result);
-                await fetchSubscription();
                 toast.info(
                     t(
                         result.requiresManualEntry
@@ -135,65 +112,45 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                             : "file_upload.scanned_verify",
                     ),
                 );
-            } else {
-                onFileProcessed(result);
-                await fetchSubscription();
             }
         } catch (error) {
             console.error("File upload error:", error);
-            if (ocrTimerRef.current) clearInterval(ocrTimerRef.current);
+            const status = error.response?.status;
+            const serverError = error.response?.data?.error;
 
-            if (error.message?.includes("No text could be extracted")) {
+            if (status === 403 && error.response.data?.upgradeRequired) {
+                fetchSubscription();
+                onError(t("file_upload.error_upgrade"));
+            } else if (serverError?.includes("No text could be extracted")) {
                 onError(t("file_upload.error_no_text"));
-            } else if (error.message?.includes("No health parameters found")) {
+            } else if (serverError?.includes("No health parameters found")) {
                 onError(t("file_upload.error_no_parameters"));
-            } else if (
-                error.message?.includes("timeout") ||
-                error.code === "ECONNABORTED"
-            ) {
+            } else if (error.code === "ECONNABORTED") {
                 onError(t("file_upload.error_timeout"));
-            } else if (
-                error.message?.includes("Network Error") ||
-                !navigator.onLine
-            ) {
+            } else if (!error.response) {
                 onError(t("file_upload.error_network"));
-            } else if (error.response?.status === 413) {
+            } else if (status === 413) {
                 onError(t("file_upload.error_413"));
-            } else if (error.response?.status === 415) {
+            } else if (status === 415) {
                 onError(t("file_upload.error_415"));
-            } else if (
-                error.response?.status === 403 &&
-                error.response?.data?.upgradeRequired
-            ) {
-                onError(
-                    t("file_upload.error_upgrade", {
-                        message: error.response.data.message,
-                    }),
-                );
-            } else if (error.response?.status >= 500) {
+            } else if (status >= 500) {
                 onError(t("file_upload.error_server"));
             } else {
-                onError(error.message || t("file_upload.error_generic"));
+                onError(serverError || t("file_upload.error_generic"));
             }
         } finally {
-            // hideLoading();
             resetProgress();
         }
     };
 
-    // Free plan at its report limit: block the picker (mouse + keyboard) and mark disabled.
-    const isAtLimit =
-        subscription?.plan === "free" &&
-        subscription?.reportsUsed >= subscription?.reportsLimit;
-
     const openFileDialog = () => {
-        if (isAtLimit) return;
+        if (disabled) return;
         fileInputRef.current?.click();
     };
 
     // Handle keyboard activation (Enter or Space)
     const handleKeyPress = (e) => {
-        if (isAtLimit) return;
+        if (disabled) return;
         if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             openFileDialog();
@@ -295,9 +252,10 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                 onDrop={handleDrop}
                 onClick={openFileDialog}
                 onKeyDown={handleKeyPress}
-                tabIndex={isAtLimit ? -1 : 0}
+                tabIndex={disabled ? -1 : 0}
                 role="button"
-                aria-disabled={isAtLimit}
+                aria-disabled={disabled}
+                aria-busy={uploading}
                 aria-label={t("file_upload.aria_label")}
             >
                 <div className="upload-icon">📄</div>
@@ -305,7 +263,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                 <p>{t("file_upload.subtext")}</p>
                 <p className="file-types">{t("file_upload.supported")}</p>
 
-                {uploadProgress > 0 && !processingOcr && (
+                {uploading && uploadProgress < 100 && (
                     <div className="upload-progress">
                         <div className="progress-bar">
                             <div
@@ -321,7 +279,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                     </div>
                 )}
 
-                {processingOcr && (
+                {uploading && uploadProgress === 100 && (
                     <div className="upload-progress">
                         <div className="progress-bar">
                             <div
@@ -329,11 +287,7 @@ const FileUpload = ({ onFileProcessed, onError }) => {
                                 style={{ width: `${ocrProgress}%` }}
                             ></div>
                         </div>
-                        <span>
-                            {ocrProgress < 100
-                                ? t("file_upload.ocr_analyzing")
-                                : t("file_upload.ocr_complete")}
-                        </span>
+                        <span>{t("file_upload.ocr_analyzing")}</span>
                         <p className="ocr-note">{t("file_upload.ocr_note")}</p>
                     </div>
                 )}

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 const bcrypt = require("bcryptjs");
 
+const USAGE_PERIOD_MS = 30 * 24 * 60 * 60 * 1000;
+
 // Subscription schema for Gumroad integration
 const subscriptionSchema = new mongoose.Schema({
   plan: {
@@ -10,15 +12,13 @@ const subscriptionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'past_due', 'cancelled', 'expired', 'trialing', 'paused', 'disputed'],
+    enum: ['active', 'past_due', 'cancelled', 'expired', 'trialing', 'paused', 'disputed', 'refunded'],
     default: 'active'
   },
   // Gumroad identifiers
   gumroadSubscriptionId: String,
-  gumroadSubscriberId: String,
   gumroadSaleId: String,
-  // Billing period
-  currentPeriodStart: Date,
+  // End of the paid period
   renewsAt: Date,
   // Usage tracking
   reportsUsedThisMonth: {
@@ -28,11 +28,6 @@ const subscriptionSchema = new mongoose.Schema({
   lastReportReset: {
     type: Date,
     default: Date.now
-  },
-  // Cancellation
-  cancelAtPeriodEnd: {
-    type: Boolean,
-    default: false
   }
 }, { _id: false });
 
@@ -70,6 +65,11 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
+  // Part of every JWT; bumping it signs the user out everywhere
+  tokenVersion: {
+    type: Number,
+    default: 0
+  },
   resetPasswordToken: {
     type: String,
     default: null
@@ -87,16 +87,23 @@ const userSchema = new mongoose.Schema({
   timestamps: true // This adds createdAt and updatedAt fields
 });
 
-// Virtual for full name
-userSchema.virtual('fullName').get(function () {
-  return `${this.firstName} ${this.lastName}`;
-});
+// A Gumroad sale or subscription can only ever back one account
+userSchema.index(
+  { 'subscription.gumroadSaleId': 1 },
+  { unique: true, partialFilterExpression: { 'subscription.gumroadSaleId': { $type: 'string' } } }
+);
+userSchema.index(
+  { 'subscription.gumroadSubscriptionId': 1 },
+  { unique: true, partialFilterExpression: { 'subscription.gumroadSubscriptionId': { $type: 'string' } } }
+);
 
-// Method to get user without password
 userSchema.methods.toSafeObject = function () {
-  const user = this.toObject();
-  delete user.password;
-  return user;
+  return {
+    id: this._id.toString(),
+    email: this.email,
+    firstName: this.firstName,
+    lastName: this.lastName
+  };
 };
 
 // Hash password before saving
@@ -113,62 +120,32 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-userSchema.methods.comparePassword = function (candidatePassword) {
-  return bcrypt.compare(candidatePassword, this.password);
-};
-
-// Method to check if user can upload reports based on subscription
-userSchema.methods.canUploadReport = function () {
-  const plan = this.subscription?.plan || 'free';
-  const limits = {
-    free: 3,
-    pro_monthly: 10,
-    pro_yearly: -1,
-    enterprise: -1
-  };
-
-  const limit = limits[plan];
-  if (limit === -1) return { allowed: true, remaining: 'unlimited' };
-
-  const used = this.subscription?.reportsUsedThisMonth || 0;
-  const remaining = Math.max(0, limit - used);
-
-  return {
-    allowed: used < limit,
-    remaining,
-    limit,
-    used
-  };
-};
-
-// Method to increment report usage
-userSchema.methods.incrementReportUsage = async function () {
-  if (!this.subscription) {
-    this.subscription = { plan: 'free', reportsUsedThisMonth: 0 };
-  }
-  this.subscription.reportsUsedThisMonth = (this.subscription.reportsUsedThisMonth || 0) + 1;
-  await this.save();
-  return this.subscription.reportsUsedThisMonth;
-};
-
-// Static method to reset monthly usage for all users (run via cron)
-userSchema.statics.resetMonthlyUsage = async function () {
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const result = await this.updateMany(
-    { 'subscription.lastReportReset': { $lt: startOfMonth } },
+userSchema.statics.resetUsageIfDue = function (userId) {
+  return this.updateOne(
     {
-      $set: {
-        'subscription.reportsUsedThisMonth': 0,
-        'subscription.lastReportReset': new Date()
-      }
-    }
+      _id: userId,
+      $or: [
+        { 'subscription.lastReportReset': { $lt: new Date(Date.now() - USAGE_PERIOD_MS) } },
+        { 'subscription.lastReportReset': null }
+      ]
+    },
+    { $set: { 'subscription.reportsUsedThisMonth': 0, 'subscription.lastReportReset': new Date() } }
   );
+};
 
-  console.log(`Reset monthly usage for ${result.modifiedCount} users`);
-  return result.modifiedCount;
+// Atomically takes one upload slot. Resolves to null when the limit is used up; -1 means unlimited.
+userSchema.statics.reserveReport = async function (userId, limit) {
+  await this.resetUsageIfDue(userId);
+  const filter = { _id: userId };
+  if (limit !== -1) filter['subscription.reportsUsedThisMonth'] = { $not: { $gte: limit } };
+  return this.findOneAndUpdate(filter, { $inc: { 'subscription.reportsUsedThisMonth': 1 } });
+};
+
+userSchema.statics.releaseReport = function (userId) {
+  return this.updateOne(
+    { _id: userId, 'subscription.reportsUsedThisMonth': { $gt: 0 } },
+    { $inc: { 'subscription.reportsUsedThisMonth': -1 } }
+  );
 };
 
 module.exports = mongoose.model('User', userSchema);

@@ -58,16 +58,11 @@ content="#111827">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Health Analyzer" />
 
-  <!-- Favicon -->
-  <link rel="shortcut icon" href="/Health Report Analyzer Logo.png" type="image/x-icon" />
-  <link rel="apple-touch-icon" sizes="180x180" href="/Health Report Analyzer Logo.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
 
   <!-- Preconnect for performance -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
-  <!-- AOS Animation -->
-  <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
   <!-- Google Site Verification -->
   <!-- <meta name="google-site-verification" content="V4eqMhokbu6jbcleIrX6VB0qJ9cwTWDKBpKcHLykJuo" /> -->
@@ -76,7 +71,6 @@ content="#111827">
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="dns-prefetch" href="//fonts.gstatic.com">
 <link rel="dns-prefetch" href="//www.chatbase.co">
-<link rel="manifest" href="/manifest.webmanifest">
 <meta name="google-site-verification" content="MaTrlAdRKyxBac_WZtLpQk5ieP62w-LL28JPvXchZrg" />
 
   <!-- Structured Data -->
@@ -150,15 +144,8 @@ content="#111827">
 <body>
   <div id="root"></div>
   <script type="module" src="/src/main.jsx"></script>
-  <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
   <script>
     (function () { if (!window.chatbase || window.chatbase("getState") !== "initialized") { window.chatbase = (...arguments) => { if (!window.chatbase.q) { window.chatbase.q = [] } window.chatbase.q.push(arguments) }; window.chatbase = new Proxy(window.chatbase, { get(target, prop) { if (prop === "q") { return target.q } return (...args) => target(prop, ...args) } }) } const onLoad = function () { const script = document.createElement("script"); script.src = "https://www.chatbase.co/embed.min.js"; script.id = "jY6ba8Rxvx__D7VSNuuxj"; script.domain = "www.chatbase.co"; document.body.appendChild(script) }; if (document.readyState === "complete") { onLoad() } else { window.addEventListener("load", onLoad) } })();
-  </script>
-  <script>
-    AOS.init({
-      once: true,
-      duration: 700
-    });
   </script>
 </body>
 

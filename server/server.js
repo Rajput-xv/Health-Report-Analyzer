@@ -1,17 +1,17 @@
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const connectDB = require('./config/database');
 require('dotenv').config();
 
-// Initialize database connection. Outside of tests, a failed connection is fatal
-// (connectDB rejects) so the process exits and the orchestrator can restart/retry
-// instead of silently running on an ephemeral database.
+// A failed connection is fatal (connectDB rejects) so the process exits and the
+// orchestrator can restart/retry.
 connectDB().catch((err) => {
   console.error('Fatal: could not establish a database connection.', err.message);
   process.exit(1);
-}); 
+});
 
 const app = express();
 const PORT = process.env.PORT || 5001;
@@ -21,9 +21,6 @@ app.set('trust proxy', 1);
 
 // Security headers (the browser CSP is set on the client host, not here)
 app.use(helmet({ contentSecurityPolicy: false }));
-
-// Set server timeout to 5 minutes for OCR processing
-app.timeout = 300000;
 
 // Basic rate limit across the whole API
 const globalLimiter = rateLimit({
@@ -45,13 +42,8 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// IMPORTANT: Gumroad webhook needs urlencoded body BEFORE express.json middleware
-// The payments route handles its own body parsing for the webhook endpoint
-app.use('/api/payments/webhook', express.urlencoded({ extended: true }));
-
-// Ensure Express handles large payloads for OCR images
-app.use(express.json({ limit: '20mb' }));
-app.use(express.urlencoded({ extended: true, limit: '20mb' }));
+// Files arrive as multipart (multer) and the Gumroad webhook parses its own form body
+app.use(express.json({ limit: '100kb' }));
 
 // API routes
 app.use('/api/auth', require('./routes/auth'));
@@ -65,7 +57,6 @@ app.use('/api/contact', require('./routes/contact'));
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
-	const mongoose = require('mongoose');
 	const dbConnected = mongoose.connection.readyState === 1;
 
 	res.json({
@@ -80,14 +71,26 @@ app.get('/api/health', (req, res) => {
 	});
 });
 
-// Centralized error handler 
+// Centralized error handler
 app.use((err, req, res, next) => {
+	// Client errors from the body parser (malformed JSON, body too large)
+	if (err.expose && err.status < 500) {
+		return res.status(err.status).json({ error: err.message });
+	}
 	console.error("Server error:", err);
 	res.status(500).json({
 		error: process.env.NODE_ENV === 'production' ? 'Internal Server Error' : err.message
 	});
 });
-app.listen(PORT, () => {
-	// Server started successfully
+
+const server = app.listen(PORT, () => {
 	console.log(`Server is running on port ${PORT}`);
 });
+
+function shutdown(signal) {
+	console.log(`${signal} received, shutting down`);
+	server.close(() => mongoose.connection.close().finally(() => process.exit(0)));
+	setTimeout(() => process.exit(1), 10000).unref();
+}
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);

@@ -1,0 +1,21 @@
+# Health Report Analyzer
+
+> Web app that reads lab reports (PDF or photo), extracts the test values into organized tables, tracks how each marker changes over time and adds plain-language summaries. For information only - it is not medical advice.
+
+Values are pulled out of uploaded reports with OCR and explained with Google Gemini. It works with common panels such as cholesterol/lipids, HbA1c, complete blood count (CBC), vitamins and thyroid. Accounts use email or Google sign-in. The free plan includes 3 reports per month; paid Pro plans add more reports and trend analysis. Always discuss results with a healthcare professional.
+
+## Pages
+
+- [Home](https://health-report-analyzer.rajputxv.me/): What the app does and how to upload a report
+- [Pricing](https://health-report-analyzer.rajputxv.me/pricing): Free and Pro plans
+- [Contact](https://health-report-analyzer.rajputxv.me/contact): Questions, feedback and support
+- [Blog](https://health-report-analyzer.rajputxv.me/blog): Plain-English guides to lab reports
+
+## Guides
+
+- [How to Read Your Blood Test Report](https://health-report-analyzer.rajputxv.me/blog/how-to-read-blood-test-report): Reference ranges, common markers, what "high" and "low" mean and when to see a doctor
+- [Understanding Your CBC Results](https://health-report-analyzer.rajputxv.me/blog/understanding-cbc-blood-count): WBC, RBC, hemoglobin, hematocrit, platelets and MCV
+- [Cholesterol and Lipid Panel Explained](https://health-report-analyzer.rajputxv.me/blog/cholesterol-lipid-panel-explained): Total cholesterol, LDL, HDL and triglycerides
+- [HbA1c Explained](https://health-report-analyzer.rajputxv.me/blog/hba1c-blood-sugar-explained): The 3-month blood sugar average and its ranges
+- [Why Tracking Lab Results Over Time Matters](https://health-report-analyzer.rajputxv.me/blog/track-lab-results-over-time): Why trends say more than a single value
+- [How AI Analyzes Your Health Reports](https://health-report-analyzer.rajputxv.me/blog/how-ai-analyzes-health-reports): How OCR and AI extract values, accuracy, privacy and limits

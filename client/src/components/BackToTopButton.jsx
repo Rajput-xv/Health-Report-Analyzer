@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaArrowUp } from "react-icons/fa";
+import { ArrowUp } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 const BackToTopButton = () => {
@@ -44,7 +44,7 @@ const BackToTopButton = () => {
         onMouseEnter={() => setShowTooltip(true)}
         onMouseLeave={() => setShowTooltip(false)}
       >
-        <FaArrowUp size={28} />
+        <ArrowUp size={28} />
         <span className={`tooltip ${showTooltip ? 'show' : ''}`}>{t('backToTop.label')}</span>
       </button>
     </div>

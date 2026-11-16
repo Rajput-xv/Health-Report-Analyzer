@@ -3,6 +3,13 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 // Initialize Gemini API
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// Use Gemini Flash for cost-efficiency. Reading a multi-page scan takes longer than text-only analysis.
+const MODEL = 'gemini-2.5-flash';
+const extractionModel = genAI.getGenerativeModel({ model: MODEL }, { timeout: 120000 });
+const analysisModel = genAI.getGenerativeModel({ model: MODEL }, { timeout: 60000 });
+
+const PARAMETER_TYPES = ['numeric', 'categorical', 'text', 'boolean'];
+
 /**
  * Extracts health parameters and generates insights from medical report image/PDF
  * @param {Buffer} fileBuffer - The file buffer (image or PDF)
@@ -14,9 +21,6 @@ async function extractWithGemini(fileBuffer, mimeType) {
 
   try {
     console.log('Starting Gemini extraction...');
-
-    // Use Gemini Flash for cost-efficiency
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
     // Convert buffer to base64 for Gemini
     const base64Data = fileBuffer.toString('base64');
@@ -95,7 +99,7 @@ VALID RISK LEVELS: "Low", "Moderate", "High"
 VALID PARAMETER TYPES: "numeric", "categorical", "text", "boolean"`;
 
     // Generate content with image
-    const result = await model.generateContent([
+    const result = await extractionModel.generateContent([
       prompt,
       {
         inlineData: {
@@ -132,16 +136,19 @@ VALID PARAMETER TYPES: "numeric", "categorical", "text", "boolean"`;
 
     // Transform and sanitize parameters
     const healthParameters = parsedData.parameters.map(p => {
+      const parameterType = PARAMETER_TYPES.includes(p.parameterType)
+        ? p.parameterType
+        : (isNaN(parseFloat(p.value)) ? 'text' : 'numeric');
       const param = {
         name: p.name || 'Unknown',
         unit: p.unit || '',
         normalRange: p.normalRange || 'N/A',
         category: p.category || 'General',
-        parameterType: p.parameterType || 'numeric'
+        parameterType
       };
 
       // Handle numeric vs categorical values
-      if (p.parameterType === 'categorical' || p.parameterType === 'text' || p.parameterType === 'boolean') {
+      if (parameterType !== 'numeric') {
         // For categorical/text, store the text and use 0 as placeholder
         param.value = 0;
         param.textValue = p.textValue || String(p.value) || 'N/A';
@@ -186,7 +193,7 @@ VALID PARAMETER TYPES: "numeric", "categorical", "text", "boolean"`;
       healthParameters: healthParameters,
       aiInsights: aiInsights,
       metadata: {
-        model: 'gemini-2.5-flash',
+        model: MODEL,
         processingTime: processingTime,
         confidence: parsedData.confidence || 0.8,
         parameterCount: healthParameters.length
@@ -214,11 +221,12 @@ function sanitizeStatus(status) {
 
   const normalized = String(status).toLowerCase().trim();
 
-  // Map various inputs to valid enum values
-  if (normalized.includes('normal') || normalized === 'within range') return 'Normal';
-  if (normalized.includes('high') || normalized.includes('elevated')) return 'High';
-  if (normalized.includes('low') || normalized.includes('decreased')) return 'Low';
+  // Map various inputs to valid enum values. 'Abnormal', 'Below normal' and 'Above normal'
+  // all contain 'normal', so they are checked first.
   if (normalized.includes('abnormal') || normalized.includes('diagnosed')) return 'Abnormal';
+  if (normalized.includes('high') || normalized.includes('elevated') || normalized.includes('above')) return 'High';
+  if (normalized.includes('low') || normalized.includes('decreased') || normalized.includes('below')) return 'Low';
+  if (normalized.includes('normal') || normalized === 'within range') return 'Normal';
   if (normalized.includes('present')) return 'Present';
   if (normalized.includes('absent') || normalized.includes('none')) return 'Absent';
 
@@ -265,15 +273,12 @@ async function reanalyzeReport(report) {
   try {
     console.log('🔄 Re-analyzing report with Gemini...');
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
     const prompt = `You are a medical advisor. Analyze these lab test results and provide insights.
 
 Lab Results:
 ${JSON.stringify(report.healthParameters, null, 2)}
 
 Patient Context:
-- Previous reports: ${report.previousReportCount || 0}
 - Test date: ${report.createdAt}
 
 Provide detailed analysis in JSON format:
@@ -305,7 +310,7 @@ Provide detailed analysis in JSON format:
 VALID SEVERITY: "Mild", "Moderate", "Severe"
 VALID RISK LEVEL: "Low", "Moderate", "High"`;
 
-    const result = await model.generateContent(prompt);
+    const result = await analysisModel.generateContent(prompt);
     const response = await result.response;
     let text = response.text().trim();
 
@@ -369,8 +374,6 @@ async function generateTrendAnalysis(reports) {
 
     console.log(`📊 Analyzing trends across ${reports.length} reports...`);
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-
     // Prepare data for analysis
     const reportData = reports.map(r => ({
       date: r.createdAt,
@@ -405,7 +408,7 @@ Provide trend analysis in JSON:
   ]
 }`;
 
-    const result = await model.generateContent(prompt);
+    const result = await analysisModel.generateContent(prompt);
     const response = await result.response;
     let text = response.text().trim();
 
@@ -441,5 +444,6 @@ Provide trend analysis in JSON:
 module.exports = {
   extractWithGemini,
   reanalyzeReport,
-  generateTrendAnalysis
+  generateTrendAnalysis,
+  sanitizeStatus
 };

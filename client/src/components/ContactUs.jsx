@@ -106,9 +106,9 @@ const ContactUs = ({ user }) => {
                     ) : (
                         <>
                             <div className="contact-header">
-                                <h2 data-aos="fade-down" data-aos-delay="200">
+                                <h1 data-aos="fade-down" data-aos-delay="200">
                                     {t("contact.title")}
-                                </h2>
+                                </h1>
                                 <p>{t("contact.feedback_question")}</p>
                             </div>
 

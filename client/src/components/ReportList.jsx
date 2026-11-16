@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'react-toastify';
-import api, { fetchTrendData, regenerateInsights } from '../utils/api';
-import TrendChart from './TrendChart';
+import api, { regenerateInsights } from '../utils/api';
 import '../styles/ReportList.css';
 
 export const ReportsList = ({ onSelectReport }) => {
@@ -135,13 +134,13 @@ export const ReportsList = ({ onSelectReport }) => {
                                         backgroundColor: reportItem.aiInsights?.riskLevel === 'High' ? 'rgba(220, 38, 38, 0.1)' :
                                             reportItem.aiInsights?.riskLevel === 'Moderate' ? 'rgba(249, 115, 22, 0.1)' :
                                                 'rgba(16, 185, 129, 0.1)',
-                                        color: reportItem.aiInsights?.riskLevel === 'High' ? '#dc2626' :
-                                            reportItem.aiInsights?.riskLevel === 'Moderate' ? '#f97316' : '#10b981'
+                                        color: reportItem.aiInsights?.riskLevel === 'High' ? '#b91c1c' :
+                                            reportItem.aiInsights?.riskLevel === 'Moderate' ? '#c2410c' : '#047857'
                                     }}
                                 >
                                     {reportItem.aiInsights?.riskLevel === 'High' ? '⚠️' :
                                         reportItem.aiInsights?.riskLevel === 'Moderate' ? '⚡' : '✓'}
-                                    {' '}{reportItem.aiInsights?.riskLevel || t('reports_detail.status_analyzed')}
+                                    {' '}{reportItem.aiInsights?.riskLevel ? t(`status.${reportItem.aiInsights.riskLevel}`, reportItem.aiInsights.riskLevel) : t('reports_detail.status_analyzed')}
                                 </span>
                             </div>
                         </div>
@@ -172,12 +171,10 @@ export const ReportDetail = ({ reportId, onBack }) => {
     const [report, setReport] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [trends, setTrends] = useState(null);
     const [regenerating, setRegenerating] = useState(false);
 
     useEffect(() => {
         fetchReport();
-        loadTrends();
     }, [reportId]);
 
     const fetchReport = async () => {
@@ -191,14 +188,6 @@ export const ReportDetail = ({ reportId, onBack }) => {
             console.error(err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const loadTrends = async () => {
-        const data = await fetchTrendData(reportId);
-        // fetchTrendData returns the trend map on success, or an error object on failure
-        if (data && !data.error && typeof data === 'object') {
-            setTrends(data);
         }
     };
 
@@ -233,9 +222,9 @@ export const ReportDetail = ({ reportId, onBack }) => {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Normal': return '#10b981';
-            case 'High': return '#ef4444';
-            case 'Low': return '#f97316';
+            case 'Normal': return '#047857';
+            case 'High': return '#b91c1c';
+            case 'Low': return '#c2410c';
             case 'Abnormal': return '#dc2626';
             default: return '#6b7280';
         }
@@ -307,7 +296,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
                 </div>
                 {report.aiInsights && (
                     <div style={{ backgroundColor: '#fef3c7', padding: '15px', borderRadius: '4px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>{report.aiInsights.riskLevel || 'N/A'}</div>
+                        <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>{report.aiInsights.riskLevel ? t(`status.${report.aiInsights.riskLevel}`, report.aiInsights.riskLevel) : 'N/A'}</div>
                         <div style={{ fontSize: '12px', color: '#b45309' }}>{t('reports_detail.risk_level')}</div>
                     </div>
                 )}
@@ -416,7 +405,7 @@ export const ReportDetail = ({ reportId, onBack }) => {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '8px' }}>
                                         <div style={{ fontWeight: 'bold', color: '#1f2937' }}>{param.name}</div>
                                         <div style={{ backgroundColor: getStatusColor(param.status), color: '#fff', padding: '2px 8px', borderRadius: '3px', fontSize: '11px', fontWeight: 'bold' }}>
-                                            {param.status}
+                                            {param.status && t(`status.${param.status}`, param.status)}
                                         </div>
                                     </div>
 
@@ -453,12 +442,6 @@ export const ReportDetail = ({ reportId, onBack }) => {
                     </div>
                 ))}
             </div>
-
-            {trends && Object.keys(trends).length > 0 && (
-                <div style={{ marginTop: '24px' }}>
-                    <TrendChart data={trends} reportId={reportId} />
-                </div>
-            )}
 
             <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f9fafb', borderRadius: '4px', fontSize: '12px', color: '#6b7280' }}>
                 <p style={{ margin: '0' }}>

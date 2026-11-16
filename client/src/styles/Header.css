@@ -412,9 +412,11 @@ body.dark-mode .main-header.scrolled {
   transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
+/* Visible at once on open so focus can move into the drawer; the fade-out keeps the delay. */
 .mobile-overlay.open {
   opacity: 1;
   visibility: visible;
+  transition: opacity 0.25s ease;
 }
 
 .mobile-nav {

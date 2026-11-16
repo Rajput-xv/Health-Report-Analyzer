@@ -1,8 +1,10 @@
 const express = require('express');
 const multer = require('multer');
 const authMiddleware = require('../utils/authMiddleware');
+const geminiLimiter = require('../utils/geminiLimiter');
 const Report = require('../models/Report');
 const User = require('../models/User');
+const { PLANS, effectivePlan } = require('../config/plans');
 const { extractHealthData, validateExtractionResults, getExtractionStats } = require('../services/extractionService');
 
 const router = express.Router();
@@ -56,7 +58,8 @@ const uploadSingle = (req, res, next) => {
  * Upload and process medical report
  * Uses Gemini (primary) → OCR (fallback) → Manual entry
  */
-router.post('/', authMiddleware, uploadSingle, async (req, res) => {
+router.post('/', authMiddleware, geminiLimiter, uploadSingle, async (req, res) => {
+  let releaseSlot = false;
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -73,19 +76,21 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const uploadPermission = user.canUploadReport();
-    if (!uploadPermission.allowed) {
+    // Take the slot before the slow extraction so parallel uploads can't all pass the check
+    const plan = effectivePlan(user.subscription);
+    const limit = PLANS[plan].reportsPerMonth;
+    if (!await User.reserveReport(req.user.id, limit)) {
       return res.status(403).json({
         error: 'Monthly upload limit reached',
-        message: `You've used all ${uploadPermission.limit} reports this month. Upgrade to Pro for more uploads!`,
+        message: `You've used all ${limit} reports this month. Upgrade to Pro for more uploads!`,
         upgradeRequired: true,
-        used: uploadPermission.used,
-        limit: uploadPermission.limit
+        used: limit,
+        limit
       });
     }
+    releaseSlot = true;
 
-    console.log(`\nProcessing upload: ${req.file.originalname} (${req.file.mimetype})`);
-    console.log(`User: ${user.email} | Plan: ${user.subscription?.plan || 'free'} | Reports used: ${uploadPermission.used}/${uploadPermission.remaining === 'unlimited' ? '∞' : uploadPermission.limit}`);
+    console.log(`\nProcessing upload: ${req.file.mimetype}, ${req.file.size} bytes | Plan: ${plan}`);
 
     // Extract options from query/body
     const options = {
@@ -147,8 +152,8 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
     const report = new Report(reportData);
     const savedReport = await report.save();
 
-    // Increment user's report usage count
-    await user.incrementReportUsage();
+    // Failed extractions don't count against the monthly limit
+    releaseSlot = !extractionResult.healthParameters?.length;
 
     console.log(`✅ Report saved: ${savedReport._id} (${extractionResult.method})`);
 
@@ -197,48 +202,14 @@ router.post('/', authMiddleware, uploadSingle, async (req, res) => {
 
   } catch (error) {
     console.error('❌ Upload processing error:', error);
-
-    // Try to save a failed report for tracking
-    try {
-      const failedReport = new Report({
-        userId: req.user.id,
-        filename: req.file.originalname,
-        fileType: req.file.mimetype,
-        fileSize: req.file.size,
-        extractedText: ' ',
-        healthParameters: [],
-        extractionMethod: 'failed',
-        isScannedDocument: true,
-        requiresManualEntry: true,
-        processingStatus: 'failed',
-        extractionLog: {
-          error: error.message,
-          totalTime: 0
-        },
-        createdAt: new Date()
-      });
-
-      const savedReport = await failedReport.save();
-
-      return res.status(200).json({
-        success: true,
-        reportId: savedReport._id,
-        filename: req.file.originalname,
-        requiresManualEntry: true,
-        healthParameters: [],
-        extractedParameterCount: 0,
-        message: 'Processing failed. Please enter data manually.',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
-      });
-
-    } catch (saveError) {
-      console.error('❌ Failed to save error report:', saveError);
-    }
-
     res.status(500).json({
       error: 'Failed to process uploaded file',
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
+  } finally {
+    if (releaseSlot) {
+      await User.releaseReport(req.user.id).catch(err => console.error('Failed to release upload slot:', err.message));
+    }
   }
 });
 

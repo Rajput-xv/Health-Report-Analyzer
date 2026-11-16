@@ -140,17 +140,6 @@ export default function PricingPage({ user }) {
     }
   };
 
-  const handleManageSubscription = async () => {
-    try {
-      const response = await api.get('/payments/customer-portal');
-      if (response.data.portalUrl) {
-        window.open(response.data.portalUrl, '_blank');
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: t('pricing.messages.portal_failed') });
-    }
-  };
-
   const handleSyncSubscription = async () => {
     setLoading('sync');
     setMessage(null);
@@ -252,9 +241,9 @@ export default function PricingPage({ user }) {
               </span>
             )}
           </div>
-          <button className="manage-btn" onClick={handleManageSubscription}>
+          <a className="manage-btn" href="https://app.gumroad.com/library" target="_blank" rel="noopener noreferrer">
             {t('pricing.subscription.manage_billing')}
-          </button>
+          </a>
         </div>
       )}
 

@@ -22,7 +22,7 @@ const PRERENDER_SEO = {
     "/pricing": {
         title: "Pricing - Health Report Analyzer",
         description:
-            "Compare Health Report Analyzer plans: start free with 3 reports per month, or upgrade to Pro for unlimited AI-powered lab report analysis and trend tracking.",
+            "Compare Health Report Analyzer plans: start free with 3 reports per month, or upgrade to Pro for 10 reports a month, or unlimited on the yearly plan.",
     },
     "/contact": {
         title: "Contact Us - Health Report Analyzer",
@@ -34,7 +34,12 @@ const PRERENDER_SEO = {
 function applyPrerenderSeo(html, route) {
     const path = route === "/" ? "/" : route.replace(/\/+$/, "");
     const url = PRERENDER_SITE + path;
+    // Chatbase and Vercel Analytics inject these at runtime; baked in, the Chatbase script becomes parser-blocking.
     html = html
+        .replace(/<script[^>]*src="https:\/\/www\.chatbase\.co\/embed\.min\.js"[\s\S]*(?=<\/body>)/i, "")
+        .replace(/<link rel="preconnect" href="https:\/\/www\.chatbase\.co"[^>]*>/gi, "")
+        .replace(/<style id="cb-[^"]*">[\s\S]*?<\/style>/gi, "")
+        .replace(/<script[^>]*src="\/_vercel\/insights\/script\.js"[^>]*><\/script>/gi, "")
         .replace(/(<link rel="canonical" href=")[^"]*(")/i, `$1${url}$2`)
         .replace(/(<meta property="og:url" content=")[^"]*(")/i, `$1${url}$2`)
         .replace(/(<meta name="twitter:url" content=")[^"]*(")/i, `$1${url}$2`);
@@ -98,6 +103,26 @@ function serveBlogStaticInDev() {
     };
 }
 
+function inlineBlogCss() {
+    const link = '<link rel="stylesheet" href="/blog/assets/site-header.css">';
+    return {
+        name: "inline-blog-css",
+        apply: "build",
+        writeBundle({ dir }) {
+            const blogDir = path.join(dir, "blog");
+            const css = fs
+                .readFileSync(path.join(blogDir, "assets/site-header.css"), "utf8")
+                .replace(/\/\*[\s\S]*?\*\//g, "");
+            for (const name of fs.readdirSync(blogDir)) {
+                if (!name.endsWith(".html")) continue;
+                const file = path.join(blogDir, name);
+                const html = fs.readFileSync(file, "utf8");
+                fs.writeFileSync(file, html.replace(link, () => `<style>${css}</style>`));
+            }
+        },
+    };
+}
+
 // On Vercel's build container the system libraries Chrome needs (libnspr4, …)
 // aren't present, so puppeteer's bundled Chromium can't launch. There we point
 // Puppeteer at @sparticuz/chromium (a serverless Chromium build that carries its
@@ -121,6 +146,7 @@ if (process.env.VERCEL === "1") {
 export default defineConfig({
     plugins: [
         serveBlogStaticInDev(),
+        inlineBlogCss(),
         react(),
         VitePWA({
     registerType: "autoUpdate",
@@ -134,24 +160,29 @@ export default defineConfig({
             /^\/blog/,
             /^\/robots\.txt$/,
             /^\/sitemap\.xml$/,
+            /^\/llms\.txt$/,
+            /^\/\.well-known\//,
+            /^\/404/,
             /^\/preview\.png$/,
             /^\/favicon\.ico$/,
             /^\/Health Report Analyzer Logo\.png$/,
             /^\/manifest\.webmanifest$/
         ],
 
-        globIgnores: ["**/blog/**"]
+        globIgnores: ["**/blog/**", "404.html"]
     },
 
     manifest: {
         name: "Health Report Analyzer",
-        short_name: "HealthAnalyzer",
-        description: "Upload and analyze your health reports.",
-        theme_color: "#ffffff",
-        background_color: "#ffffff",
+        short_name: "Health Analyzer",
+        description: "Understand your medical reports with clear, AI-powered health insights.",
+        theme_color: "#667eea",
+        background_color: "#667eea",
         start_url: "/",
         scope: "/",
         display: "standalone",
+        lang: "en",
+        categories: ["health", "medical", "productivity"],
         icons: [
             {
                 src: "hra-192x192.png",
@@ -172,7 +203,9 @@ export default defineConfig({
         ]
     }
 }),
-        visualizer({ filename: "dist/stats.html", open: false }),
+        ...(process.env.ANALYZE === "true"
+            ? [visualizer({ filename: "stats.html", open: false })]
+            : []),
         // Build-time prerender of the public marketing pages so crawlers
         // (incl. non-JS/AI crawlers) get real HTML instead of an empty #root.
         // Runs in real Chromium via Puppeteer, so the app's browser-only code

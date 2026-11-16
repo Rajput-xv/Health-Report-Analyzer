@@ -6,33 +6,52 @@ const jwt = require('jsonwebtoken');
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
 const mongoose = require('mongoose');
+const authMiddleware = require('../utils/authMiddleware');
 const { verifyFirebaseIdToken } = require('../config/firebaseAdmin');
 
 const router = express.Router();
 
-// Limit the login/signup/reset endpoints to slow down brute-force attempts
-const authLimiter = rateLimit({
+// Slow down brute-force attempts, with a separate budget per endpoint
+const limitTo = (limit, options) => rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10,
+  limit,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'Too many attempts. Please try again in a few minutes.' }
+  message: { error: 'Too many attempts. Please try again in a few minutes.' },
+  ...options
 });
+const registerLimiter = limitTo(10);
+const loginLimiter = limitTo(10, { skipSuccessfulRequests: true });
+const forgotPasswordLimiter = limitTo(5);
+const resetPasswordLimiter = limitTo(10);
+const googleAuthLimiter = limitTo(20, { skipSuccessfulRequests: true });
 
 // Password rules, same as the client
 const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
 const PASSWORD_REQUIREMENTS_MESSAGE =
   'Password must be at least 8 characters and include uppercase, lowercase, number, and special character';
 
+// Compared against when the email is unknown, so login takes as long either way
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(crypto.randomBytes(16).toString('hex'), 10);
+
+// For Gmail, EMAIL_PASS must be an App Password (https://myaccount.google.com/apppasswords)
+const mailer = nodemailer.createTransport({
+  service: 'Gmail',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
 // Check if database is connected
 const isDatabaseConnected = () => {
   return mongoose.connection.readyState === 1;
 };
 
-const generateToken = (userId) => {
+const generateToken = (user) => {
   return jwt.sign(
-    { userId,
-      iat: Math.floor(Date.now() / 1000),
+    { userId: user._id,
+      tokenVersion: user.tokenVersion,
       type: 'access'
     },
     process.env.JWT_SECRET,
@@ -41,7 +60,7 @@ const generateToken = (userId) => {
 };
 
 // Register new user
-router.post('/register', authLimiter, async (req, res) => {
+router.post('/register', registerLimiter, async (req, res) => {
   try {
     // Check if database is connected
     if (!isDatabaseConnected()) {
@@ -66,11 +85,6 @@ router.post('/register', authLimiter, async (req, res) => {
         error: PASSWORD_REQUIREMENTS_MESSAGE
       });
     }
-    // if (password.length < 6) {
-    //   return res.status(400).json({
-    //     error: 'Password must be at least 6 characters'
-    //   });
-    // }
 
     if (password !== confirm_password) {
       return res.status(400).json({
@@ -86,11 +100,6 @@ router.post('/register', authLimiter, async (req, res) => {
       });
     }
 
-
-    // Hash password
-    // const saltRounds = 12;
-    // const hashedPassword = await bcrypt.hash(password, saltRounds);
-    // Create new user
     const newUser = new User({
       email: email.toLowerCase(),
       firstName: firstName.trim(),
@@ -101,7 +110,7 @@ router.post('/register', authLimiter, async (req, res) => {
     await newUser.save();
 
     // Generate token
-    const token = generateToken(newUser._id);
+    const token = generateToken(newUser);
 
     res.status(201).json({
       success: true,
@@ -119,7 +128,7 @@ router.post('/register', authLimiter, async (req, res) => {
 });
 
 // Login user
-router.post('/login', authLimiter, async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     // Check if database is connected
     if (!isDatabaseConnected()) {
@@ -138,38 +147,23 @@ router.post('/login', authLimiter, async (req, res) => {
       });
     }
 
-    // Find user
     const user = await User.findOne({ email: email.toLowerCase() });
-    if (!user) {
+    const isValidPassword = await bcrypt.compare(password, user?.password || DUMMY_PASSWORD_HASH);
+
+    if (!user || !isValidPassword) {
       return res.status(400).json({
         error: 'Invalid email or password'
       });
     }
 
-    // Check if user is active
     if (!user.isActive) {
       return res.status(400).json({
         error: 'Account is deactivated'
       });
     }
-    // Special handling for Google-authenticated users who have reset their password
-    // console.log(`Login attempt for ${email}: Google Auth = ${user.googleAuth}, Password Changed = ${user.passwordChanged}`);
-
-    // Special handling for Google-authenticated users who have reset their password
-    // console.log(`Login attempt for ${email}: Google Auth = ${user.googleAuth}, Password Changed = ${user.passwordChanged}`);
-
-    // Check password - log comparison details for debugging
-    const isValidPassword = await bcrypt.compare(password, user.password);
-    // console.log(`Login attempt for ${email}: Password validation result = ${isValidPassword}`);
-    
-    if (!isValidPassword) {
-      return res.status(400).json({
-        error: 'Invalid email or password'
-      });
-    }
 
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     res.json({
       success: true,
@@ -187,16 +181,17 @@ router.post('/login', authLimiter, async (req, res) => {
 });
 
 // Forgot Password
-router.post("/forgot-password", authLimiter, async (req, res) => {
+router.post("/forgot-password", forgotPasswordLimiter, async (req, res) => {
   const { email } = req.body;
+  const reply = () => res.json({ message: "If the email exists, a reset link has been sent" });
   try {
     // Only accept a string so nobody can pass a Mongo operator object
     if (typeof email !== 'string') {
-      return res.json({ message: "If the email exists, a reset link has been sent" });
+      return reply();
     }
     const user = await User.findOne({ email: email.toLowerCase() });
     if (!user) {
-      return res.json({ message: "If the email exists, a reset link has been sent" });
+      return reply();
     }
 
     // Generate token
@@ -208,49 +203,25 @@ router.post("/forgot-password", authLimiter, async (req, res) => {
     user.resetPasswordExpire = Date.now() + 60 * 60 * 1000; // 1 hour
     await user.save();
 
-    // FRONTEND_URL should be set in your .env file (not committed) to your frontend URL
     const resetURL = `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
-
-    // Send email
-    // These email config variables should be set in your .env file:
-    // For Gmail, you MUST use an App Password:
-    // 1. Enable 2-Step Verification on your Google account
-    // 2. Go to https://myaccount.google.com/apppasswords to create an App Password
-    // 3. Use that 16-character password in your EMAIL_PASS environment variable
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail',
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS // This MUST be an App Password for Gmail
-      }
-    });
-
-    // Verify the connection configuration (single call)
-    transporter.verify(function(error, success) {
-      if (error) {
-        console.error("SMTP Verification Error:", error);
-      } else {
-        console.log("SMTP server is ready to take our messages");
-      }
-    });
-    await transporter.sendMail({
+    // Not awaited: waiting on SMTP would make known emails measurably slower to answer
+    mailer.sendMail({
       from: `"Health Report Analyzer" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: "Password Reset Request",
       html: `<p>Click <a href="${resetURL}">here</a> to reset your password. Link valid for 1 hour.</p>`
-    });
+    }).catch(err => console.error("Password reset email failed:", err.message));
 
-    res.json({ message: "If the email exists, a reset link has been sent" });
+    reply();
   } catch (err) {
-    console.error("Password reset email error:", err);
-
-    res.status(500).json({ message: "Server error" });
+    console.error("Password reset request failed:", err.message);
+    reply();
   }
 });
 
 // Reset Password
-router.post("/reset-password/:token", authLimiter, async (req, res) => {
+router.post("/reset-password/:token", resetPasswordLimiter, async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
@@ -276,6 +247,7 @@ router.post("/reset-password/:token", authLimiter, async (req, res) => {
   user.resetPasswordToken = null;
   user.resetPasswordExpire = null;
   user.passwordChanged = true;
+  user.tokenVersion += 1;
   await user.save();
     console.log(`Password reset successful for user: ${user._id}`);
     res.json({ message: "Password updated successfully" });
@@ -287,42 +259,17 @@ router.post("/reset-password/:token", authLimiter, async (req, res) => {
 
 
 // Verify token and get user profile
-router.get('/me', async (req, res) => {
-  try {
-    const token = req.headers.authorization?.replace('Bearer ', '');
-
-    if (!token) {
-      return res.status(401).json({
-        error: 'No token provided'
-      });
-    }
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-
-    if (!user || !user.isActive) {
-      return res.status(401).json({
-        error: 'Invalid token'
-      });
-    }
-
-    res.json({
-      success: true,
-      user: user.toSafeObject()
-    });
-
-  } catch (error) {
-    console.error('Token verification failed');
-    res.status(401).json({
-      error: 'Invalid token'
-    });
-  }
+router.get('/me', authMiddleware, (req, res) => {
+  res.json({
+    success: true,
+    user: req.user
+  });
 });
 
 // Google Authentication
 // Client signs in with Firebase and sends the ID token. We verify it and read the
 // email/name from the verified token, not from the request body.
-router.post('/google-auth', authLimiter, async (req, res) => {
+router.post('/google-auth', googleAuthLimiter, async (req, res) => {
   try {
     const { idToken } = req.body;
 
@@ -363,6 +310,10 @@ router.post('/google-auth', authLimiter, async (req, res) => {
     // Check if user exists (by verified email)
     let user = await User.findOne({ email });
 
+    if (user && !user.isActive) {
+      return res.status(403).json({ error: 'Account is deactivated' });
+    }
+
     // If user doesn't exist, create a new one
     if (!user) {
       const randomPassword = crypto.randomBytes(16).toString('hex');
@@ -385,19 +336,18 @@ router.post('/google-auth', authLimiter, async (req, res) => {
       if (fullName && lastName !== user.lastName) {
         user.lastName = lastName;
       }
-      // Mark as Google authenticated if not already set
+      // Registration doesn't verify email, so a password set before the verified owner
+      // first signs in with Google may belong to someone else: replace it and end its sessions
       if (!user.googleAuth) {
         user.googleAuth = true;
+        user.password = crypto.randomBytes(16).toString('hex');
+        user.tokenVersion += 1;
       }
       await user.save();
     }
 
-    if (!user.isActive) {
-      return res.status(403).json({ error: 'Account is deactivated' });
-    }
-
     // Generate token
-    const token = generateToken(user._id);
+    const token = generateToken(user);
 
     res.json({
       success: true,

@@ -178,68 +178,12 @@ const reportSchema = new mongoose.Schema({
 
 // Indexes for faster queries
 reportSchema.index({ userId: 1, createdAt: -1 });
-reportSchema.index({ extractionMethod: 1 });
-reportSchema.index({ 'aiInsights.riskLevel': 1 });
-
-// Virtuals
-reportSchema.virtual('parameterCount').get(function () {
-  return this.healthParameters.length;
-});
-
-reportSchema.virtual('abnormalCount').get(function () {
-  return this.healthParameters.filter(p =>
-    ['High', 'Low', 'Abnormal'].includes(p.status)
-  ).length;
-});
-
-reportSchema.virtual('hasAiInsights').get(function () {
-  return !!this.aiInsights && !!this.aiInsights.summary;
-});
-
-reportSchema.virtual('outlierCount').get(function () {
-  return this.aiInsights?.outliers?.length || 0;
-});
-
-// Methods
-reportSchema.methods.needsInsightsUpdate = function () {
-  // Check if insights are older than 30 days or don't exist
-  if (!this.aiInsights || !this.aiInsights.generatedAt) {
-    return true;
-  }
-
-  const daysSinceGeneration = (Date.now() - this.aiInsights.generatedAt) / (1000 * 60 * 60 * 24);
-  return daysSinceGeneration > 30;
-};
-
-reportSchema.methods.getExtractionQuality = function () {
-  const quality = {
-    method: this.extractionMethod,
-    hasParameters: this.healthParameters.length > 0,
-    hasInsights: this.hasAiInsights,
-    parametersComplete: this.healthParameters.every(p =>
-      p.name && p.value !== null && p.value !== undefined
-    ),
-    processingTime: this.extractionLog?.totalTime || this.geminiMetadata?.processingTime
-  };
-
-  // Calculate quality score (0-100)
-  let score = 0;
-  if (quality.method === 'gemini') score += 40;
-  else if (quality.method === 'ocr') score += 20;
-
-  if (quality.hasParameters) score += 30;
-  if (quality.hasInsights) score += 20;
-  if (quality.parametersComplete) score += 10;
-
-  quality.score = score;
-  quality.grade = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Poor';
-
-  return quality;
-};
 
 // Static methods
 reportSchema.statics.getAnalytics = async function (userId) {
-  const reports = await this.find({ userId }).lean();
+  const reports = await this.find({ userId })
+    .select('extractionMethod aiInsights.riskLevel healthParameters._id')
+    .lean();
 
   return {
     totalReports: reports.length,

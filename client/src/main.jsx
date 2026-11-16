@@ -14,8 +14,6 @@ import 'aos/dist/aos.css';
 import Lenis from 'lenis';
 import 'lenis/dist/lenis.css';
 
-import { LoadingProvider } from './context/LoadingContext.jsx';
-
 import { Analytics } from "@vercel/analytics/react";
 
 // Detect if device is mobile
@@ -43,11 +41,6 @@ if (!isMobile) {
   }
 
   requestAnimationFrame(raf);
-
-  // Integrate Lenis with AOS
-  lenis.on('scroll', () => {
-    AOS.refresh();
-  });
 }
 
 // Initialize AOS with mobile-optimized settings
@@ -66,9 +59,7 @@ AOS.init({
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <LoadingProvider>
-      <App />
-      <Analytics />
-    </LoadingProvider>
+    <App />
+    <Analytics />
   </React.StrictMode>,
 );

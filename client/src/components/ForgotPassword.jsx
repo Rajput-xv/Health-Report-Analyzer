@@ -9,20 +9,21 @@ const ForgotPassword = () => {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
+    setError("");
 
     try {
       await forgotPassword(email);
       setMessage(t('forgot_password_form.reset_sent_message'));
-    } catch (error) {
-      console.error("Forgot password error:", error);
-      setMessage(error.message || t('forgot_password_form.error_sending'));
-
+    } catch (err) {
+      console.error("Forgot password error:", err);
+      setError(t(err.response?.status === 429 ? 'forgot_password_form.error_rate_limited' : 'forgot_password_form.error_sending'));
     } finally {
       setLoading(false);
     }
@@ -33,18 +34,15 @@ const ForgotPassword = () => {
       {/* The same shared navbar as the rest of the app, on every screen size */}
       <Header user={null} setUser={() => { }} />
 
-      <div className="auth-container">
+      <main className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <h2>{t('auth.forgot_password')}</h2>
+            <h1>{t('auth.forgot_password')}</h1>
             <p>{t('forgot_password_form.description')}</p>
           </div>
 
-          {message && (
-            <div role="alert" className={message.includes(t('forgot_password_form.reset_sent_message')) ? "auth-message" : "auth-error"}>
-              {message.includes(t('forgot_password_form.reset_sent_message')) ? "✅" : "❌"} {message}
-            </div>
-          )}
+          {message && <div role="alert" className="auth-message">✅ {message}</div>}
+          {error && <div role="alert" className="auth-error">❌ {error}</div>}
 
           <form onSubmit={handleSubmit} className="auth-form">
             <div className="form-group">
@@ -91,7 +89,7 @@ const ForgotPassword = () => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

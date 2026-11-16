@@ -17,11 +17,9 @@
     "email": "Email Address",
     "password": "Password",
     "confirm_password": "Confirm Password",
-    "remember_me": "Remember me",
     "forgot_password": "Forgot Password?",
     "no_account": "Don't have an account?",
     "have_account": "Already have an account?",
-    "sign_up_here": "Sign up here",
     "sign_in_here": "Sign in here",
     "reset_password": "Reset Password",
     "new_password": "New Password",
@@ -32,16 +30,7 @@
     "subtitle": " with Advanced Technology",
     "welcome": "Welcome",
     "loading": "Loading...",
-    "error": "An error occurred",
     "try_again": "Try Again"
-  },
-  "loading": {
-    "title": "🔍 Processing Your Report...",
-    "subtitle": "Extracting health parameters from your document",
-    "step_1": "📄 Reading document...",
-    "step_2": "🔤 Extracting text...",
-    "step_3": "🧬 Analyzing parameters...",
-    "step_4": "📊 Generating insights..."
   },
   "backToTop": {
     "aria": "Scroll back to top",
@@ -51,7 +40,6 @@
     "hero_title": "Analyze Your Health Reports",
     "hero_subtitle": "Upload your medical reports and get instant, comprehensive analysis with personalized insights. Our advanced technology helps you understand your health data like never before.",
     "get_started": "Get Started",
-    "learn_more": "Learn More",
     "features_title": "Why Choose Our Platform?",
     "feature_1_title": "Instant Analysis",
     "feature_1_desc": "Get comprehensive analysis of your health reports in seconds using advanced OCR technology.",
@@ -78,21 +66,7 @@
     "platform_desc": "Transform complex medical data into clear, actionable insights with our cutting-edge platform"
   },
   "dashboard": {
-    "title": "Dashboard",
-    "upload_report": "Upload New Report",
-    "recent_reports": "Recent Reports",
-    "no_reports": "No reports uploaded yet",
     "upload_first": "Upload your first medical report to get started"
-  },
-  "reports": {
-    "upload_title": "Upload Medical Report",
-    "drag_drop": "Drag and drop your medical report here",
-    "or": "or",
-    "browse_files": "Browse Files",
-    "supported_formats": "Supported formats: PDF, JPG, PNG, JPEG",
-    "analyzing": "Analyzing your report...",
-    "analysis_complete": "Analysis Complete",
-    "download_report": "Download Report"
   },
   "reports_detail": {
     "my_reports": "My Reports",
@@ -134,9 +108,18 @@
     "insights_regenerated": "AI insights updated",
     "insights_error": "Could not generate insights"
   },
+  "status": {
+    "Normal": "Normal",
+    "High": "High",
+    "Low": "Low",
+    "Abnormal": "Abnormal",
+    "Moderate": "Moderate",
+    "Unknown": "Unknown",
+    "Present": "Present",
+    "Absent": "Absent"
+  },
   "contact": {
     "title": "Contact Us",
-    "subtitle": "Get in touch with our team",
     "name": "Full Name",
     "email": "Email Address",
     "subject": "Subject",
@@ -165,23 +148,15 @@
   },
   "footer": {
     "copyright": "© {{year}} Health Report Analyzer. Empowering better health decisions through technology.",
-    "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals.",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
-    "about": "About Us",
-    "support": "Support"
+    "disclaimer": "⚠️ This tool is for informational purposes only. Always consult with healthcare professionals."
   },
   "toast": {
     "logout_success": "Successfully logged out. See you again!",
-    "login_success": "Welcome back!",
     "login_success_named": "Welcome back, {{name}}!",
     "login_success_google": "Welcome, {{name}}!",
-    "signup_success": "Account created successfully!",
     "signup_success_named": "Account created successfully! Welcome, {{name}}!",
     "upload_success": "Report uploaded successfully",
     "upload_error": "Failed to upload report",
-    "analysis_success": "Report analyzed successfully",
-    "analysis_error": "Failed to analyze report",
     "google_failed": "Google sign-in failed. Please try again.",
     "google_auth_failed": "Google authentication failed. Please try again.",
     "auth_failed": "Authentication failed",
@@ -208,19 +183,11 @@
     "banner_cancelled": "Payment was cancelled. You can upgrade anytime from the pricing page."
   },
   "language": {
-    "select": "Select Language",
-    "english": "English",
-    "hindi": "Hindi"
+    "select": "Select Language"
   },
   "common": {
-    "save": "Save",
-    "cancel": "Cancel",
     "delete": "Delete",
-    "edit": "Edit",
     "close": "Close",
-    "confirm": "Confirm",
-    "yes": "Yes",
-    "no": "No",
     "back_home": "Back to Home",
     "remember_password": "Remember your password?"
   },
@@ -245,6 +212,7 @@
     "creating_account": "Creating Account...",
     "create_one": "Create one",
     "sign_in": "Sign in",
+    "google_signin": "Sign in with Google",
     "secure_platform": "Secure Platform",
     "secure_description": "Your data is securely stored in our cloud database with industry-standard encryption and authentication.",
     "password_requirements": {
@@ -264,7 +232,8 @@
     "secure_reset": "Secure Reset",
     "secure_reset_desc": "If your email exists in our system, you'll receive a secure password reset link.",
     "reset_sent_message": "If an account with that email exists, a reset link has been sent.",
-    "error_sending": "An error occurred while sending the reset link"
+    "error_sending": "An error occurred while sending the reset link",
+    "error_rate_limited": "Too many attempts. Please wait a few minutes and try again."
   },
   "pricing": {
     "title": "Simple, Transparent Pricing",
@@ -284,7 +253,6 @@
       "payment_cancelled": "Payment was cancelled. You can try again anytime.",
       "already_on_plan": "You are already on this plan!",
       "checkout_failed": "Failed to start checkout. Please try again.",
-      "portal_failed": "Failed to open billing portal",
       "sync_success": "✅ Subscription synced! You're on the {{planName}} plan.",
       "sync_none": "No active subscription found. If you just completed payment, please wait a moment and try again.",
       "sync_failed": "Failed to sync subscription. Please try again."
@@ -384,7 +352,7 @@
     "error_network": "Network issue detected. Please check your connection.",
     "error_413": "File too large. Please upload under 10MB.",
     "error_415": "Unsupported format. Please upload PDF, JPEG, JPG, or PNG.",
-    "error_upgrade": "📊 {{message}} Click here to upgrade.",
+    "error_upgrade": "📊 Monthly upload limit reached. Upgrade your plan to upload more reports.",
     "error_server": "Server error. Please try again later.",
     "error_generic": "Upload failed. Please try again.",
     "quota_pro_yearly": "Pro Yearly - Unlimited uploads",
@@ -399,7 +367,6 @@
     "supported": "Supported: PDF, JPEG, JPG, PNG (max 10MB)",
     "percent_uploaded": "{{percent}}% uploaded",
     "ocr_analyzing": "Analyzing document with OCR...",
-    "ocr_complete": "Analysis complete!",
     "ocr_note": "OCR processing can take up to 5 minutes for complex documents",
     "tips_title": "📋 Tips for better results:",
     "tip_1": "Ensure the document is clear and well-lit",
@@ -422,27 +389,14 @@
     "looking_for": "You might be looking for:",
     "login": "Login"
   },
-  "trend": {
-    "no_data": "No trend data available.",
-    "title": "Trend Analysis",
-    "select_parameter": "Select Parameter:",
-    "trend_suffix": "Trend",
-    "normal_range": "Normal Range:",
-    "six_month_trend": "6-Month Trend",
-    "insights_title": "Insights & Recommendations",
-    "no_insights": "No specific insights available for this parameter.",
-    "icon_aria": "{{type}} icon",
-    "info_icon_aria": "info icon",
-    "disclaimer_label": "Disclaimer:",
-    "disclaimer_text": "Trend data includes simulated historical values for demonstration purposes. Always consult with healthcare professionals for medical advice."
-  },
   "header": {
     "pro": "Pro",
     "uploads_left": "{{count}} uploads left",
     "manage_plan": "Manage Plan",
     "upgrade_to_pro": "Upgrade to Pro",
     "user_fallback": "User",
-    "toggle_menu": "Toggle menu"
+    "toggle_menu": "Toggle menu",
+    "dark_mode": "Dark mode"
   },
   "reset_password": {
     "subtitle": "Enter your new password below",
@@ -454,6 +408,7 @@
     "title": "Health Insights",
     "subtitle": "Trends, comparisons, and an overall summary across your reports.",
     "loading": "Loading your insights…",
+    "load_error": "Could not load your insights.",
     "no_reports": "Upload at least one report to see insights.",
     "go_upload": "Go to Upload",
     "summary_title": "Overall Summary",

@@ -8,8 +8,8 @@ const router = express.Router();
 router.get('/', async (req, res) => {
   try {
     const [userCount, reportCount] = await Promise.all([
-      User.countDocuments({}),
-      Report.countDocuments({})
+      User.estimatedDocumentCount(),
+      Report.estimatedDocumentCount()
     ]);
     res.json({
       totalUsers: userCount,

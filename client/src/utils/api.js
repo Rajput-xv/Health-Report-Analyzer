@@ -38,14 +38,26 @@ api.interceptors.request.use(
     },
 );
 
-// Handle auth errors
+const PROTECTED_PATHS = [
+    "/dashboard",
+    "/insights",
+    "/payment-callback",
+    "/callback",
+];
+
+// Expired session: drop the stored token. /auth/* callers handle their own 401s.
 api.interceptors.response.use(
     (response) => response,
     (error) => {
-        if (error.response?.status === 401) {
+        if (
+            error.response?.status === 401 &&
+            !error.config?.url?.startsWith("/auth/")
+        ) {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
-            window.location.href = "/login";
+            if (PROTECTED_PATHS.includes(window.location.pathname)) {
+                window.location.href = "/login";
+            }
         }
         return Promise.reject(error);
     },
@@ -63,9 +75,7 @@ export const login = async (email, password) => {
         const response = await api.post("/auth/login", { email, password });
         return response.data;
     } catch (error) {
-        return (
-            error.response?.data || { success: false, error: "Login failed" }
-        );
+        return error.response?.data || { success: false };
     }
 };
 
@@ -75,12 +85,7 @@ export const register = async (userData) => {
         const response = await api.post("/auth/register", userData);
         return response.data;
     } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Registration failed",
-            }
-        );
+        return error.response?.data || { success: false };
     }
 };
 
@@ -90,65 +95,27 @@ export const googleAuth = async (idToken) => {
         const response = await api.post("/auth/google-auth", { idToken });
         return response.data;
     } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Google authentication failed",
-            }
-        );
+        return error.response?.data || { success: false };
     }
 };
 
-// File upload function
-export const uploadFile = async (file) => {
-    try {
-        const formData = new FormData();
-        formData.append("file", file);
+export const uploadFile = async (file, onProgress) => {
+    const formData = new FormData();
+    formData.append("file", file);
 
-        const response = await api.post("/upload", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        });
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "File upload failed",
-            }
-        );
-    }
+    const response = await api.post("/upload", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+        onUploadProgress: (e) =>
+            onProgress?.(Math.round((e.progress ?? 0) * 100)),
+    });
+    return response.data;
 };
 
-// Fetch trend data function
-export const fetchTrendData = async (reportId) => {
-    try {
-        const response = await api.get(`/reports/${reportId}/trends`);
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to fetch trend data",
-            }
-        );
-    }
-};
-
-// Forgot password function
 export const forgotPassword = async (email) => {
-    try {
-        const response = await api.post("/auth/forgot-password", { email });
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to send reset email",
-            }
-        );
-    }
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
 };
 
 // Reset password function.
@@ -159,68 +126,6 @@ export const resetPassword = async (token, newPassword) => {
         password: newPassword,
     });
     return response.data;
-};
-
-// Get subscription status
-export const getSubscription = async () => {
-    try {
-        const response = await api.get("/payments/subscription");
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to get subscription",
-            }
-        );
-    }
-};
-
-// Create checkout session
-export const createCheckout = async (planId) => {
-    try {
-        const response = await api.post("/payments/create-checkout", {
-            planId,
-        });
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to create checkout",
-            }
-        );
-    }
-};
-
-// Cancel subscription
-export const cancelSubscription = async () => {
-    try {
-        const response = await api.post("/payments/cancel");
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to cancel subscription",
-            }
-        );
-    }
-};
-
-// Get customer portal URL
-export const getCustomerPortal = async () => {
-    try {
-        const response = await api.get("/payments/customer-portal");
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to get customer portal",
-            }
-        );
-    }
 };
 
 // Send a contact message through our backend
@@ -238,65 +143,13 @@ export const sendContactMessage = async (payload) => {
     }
 };
 
-// Verify payment status after Gumroad redirect
-export const verifyPayment = async (expectedPlan = "") => {
-    try {
-        const response = await api.get(
-            `/payments/verify-payment?expectedPlan=${expectedPlan}`,
-        );
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to verify payment",
-            }
-        );
-    }
-};
-
 // Regenerate AI insights for a report
 export const regenerateInsights = async (reportId) => {
     try {
         const response = await api.post(`/analysis/${reportId}/regenerate`);
         return response.data;
     } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to regenerate insights",
-            }
-        );
-    }
-};
-
-// Get insights for a report
-export const getInsights = async (reportId) => {
-    try {
-        const response = await api.get(`/analysis/${reportId}/insights`);
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                hasInsights: false,
-                error: "Failed to get insights",
-            }
-        );
-    }
-};
-
-// Cross-report AI trend analysis (needs 2+ reports)
-export const getTrendAnalysis = async (reportIds = []) => {
-    try {
-        const response = await api.post("/analysis/trends", { reportIds });
-        return response.data;
-    } catch (error) {
-        return (
-            error.response?.data || {
-                success: false,
-                error: "Failed to generate trend analysis",
-            }
-        );
+        return error.response?.data || { success: false };
     }
 };
 

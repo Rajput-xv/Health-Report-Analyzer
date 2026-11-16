@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { toast } from "react-toastify";
@@ -164,6 +164,7 @@ function UserMenu({ user, subscription, open, setOpen, onLogout }) {
 
 // The slide-in menu for mobile. Reuses the same nav links as desktop.
 function MobileMenu({
+    drawerRef,
     open,
     links,
     currentPath,
@@ -180,6 +181,7 @@ function MobileMenu({
             onClick={onClose}
         >
             <nav
+                ref={drawerRef}
                 id="mobile-nav-drawer"
                 role="dialog"
                 aria-modal="true"
@@ -192,7 +194,11 @@ function MobileMenu({
                         <FileText size={24} />
                         <span>{t("app.title")}</span>
                     </Link>
-                    <button className="mobile-close-btn" onClick={onClose}>
+                    <button
+                        className="mobile-close-btn"
+                        onClick={onClose}
+                        aria-label={t("common.close")}
+                    >
                         <X size={24} />
                     </button>
                 </div>
@@ -282,11 +288,14 @@ export default function Header({ user, setUser }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
     const location = useLocation();
-    const { subscription, fetchSubscription } = useSubscription();
+    const { subscription, fetchSubscription, setSubscription } =
+        useSubscription();
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
+    const drawerRef = useRef(null);
+    const menuButtonRef = useRef(null);
 
     const navLinks = buildNavLinks(t, user);
 
@@ -305,23 +314,41 @@ export default function Header({ user, setUser }) {
 
     // Freeze the page behind the mobile menu while it's open, hide the floating
     // chat bubble (it lives in <body> with a near-max z-index, so it'd otherwise
-    // float over the drawer), and let Escape close the drawer.
+    // float over the drawer), keep keyboard focus inside the drawer, and let
+    // Escape close it.
     useEffect(() => {
-        const value = menuOpen ? "hidden" : "";
-        document.body.style.overflow = value;
-        document.documentElement.style.overflow = value;
-        document.body.classList.toggle("menu-open", menuOpen);
+        if (!menuOpen) return;
+        document.body.style.overflow = "hidden";
+        document.documentElement.style.overflow = "hidden";
+        document.body.classList.add("menu-open");
+
+        const drawer = drawerRef.current;
+        drawer.querySelector(".mobile-close-btn").focus();
 
         const onKeyDown = (e) => {
             if (e.key === "Escape") setMenuOpen(false);
+            if (e.key !== "Tab") return;
+            const focusable = drawer.querySelectorAll(
+                "a[href], button:not([disabled])",
+            );
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (e.shiftKey && document.activeElement === first) {
+                e.preventDefault();
+                last.focus();
+            } else if (!e.shiftKey && document.activeElement === last) {
+                e.preventDefault();
+                first.focus();
+            }
         };
-        if (menuOpen) document.addEventListener("keydown", onKeyDown);
+        document.addEventListener("keydown", onKeyDown);
 
         return () => {
             document.body.style.overflow = "";
             document.documentElement.style.overflow = "";
             document.body.classList.remove("menu-open");
             document.removeEventListener("keydown", onKeyDown);
+            menuButtonRef.current?.focus();
         };
     }, [menuOpen]);
 
@@ -334,6 +361,10 @@ export default function Header({ user, setUser }) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
+        setSubscription(null);
+        import("./firebase.jsx").then(
+            ({ auth, signOut }) => auth && signOut(auth),
+        );
         toast.success(t("toast.logout_success"));
         setMenuOpen(false);
         setUserMenuOpen(false);
@@ -353,7 +384,7 @@ export default function Header({ user, setUser }) {
     return (
         <header className={`main-header ${scrolled ? "scrolled" : ""}`}>
             <div className="header-container">
-                <Link to="/" className="header-logo" aria-label={t("nav.home")}>
+                <Link to="/" className="header-logo">
                     <div className="logo-icon-wrapper">
                         <FileText className="logo-icon" />
                     </div>
@@ -404,6 +435,7 @@ export default function Header({ user, setUser }) {
                 </nav>
 
                 <button
+                    ref={menuButtonRef}
                     className="mobile-menu-btn"
                     onClick={() => setMenuOpen((prev) => !prev)}
                     aria-label={t("header.toggle_menu")}
@@ -415,6 +447,7 @@ export default function Header({ user, setUser }) {
             </div>
 
             <MobileMenu
+                drawerRef={drawerRef}
                 open={menuOpen}
                 links={navLinks}
                 currentPath={location.pathname}

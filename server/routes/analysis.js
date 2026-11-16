@@ -1,17 +1,23 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const authMiddleware = require('../utils/authMiddleware');
+const geminiLimiter = require('../utils/geminiLimiter');
 const Report = require('../models/Report');
+const User = require('../models/User');
+const { PLANS, effectivePlan } = require('../config/plans');
 const { reanalyzeReport, generateTrendAnalysis } = require('../services/geminiService');
 
 const router = express.Router();
+
+// Most recent reports sent to Gemini for one trend analysis
+const TREND_REPORT_LIMIT = 12;
 
 /**
  * POST /api/analysis/:reportId/regenerate
  * Regenerate AI insights for an existing report
  * Useful for: updating old reports, getting fresh insights, or when Gemini wasn't used initially
  */
-router.post('/:reportId/regenerate', authMiddleware, async (req, res) => {
+router.post('/:reportId/regenerate', authMiddleware, geminiLimiter, async (req, res) => {
     try {
         if (!mongoose.isValidObjectId(req.params.reportId)) {
             return res.status(404).json({ error: 'Report not found' });
@@ -41,7 +47,7 @@ router.post('/:reportId/regenerate', authMiddleware, async (req, res) => {
         if (!analysisResult.success) {
             return res.status(500).json({
                 error: 'Failed to regenerate insights',
-                details: analysisResult.error
+                details: process.env.NODE_ENV === 'development' ? analysisResult.error : undefined
             });
         }
 
@@ -115,26 +121,32 @@ router.get('/:reportId/insights', authMiddleware, async (req, res) => {
 /**
  * POST /api/analysis/trends
  * Generate trend analysis across multiple reports
- * Body: { reportIds: [id1, id2, ...] } or leave empty for all user reports
+ * Body: { reportIds: [id1, id2, ...] } or leave empty for the user's latest reports.
+ * Pro only; at most TREND_REPORT_LIMIT reports are analysed.
  */
-router.post('/trends', authMiddleware, async (req, res) => {
+router.post('/trends', authMiddleware, geminiLimiter, async (req, res) => {
     try {
-        let reports;
-
-        if (req.body.reportIds && req.body.reportIds.length > 0) {
-            // Analyze specific reports
-            reports = await Report.find({
-                _id: { $in: req.body.reportIds },
-                userId: req.user.id
-            })
-                .sort({ createdAt: 1 }) // Oldest first for trend analysis
-                .lean();
-        } else {
-            // Analyze all user reports
-            reports = await Report.find({ userId: req.user.id })
-                .sort({ createdAt: 1 })
-                .lean();
+        const { reportIds = [] } = req.body;
+        if (!Array.isArray(reportIds) || !reportIds.every(id => typeof id === 'string' && mongoose.isValidObjectId(id))) {
+            return res.status(400).json({ error: 'reportIds must be an array of report ids' });
         }
+
+        const user = await User.findById(req.user.id);
+        if (!PLANS[effectivePlan(user?.subscription)].features.includes('trend_analysis')) {
+            return res.status(403).json({ error: 'Trend analysis is a Pro feature', upgradeRequired: true });
+        }
+
+        const filter = { userId: req.user.id };
+        if (reportIds.length > 0) {
+            filter._id = { $in: reportIds };
+        }
+
+        // Newest first to apply the cap, then oldest first for trend analysis
+        const reports = (await Report.find(filter)
+            .select('createdAt healthParameters.name healthParameters.value healthParameters.unit healthParameters.normalRange healthParameters.status healthParameters.textValue')
+            .sort({ createdAt: -1 })
+            .limit(TREND_REPORT_LIMIT)
+            .lean()).reverse();
 
         if (reports.length < 2) {
             return res.status(400).json({
@@ -151,7 +163,7 @@ router.post('/trends', authMiddleware, async (req, res) => {
         if (!trendResult.success) {
             return res.status(500).json({
                 error: 'Failed to generate trend analysis',
-                details: trendResult.error
+                details: process.env.NODE_ENV === 'development' ? trendResult.error : undefined
             });
         }
 
@@ -181,6 +193,7 @@ router.get('/summary', authMiddleware, async (req, res) => {
             userId: req.user.id,
             'healthParameters.0': { $exists: true } // Only reports with parameters
         })
+            .select('-extractedText')
             .sort({ createdAt: -1 })
             .limit(10)
             .lean();

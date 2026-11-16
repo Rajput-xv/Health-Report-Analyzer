@@ -6,26 +6,21 @@ import {
     Routes,
     Route,
     Navigate,
-    useNavigate,
     useLocation,
 } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import { refreshAnimations, checkPerformance } from "./utils/animationUtils";
 import "react-toastify/dist/ReactToastify.css";
 import { useTranslation } from "react-i18next";
 import LoadingSpinner from "./components/LoadingSpinner";
 import LandingPage from "./components/LandingPage";
 import Footer from "./components/Footer";
-import FileUpload from "./components/FileUpload";
 import { getCurrentUser } from "./utils/api";
 import "./styles/App.css";
 import FAQ from "./components/FAQ";
-import { useLoading } from "./context/LoadingContext.jsx";
 import { SubscriptionProvider } from "./context/SubscriptionContext.jsx";
-import { ReportsList, ReportDetail } from "./components/ReportList";
 import Stats from "./components/Stats";
 import Header from "./components/Header";
-import AnalyticsTracker from "./AnalyticsTracker";
 
 // Loaded on demand so they stay out of the initial (landing-page) bundle.
 const AuthForm = lazy(() => import("./components/AuthForm"));
@@ -36,196 +31,7 @@ const PricingPage = lazy(() => import("./components/PricingPage"));
 const PaymentCallback = lazy(() => import("./components/PaymentCallback"));
 const NotFoundPage = lazy(() => import("./components/NotFoundPage"));
 const HealthInsights = lazy(() => import("./components/HealthInsights"));
-
-function Dashboard({ user, setUser }) {
-    const { t } = useTranslation();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [uploadedReportId, setUploadedReportId] = useState(null);
-    const [viewingReportId, setViewingReportId] = useState(null);
-    const [trendData, setTrendData] = useState(null);
-    const [error, setError] = useState(null);
-    const [paymentMessage, setPaymentMessage] = useState(null);
-
-    const { loading } = useLoading();
-
-    // Check for payment success/cancelled in URL and refresh user data
-    useEffect(() => {
-        const params = new URLSearchParams(location.search);
-        const paymentStatus = params.get("payment");
-
-        const refreshUserData = async () => {
-            try {
-                // Fetch fresh user data to get updated subscription
-                const response = await getCurrentUser();
-                const updatedUser = response.user || response;
-
-                // Update user in localStorage and state
-                localStorage.setItem("user", JSON.stringify(updatedUser));
-                setUser(updatedUser);
-
-                console.log("✅ User data refreshed after payment");
-            } catch (error) {
-                console.error("Failed to refresh user data:", error);
-            }
-        };
-
-        if (paymentStatus === "success") {
-            setPaymentMessage({
-                type: "success",
-                text: t("payment.banner_success"),
-            });
-            toast.success(t("payment.banner_toast_success"));
-
-            // Refresh user data to show updated subscription
-            refreshUserData();
-
-            // Clear the URL parameter after a short delay
-            setTimeout(() => {
-                navigate("/dashboard", { replace: true });
-            }, 100);
-        } else if (paymentStatus === "cancelled") {
-            setPaymentMessage({
-                type: "info",
-                text: t("payment.banner_cancelled"),
-            });
-            setTimeout(() => {
-                navigate("/dashboard", { replace: true });
-            }, 100);
-        }
-    }, [location.search, navigate, setUser, t]);
-
-    const handleFileProcessed = (data) => {
-        setUploadedReportId(data.reportId || data._id);
-        setViewingReportId(data.reportId || data._id);
-        setError(null);
-        toast.success(t("toast.upload_success"));
-    };
-
-    const handleTrendData = (trends) => {
-        setTrendData(trends);
-    };
-
-    const handleError = (errorMessage) => {
-        setError(errorMessage);
-        setUploadedReportId(null);
-        setViewingReportId(null);
-        setTrendData(null);
-        toast.error(t("toast.upload_error"));
-    };
-
-    const handleReset = () => {
-        setUploadedReportId(null);
-        setViewingReportId(null);
-        setTrendData(null);
-        setError(null);
-    };
-
-    return (
-        <div className="app">
-            {loading && (
-                <div className="global-loading-overlay">
-                    <LoadingSpinner />
-                </div>
-            )}
-
-            <Header user={user} setUser={setUser} />
-
-            <main className="app-main">
-                {/* Payment Success/Cancelled Message */}
-                {paymentMessage && (
-                    <div
-                        className={`payment-message ${paymentMessage.type}`}
-                        style={{
-                            padding: "1rem 1.5rem",
-                            marginBottom: "1.5rem",
-                            borderRadius: "12px",
-                            backgroundColor:
-                                paymentMessage.type === "success"
-                                    ? "rgba(34, 197, 94, 0.1)"
-                                    : "rgba(59, 130, 246, 0.1)",
-                            border: `1px solid ${paymentMessage.type === "success" ? "rgba(34, 197, 94, 0.3)" : "rgba(59, 130, 246, 0.3)"}`,
-                            color:
-                                paymentMessage.type === "success"
-                                    ? "#16a34a"
-                                    : "#2563eb",
-                            display: "flex",
-                            justifyContent: "space-between",
-                            alignItems: "center",
-                            fontSize: "0.95rem",
-                        }}
-                    >
-                        <span>{paymentMessage.text}</span>
-                        <button
-                            onClick={() => setPaymentMessage(null)}
-                            aria-label={t('common.close')}
-                            style={{
-                                background: "none",
-                                border: "none",
-                                cursor: "pointer",
-                                fontSize: "1.2rem",
-                                opacity: 0.7,
-                            }}
-                        >
-                            ×
-                        </button>
-                    </div>
-                )}
-
-                {error && (
-                    <div className="error-banner">
-                        <span>{error}</span>
-                        <button
-                            onClick={handleReset}
-                            className="btn-retry"
-                            tabIndex={0}
-                        >
-                            {t("app.try_again")}
-                        </button>
-                    </div>
-                )}
-
-                {/* Viewing a specific report */}
-                {viewingReportId && (
-                    <div>
-                        <ReportDetail
-                            reportId={viewingReportId}
-                            onBack={handleReset}
-                        />
-                    </div>
-                )}
-
-                {/* Viewing reports list */}
-                {!viewingReportId && !uploadedReportId && (
-                    <>
-                        {!loading && (
-                            <div className="welcome-dashboard-message">
-                                <h2>
-                                    {t("app.welcome")}, {user.firstName}!
-                                </h2>
-                                <p>{t("dashboard.upload_first")}</p>
-                            </div>
-                        )}
-
-                        <FileUpload
-                            onFileProcessed={handleFileProcessed}
-                            onError={handleError}
-                        />
-
-                        <ReportsList onSelectReport={setViewingReportId} />
-                    </>
-                )}
-            </main>
-
-            <div>
-                <FAQ />
-            </div>
-            <div>
-                <Footer />
-            </div>
-        </div>
-    );
-}
+const Dashboard = lazy(() => import("./components/Dashboard"));
 
 // Contact Page Component - now uses shared Header
 function ContactPage({ user, setUser }) {
@@ -253,7 +59,6 @@ function RouteChangeTracker() {
 
 function App() {
     const { t, i18n, ready } = useTranslation();
-    const { loading } = useLoading();
     const [user, setUser] = useState(null);
     const [authLoading, setAuthLoading] = useState(true);
 
@@ -347,30 +152,16 @@ function App() {
     };
 
     // Show loading screen if translations not ready or auth is loading
-    if (!ready || authLoading || loading) {
-        return (
-            <div className="app">
-                <div className="global-loading-overlay">
-                    <LoadingSpinner />
-                    <p>{t("app.loading")}</p>
-                </div>
-            </div>
-        );
+    if (!ready || authLoading) {
+        return <LoadingSpinner />;
     }
 
     return (
         <SubscriptionProvider>
             <Router>
-                <AnalyticsTracker />
                 <RouteChangeTracker />
                 <div className="app">
-                    <Suspense
-                        fallback={
-                            <div className="global-loading-overlay">
-                                <LoadingSpinner />
-                            </div>
-                        }
-                    >
+                    <Suspense fallback={<LoadingSpinner />}>
                         <Routes>
                             {/* Landing page */}
                             <Route
@@ -483,7 +274,9 @@ function App() {
                                 element={
                                     <>
                                         <Header user={user} setUser={setUser} />
-                                        <PricingPage user={user} />
+                                        <main>
+                                            <PricingPage user={user} />
+                                        </main>
                                         <Footer />
                                     </>
                                 }

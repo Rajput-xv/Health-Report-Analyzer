@@ -4,8 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { login, register, googleAuth } from "../utils/api";
 import { toast } from 'react-toastify';
 import "../styles/AuthForm.css";
-import GoogleButton from "react-google-button";
-import { auth, provider, signInWithPopup } from "./firebase.jsx";
 import Header from './Header';
 
 // SVG Icon for password visibility toggle
@@ -100,6 +98,11 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
     setIsLogin(isLoginProp);
   }, [isLoginProp]);
 
+  // Preloaded so the click opens the popup straight away; Safari blocks popups opened after a slow await.
+  useEffect(() => {
+    import("./firebase.jsx");
+  }, []);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -111,6 +114,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
     try {
       setLoading(true);
       setError("");
+      const { auth, provider, signInWithPopup } = await import("./firebase.jsx");
       const result = await signInWithPopup(auth, provider);
       // Send the Firebase ID token; the server reads the name/email from it
       const idToken = await result.user.getIdToken();
@@ -224,10 +228,10 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
       {/* The same shared navbar as the rest of the app, on every screen size */}
       <Header user={null} setUser={() => { }} />
 
-      <div className="auth-container">
+      <main className="auth-container">
         <div className="auth-card">
           <div className="auth-header">
-            <h2>{isLogin ? t('auth.signin_title') : t('auth.signup_title')}</h2>
+            <h1>{isLogin ? t('auth.signin_title') : t('auth.signup_title')}</h1>
             <p>
               {isLogin
                 ? t('auth_form.signin_description')
@@ -373,7 +377,15 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
           </form>
 
           <div style={{ marginTop: "20px", display: "flex", justifyContent: "center" }}>
-            <GoogleButton onClick={handleGoogleSignIn} disabled={loading} />
+            <button type="button" className="google-signin-btn" onClick={handleGoogleSignIn} disabled={loading}>
+              <svg width="18" height="18" viewBox="0 0 18 18" aria-hidden="true">
+                <path fill="#4285F4" d="M17.64,9.20454545 C17.64,8.56636364 17.5827273,7.95272727 17.4763636,7.36363636 L9,7.36363636 L9,10.845 L13.8436364,10.845 C13.635,11.97 13.0009091,12.9231818 12.0477273,13.5613636 L12.0477273,15.8195455 L14.9563636,15.8195455 C16.6581818,14.2527273 17.64,11.9454545 17.64,9.20454545 Z" />
+                <path fill="#34A853" d="M9,18 C11.43,18 13.4672727,17.1940909 14.9563636,15.8195455 L12.0477273,13.5613636 C11.2418182,14.1013636 10.2109091,14.4204545 9,14.4204545 C6.65590909,14.4204545 4.67181818,12.8372727 3.96409091,10.71 L0.957272727,10.71 L0.957272727,13.0418182 C2.43818182,15.9831818 5.48181818,18 9,18 Z" />
+                <path fill="#FBBC05" d="M3.96409091,10.71 C3.78409091,10.17 3.68181818,9.59318182 3.68181818,9 C3.68181818,8.40681818 3.78409091,7.83 3.96409091,7.29 L3.96409091,4.95818182 L0.957272727,4.95818182 C0.347727273,6.17318182 0,7.54772727 0,9 C0,10.4522727 0.347727273,11.8268182 0.957272727,13.0418182 L3.96409091,10.71 Z" />
+                <path fill="#EA4335" d="M9,3.57954545 C10.3213636,3.57954545 11.5077273,4.03363636 12.4404545,4.92545455 L15.0218182,2.34409091 C13.4631818,0.891818182 11.4259091,0 9,0 C5.48181818,0 2.43818182,2.01681818 0.957272727,4.95818182 L3.96409091,7.29 C4.67181818,5.16272727 6.65590909,3.57954545 9,3.57954545 Z" />
+              </svg>
+              <span>{t('auth_form.google_signin')}</span>
+            </button>
           </div>
 
           <div className="auth-toggle">
@@ -391,7 +403,7 @@ const AuthForm = ({ onLogin, isLogin: isLoginProp }) => {
             </p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

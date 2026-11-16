@@ -7,7 +7,7 @@ const languages = [
 ];
 
 export default function LanguageSwitcher({ value, className = '', darkMode }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
 
   // Follow the real app theme unless a caller explicitly passes darkMode
@@ -39,6 +39,13 @@ export default function LanguageSwitcher({ value, className = '', darkMode }) {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const handleKeyDown = (e) => {
+    if (e.key !== 'Escape' || !open) return;
+    e.stopPropagation();
+    setOpen(false);
+    dropdownRef.current.querySelector('.language-select').focus();
+  };
+
   // Dynamic background & text color for dark/light mode
   const dropdownBg = isDark ? 'rgba(32, 28, 28, 0.88)' : '#f1f1f1';
   const dropdownText = isDark ? '#fff' : '#000';
@@ -46,10 +53,13 @@ export default function LanguageSwitcher({ value, className = '', darkMode }) {
   const selectedBg = isDark ? 'rgba(70, 70, 70, 0.88)' : '#ccc';
 
   return (
-    <div className={`language-switcher ${className}`} ref={dropdownRef} style={{ position: 'relative' }}>
+    <div className={`language-switcher ${className}`} ref={dropdownRef} onKeyDown={handleKeyDown} style={{ position: 'relative' }}>
       {/* Button with arrow */}
       <button
+        type="button"
         onClick={() => setOpen(!open)}
+        aria-expanded={open}
+        aria-label={`${t('language.select')} (${currentLanguage.code.toUpperCase()})`}
         className="language-select"
         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
       >
@@ -75,10 +85,17 @@ export default function LanguageSwitcher({ value, className = '', darkMode }) {
           }}
         >
           {languages.map(lang => (
-            <div
+            <button
+              type="button"
               key={lang.code}
               onClick={() => handleChange(lang.code)}
+              aria-pressed={lang.code === current}
               style={{
+                width: '100%',
+                border: 'none',
+                borderRadius: 0,
+                font: 'inherit',
+                transform: 'none',
                 padding: '8px 12px',
                 display: 'flex',
                 gap: '8px',
@@ -93,7 +110,7 @@ export default function LanguageSwitcher({ value, className = '', darkMode }) {
             >
               <span>{lang.flag}</span>
               <span>{lang.label}</span>
-            </div>
+            </button>
           ))}
         </div>
       )}

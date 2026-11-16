@@ -1,48 +1,36 @@
+const crypto = require('crypto');
 const express = require('express');
+const mongoose = require('mongoose');
 const authMiddleware = require('../utils/authMiddleware');
 const User = require('../models/User');
+const { PLANS, effectivePlan, planForProduct, paidThrough } = require('../config/plans');
 
 const router = express.Router();
 
 // Gumroad Configuration
 const GUMROAD_ACCESS_TOKEN = process.env.GUMROAD_ACCESS_TOKEN;
-const GUMROAD_SELLER_ID = process.env.GUMROAD_SELLER_ID; // For webhook verification
+const GUMROAD_WEBHOOK_SECRET = process.env.GUMROAD_WEBHOOK_SECRET;
 
-// Product configuration - Update these with your Gumroad product permalinks
-const PLANS = {
-  free: {
-    name: 'Free',
-    price: 0,
-    reportsPerMonth: 3,
-    features: ['basic_insights', 'email_support', '7_day_history']
-  },
-  pro_monthly: {
-    name: 'Pro Monthly',
-    productPermalink: process.env.GUMROAD_PRO_MONTHLY_PERMALINK, // e.g., "health-analyzer-pro"
-    price: 500, // $5.00 in cents
-    reportsPerMonth: 10,
-    features: ['advanced_insights', 'trend_analysis', 'pdf_export', 'priority_support', 'family_sharing', 'unlimited_history']
-  },
-  pro_yearly: {
-    name: 'Pro Yearly',
-    productPermalink: process.env.GUMROAD_PRO_YEARLY_PERMALINK, // e.g., "health-analyzer-yearly"
-    price: 4500, // $45.00 in cents (25% off - 3 months free)
-    reportsPerMonth: -1,
-    features: ['advanced_insights', 'trend_analysis', 'pdf_export', 'priority_support', 'family_sharing', 'unlimited_history', 'annual_summary']
-  }
-};
+const SALE_EVENTS = ['sale', 'refund', 'dispute', 'dispute_won'];
+const SUBSCRIPTION_EVENTS = ['cancellation', 'subscription_ended', 'subscription_restarted', 'subscription_updated'];
+const LIVE_SUBSCRIBER_STATUSES = ['alive', 'pending_failure', 'payment_method_update_required'];
 
 /**
  * Helper: Make Gumroad API request
  */
 async function gumroadRequest(endpoint, method = 'GET', body = null) {
+  if (!GUMROAD_ACCESS_TOKEN) {
+    throw new Error('GUMROAD_ACCESS_TOKEN is not configured');
+  }
+
   const url = new URL(`https://api.gumroad.com/v2${endpoint}`);
 
   const options = {
     method,
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-    }
+    },
+    signal: AbortSignal.timeout(15000)
   };
 
   const params = new URLSearchParams();
@@ -70,22 +58,127 @@ async function gumroadRequest(endpoint, method = 'GET', body = null) {
   return data;
 }
 
-// Look the sale up in Gumroad's API so we don't trust the webhook body blindly.
-// Returns the sale, or null if we can't confirm it.
-async function verifyGumroadSale(saleId) {
-  if (!GUMROAD_ACCESS_TOKEN || !saleId) return null;
-  try {
-    const data = await gumroadRequest(`/sales/${saleId}`);
-    return data.sale || null;
-  } catch (err) {
-    console.error('Gumroad sale verification failed:', err.message);
-    return null;
-  }
+function hasWebhookSecret(given) {
+  if (typeof given !== 'string') return false;
+  const digest = (value) => crypto.createHash('sha256').update(value).digest();
+  return crypto.timingSafeEqual(digest(given), digest(GUMROAD_WEBHOOK_SECRET));
 }
 
-// Compare two ids, but treat two undefined/null values as "no match"
-function idMatches(a, b) {
-  return a != null && b != null && String(a) === String(b);
+// State of a sale as reported by Gumroad's sales API
+function saleStatus(sale) {
+  if (sale.refunded) return 'refunded';
+  if (sale.chargedback) return 'disputed';
+  if (sale.dead) return 'expired';
+  if (sale.cancelled) return 'cancelled';
+  return 'active';
+}
+
+// The plan a verified sale pays for, or null if it isn't one of our products or is no longer paid up
+function paidPlan(sale) {
+  const plan = planForProduct(sale.product_id);
+  return plan && ['active', 'cancelled'].includes(saleStatus(sale)) ? plan : null;
+}
+
+async function fetchSale(saleId) {
+  const { sale } = await gumroadRequest(`/sales/${encodeURIComponent(saleId)}`);
+  return sale;
+}
+
+// Writes Gumroad's view of a sale onto the user. Throws a duplicate key error (code 11000)
+// if the sale or its subscription already belongs to another account.
+async function applySale(user, sale, plan) {
+  const subscription = user.subscription;
+  if (subscription.gumroadSaleId !== sale.id) {
+    subscription.reportsUsedThisMonth = 0;
+    subscription.lastReportReset = new Date();
+  }
+  Object.assign(subscription, {
+    plan,
+    status: saleStatus(sale),
+    gumroadSaleId: sale.id,
+    gumroadSubscriptionId: sale.subscription_id,
+    renewsAt: paidThrough(plan, sale.created_at, Boolean(sale.subscription_id) && !sale.dead)
+  });
+  await user.save();
+}
+
+async function findBuyer(sale) {
+  if (sale.subscription_id) {
+    const subscriber = await User.findOne({ 'subscription.gumroadSubscriptionId': sale.subscription_id });
+    if (subscriber) return subscriber;
+  }
+
+  // user_id is passed through the checkout URL built in /create-checkout
+  const userId = sale.url_params?.user_id;
+  if (typeof userId === 'string' && mongoose.isValidObjectId(userId)) {
+    const user = await User.findById(userId);
+    if (user) return user;
+  }
+
+  return typeof sale.email === 'string' ? User.findOne({ email: sale.email.toLowerCase() }) : null;
+}
+
+async function syncSale(saleId, isNewSale) {
+  const sale = await fetchSale(saleId);
+  const plan = isNewSale ? paidPlan(sale) : planForProduct(sale.product_id);
+  if (!plan) {
+    console.warn(`Ignoring Gumroad sale ${sale.id}: not a current purchase of a plan product`);
+    return;
+  }
+
+  const user = isNewSale
+    ? await findBuyer(sale)
+    : await User.findOne({ 'subscription.gumroadSaleId': sale.id });
+  if (!user) {
+    console.warn(`No account found for Gumroad sale ${sale.id}`);
+    return;
+  }
+
+  await applySale(user, sale, plan);
+  console.log(`Gumroad sale ${sale.id} applied to user ${user._id} (${user.subscription.status})`);
+}
+
+async function syncSubscription(subscriptionId) {
+  const { subscriber } = await gumroadRequest(`/subscribers/${encodeURIComponent(subscriptionId)}`);
+  const plan = planForProduct(subscriber.product_id);
+  if (!plan) {
+    console.warn(`Ignoring Gumroad subscription ${subscriber.id}: not a plan product`);
+    return;
+  }
+
+  const user = await User.findOne({ 'subscription.gumroadSubscriptionId': subscriber.id });
+  if (!user) {
+    console.warn(`No account found for Gumroad subscription ${subscriber.id}`);
+    return;
+  }
+
+  user.subscription.plan = plan;
+  if (subscriber.status === 'pending_cancellation') {
+    // Gumroad sets cancelled_at to the end of the period that was paid for
+    user.subscription.status = 'cancelled';
+    user.subscription.renewsAt = new Date(subscriber.cancelled_at);
+  } else {
+    user.subscription.status = LIVE_SUBSCRIBER_STATUSES.includes(subscriber.status) ? 'active' : 'expired';
+  }
+  await user.save();
+  console.log(`Gumroad subscription ${subscriber.id} synced for user ${user._id} (${user.subscription.status})`);
+}
+
+async function findLicensePurchase(licenseKey) {
+  for (const plan of Object.values(PLANS)) {
+    if (!plan.productId) continue;
+    try {
+      const { purchase } = await gumroadRequest('/licenses/verify', 'POST', {
+        product_id: plan.productId,
+        license_key: licenseKey,
+        increment_uses_count: 'false'
+      });
+      return purchase;
+    } catch (err) {
+      // Not a licence for this product; try the next one
+    }
+  }
+  return null;
 }
 
 /**
@@ -108,7 +201,7 @@ router.get('/plans', (req, res) => {
 /**
  * POST /api/payments/create-checkout
  * Generate Gumroad checkout URL
- * 
+ *
  * IMPORTANT: Gumroad redirect must be configured in product settings:
  * 1. Go to gumroad.com/products
  * 2. Edit your product
@@ -146,11 +239,6 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
 
     const checkoutUrl = `${baseUrl}?${params.toString()}`;
 
-    console.log(`🛒 Creating checkout for user ${user.email} - Plan: ${planId}`);
-    console.log(`   User ID: ${user._id.toString()}`);
-    console.log(`   Checkout URL: ${checkoutUrl}`);
-    console.log(`   ⚠️  REMINDER: Ensure redirect URL is configured in Gumroad product settings!`);
-
     res.json({
       success: true,
       checkoutUrl,
@@ -170,41 +258,27 @@ router.post('/create-checkout', authMiddleware, async (req, res) => {
  */
 router.get('/subscription', authMiddleware, async (req, res) => {
   try {
+    await User.resetUsageIfDue(req.user.id);
     const user = await User.findById(req.user.id);
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const currentPlan = user.subscription?.plan || 'free';
+    const currentPlan = effectivePlan(user.subscription);
     const planDetails = PLANS[currentPlan];
-
-    // Check if we need to reset monthly usage
-    const now = new Date();
-    const lastReset = user.subscription?.lastReportReset || user.createdAt;
-    const daysSinceReset = (now - new Date(lastReset)) / (1000 * 60 * 60 * 24);
-
-    if (daysSinceReset >= 30) {
-      user.subscription = user.subscription || {};
-      user.subscription.reportsUsedThisMonth = 0;
-      user.subscription.lastReportReset = now;
-      await user.save();
-    }
-
     const reportsUsed = user.subscription?.reportsUsedThisMonth || 0;
-    const reportsLimit = planDetails?.reportsPerMonth || 3;
+    const reportsLimit = planDetails.reportsPerMonth;
 
     res.json({
       plan: currentPlan,
-      planName: planDetails?.name || 'Free',
+      planName: planDetails.name,
       status: user.subscription?.status || 'active',
       reportsUsed,
       reportsLimit,
       canUpload: reportsLimit === -1 || reportsUsed < reportsLimit,
       renewsAt: user.subscription?.renewsAt,
-      features: planDetails?.features || PLANS.free.features,
-      gumroadSubscriberId: user.subscription?.gumroadSubscriberId,
-      subscriptionId: user.subscription?.gumroadSubscriptionId
+      features: planDetails.features
     });
 
   } catch (error) {
@@ -232,7 +306,6 @@ router.post('/cancel', authMiddleware, async (req, res) => {
       { cancelled: true }
     );
 
-    user.subscription.cancelAtPeriodEnd = true;
     user.subscription.status = 'cancelled';
     await user.save();
 
@@ -306,347 +379,42 @@ router.get('/customer-portal', authMiddleware, async (req, res) => {
 });
 
 /**
- * POST /api/payments/webhook
- * Handle Gumroad Ping webhook
- * 
- * Gumroad sends POST webhooks for:
- * - sale (new purchase)
- * - refund
- * - dispute
- * - subscription_ended
- * - subscription_restarted
- * - subscription_updated
+ * POST /api/payments/webhook?secret=GUMROAD_WEBHOOK_SECRET
+ * Gumroad Ping and resource subscription webhooks.
+ *
+ * The body only tells us which sale or subscription changed; its current state is
+ * always read back from the Gumroad API.
  */
-router.post('/webhook', express.urlencoded({ extended: true }), async (req, res) => {
+router.post('/webhook', express.urlencoded({ extended: false }), async (req, res) => {
+  if (!GUMROAD_WEBHOOK_SECRET || !GUMROAD_ACCESS_TOKEN) {
+    console.error('Rejecting Gumroad webhook: GUMROAD_WEBHOOK_SECRET or GUMROAD_ACCESS_TOKEN is not configured');
+    return res.status(503).send('Webhook not configured');
+  }
+  if (!hasWebhookSecret(req.query.secret)) {
+    return res.status(401).send('Unauthorized');
+  }
+
+  const event = req.body.resource_name || 'sale';
+  const { sale_id: saleId, subscription_id: subscriptionId } = req.body;
+
   try {
-    const payload = req.body;
-
-    console.log('📨 Gumroad webhook received:', payload.resource_name || 'sale');
-
-    // Reject anything we can't tie to our seller (the handlers below change
-    // subscriptions based on the body, so an unauthenticated webhook is dangerous).
-    if (!GUMROAD_SELLER_ID) {
-      console.error('Rejecting webhook: GUMROAD_SELLER_ID is not configured');
-      return res.status(503).send('Webhook not configured');
+    if (SALE_EVENTS.includes(event) && typeof saleId === 'string' && saleId) {
+      await syncSale(saleId, event === 'sale');
+    } else if (SUBSCRIPTION_EVENTS.includes(event) && typeof subscriptionId === 'string' && subscriptionId) {
+      await syncSubscription(subscriptionId);
+    } else {
+      console.warn(`Ignoring Gumroad webhook: ${event}`);
     }
-    if (payload.seller_id !== GUMROAD_SELLER_ID) {
-      console.warn('Rejecting webhook: seller_id mismatch');
-      return res.status(401).send('Unauthorized');
-    }
-
-    const resourceName = payload.resource_name || 'sale';
-
-    switch (resourceName) {
-      case 'sale':
-        await handleSale(payload);
-        break;
-
-      case 'refund':
-        await handleRefund(payload);
-        break;
-
-      case 'dispute':
-        await handleDispute(payload);
-        break;
-
-      case 'subscription_ended':
-        await handleSubscriptionEnded(payload);
-        break;
-
-      case 'subscription_restarted':
-        await handleSubscriptionRestarted(payload);
-        break;
-
-      case 'subscription_updated':
-        await handleSubscriptionUpdated(payload);
-        break;
-
-      default:
-        console.log(`Unhandled Gumroad event: ${resourceName}`);
-    }
-
     res.status(200).send('OK');
-
   } catch (error) {
-    console.error('Webhook error:', error);
+    if (error.code === 11000) {
+      console.warn(`Gumroad ${event} webhook: purchase already belongs to another account`);
+      return res.status(200).send('OK');
+    }
+    console.error(`Gumroad ${event} webhook failed:`, error.message);
     res.status(500).send('Webhook processing failed');
   }
 });
-
-// ============================================
-// Webhook Handler Functions
-// ============================================
-
-/**
- * Handle new sale/subscription
- */
-async function handleSale(payload) {
-  const email = payload.email?.toLowerCase();
-  const isSubscription = payload.is_recurring_billing === 'true';
-  const productPermalink = payload.permalink;
-  const shortProductId = payload.short_product_id;
-  const productId = payload.product_id;
-
-  // Enhanced logging to understand what Gumroad sends
-  console.log('📦 Full webhook payload keys:', Object.keys(payload).join(', '));
-  console.log(`📦 Product info - Permalink: ${productPermalink}, Short ID: ${shortProductId}, Product ID: ${productId}`);
-
-  // Gumroad passes custom fields in different formats depending on integration
-  // Try multiple ways to get the user_id
-  let customUserId = null;
-
-  // Method 1: url_params object (when using ?user_id=xxx in checkout URL)
-  if (payload.url_params && payload.url_params.user_id) {
-    customUserId = payload.url_params.user_id;
-  }
-  // Method 2: Direct custom field (some Gumroad integrations)
-  else if (payload.custom_fields && payload.custom_fields.user_id) {
-    customUserId = payload.custom_fields.user_id;
-  }
-  // Method 3: Check if it's in the referrer or other fields
-  else if (payload.referrer) {
-    try {
-      const referrerUrl = new URL(payload.referrer);
-      customUserId = referrerUrl.searchParams.get('user_id');
-    } catch (e) {
-      console.log('⚠️ Could not parse referrer URL');
-    }
-  }
-
-  console.log(`📝 Processing sale - Email: ${email}, Custom User ID: ${customUserId}, Product: ${productPermalink || shortProductId}`);
-
-  // Find user by custom user_id or email
-  let user = null;
-
-  if (customUserId) {
-    try {
-      user = await User.findById(customUserId);
-      if (user) {
-        console.log(`✓ Found user by ID: ${customUserId}`);
-      }
-    } catch (e) {
-      console.log(`⚠️ Invalid user ID format: ${customUserId}`);
-    }
-  }
-
-  if (!user && email) {
-    user = await User.findOne({ email });
-    if (user) {
-      console.log(`✓ Found user by email: ${email}`);
-    }
-  }
-
-  if (!user) {
-    console.error(`❌ User not found for sale - Email: ${email}, User ID: ${customUserId}`);
-    console.error(`   Payload keys: ${Object.keys(payload).join(', ')}`);
-    return;
-  }
-
-  // Double-check the sale with Gumroad before giving out a paid plan
-  if (GUMROAD_ACCESS_TOKEN) {
-    const verifiedSale = await verifyGumroadSale(payload.sale_id);
-    if (!verifiedSale || !idMatches(verifiedSale.seller_id, GUMROAD_SELLER_ID)) {
-      console.error(`Sale ${payload.sale_id} could not be verified with Gumroad; skipping.`);
-      return;
-    }
-  }
-
-  // Determine plan from product identifiers
-  // Check against all possible fields: permalink, short_product_id, product_id
-  let planId = 'pro_monthly'; // default
-
-  const monthlyPermalink = process.env.GUMROAD_PRO_MONTHLY_PERMALINK;
-  const yearlyPermalink = process.env.GUMROAD_PRO_YEARLY_PERMALINK;
-  const monthlyShortId = process.env.GUMROAD_PRODUCT_SHORT_ID_MONTH;
-  const yearlyShortId = process.env.GUMROAD_PRODUCT_SHORT_ID_YEAR;
-  const monthlyProductId = process.env.GUMROAD_PRODUCT_ID_MONTH;
-  const yearlyProductId = process.env.GUMROAD_PRODUCT_ID_YEAR;
-
-  // Check if it's a yearly plan (compare like-for-like identifiers; guarded against
-  // undefined===undefined false matches via idMatches).
-  if (idMatches(productPermalink, yearlyPermalink) ||
-    idMatches(shortProductId, yearlyShortId) ||
-    idMatches(productId, yearlyProductId)) {
-    planId = 'pro_yearly';
-  }
-  // Check if it's a monthly plan (for completeness)
-  else if (idMatches(productPermalink, monthlyPermalink) ||
-    idMatches(shortProductId, monthlyShortId) ||
-    idMatches(productId, monthlyProductId)) {
-    planId = 'pro_monthly';
-  }
-
-  console.log(`🎯 Detected plan: ${planId}`);
-
-  // Calculate next renewal date
-  const now = new Date();
-  let renewsAt = new Date(now);
-  if (planId === 'pro_yearly') {
-    renewsAt.setFullYear(renewsAt.getFullYear() + 1);
-  } else {
-    renewsAt.setMonth(renewsAt.getMonth() + 1);
-  }
-
-  // Update user subscription
-  user.subscription = {
-    plan: planId,
-    status: 'active',
-    gumroadSubscriptionId: payload.subscription_id || payload.sale_id,
-    gumroadSubscriberId: payload.purchaser_id,
-    gumroadSaleId: payload.sale_id,
-    currentPeriodStart: now,
-    renewsAt: renewsAt,
-    reportsUsedThisMonth: 0,
-    lastReportReset: now,
-    cancelAtPeriodEnd: false
-  };
-
-  await user.save();
-  console.log(`✅ Sale processed successfully for user ${user.email} - Plan: ${planId}, Recurring: ${isSubscription}`);
-}
-
-/**
- * Handle refund
- */
-async function handleRefund(payload) {
-  const email = payload.email?.toLowerCase();
-  const saleId = payload.sale_id;
-
-  const user = await User.findOne({
-    $or: [
-      { 'subscription.gumroadSaleId': saleId },
-      { email: email }
-    ]
-  });
-
-  if (!user) {
-    console.log(`User not found for refund: ${saleId}`);
-    return;
-  }
-
-  // Downgrade to free on refund
-  user.subscription = {
-    plan: 'free',
-    status: 'active',
-    reportsUsedThisMonth: 0,
-    lastReportReset: new Date(),
-    cancelAtPeriodEnd: false
-  };
-
-  await user.save();
-  console.log(`💰 Refund processed for user ${user.email}`);
-}
-
-/**
- * Handle dispute
- */
-async function handleDispute(payload) {
-  const saleId = payload.sale_id;
-
-  const user = await User.findOne({
-    'subscription.gumroadSaleId': saleId
-  });
-
-  if (!user) return;
-
-  user.subscription.status = 'disputed';
-  await user.save();
-
-  console.log(`⚠️ Dispute opened for user ${user.email}`);
-}
-
-/**
- * Handle subscription ended
- */
-async function handleSubscriptionEnded(payload) {
-  const subscriptionId = payload.subscription_id;
-  const email = payload.email?.toLowerCase();
-
-  const user = await User.findOne({
-    $or: [
-      { 'subscription.gumroadSubscriptionId': subscriptionId },
-      { email: email }
-    ]
-  });
-
-  if (!user) return;
-
-  // Downgrade to free
-  user.subscription.plan = 'free';
-  user.subscription.status = 'expired';
-  user.subscription.gumroadSubscriptionId = null;
-
-  await user.save();
-  console.log(`⚠️ Subscription ended for user ${user.email}`);
-}
-
-/**
- * Handle subscription restarted
- */
-async function handleSubscriptionRestarted(payload) {
-  const email = payload.email?.toLowerCase();
-  const subscriptionId = payload.subscription_id;
-
-  const user = await User.findOne({
-    $or: [
-      { 'subscription.gumroadSubscriptionId': subscriptionId },
-      { email: email }
-    ]
-  });
-
-  if (!user) return;
-
-  // Determine plan from product (guarded, like-for-like identifier matching)
-  let planId = 'pro_monthly';
-  if (idMatches(payload.permalink, process.env.GUMROAD_PRO_YEARLY_PERMALINK) ||
-    idMatches(payload.short_product_id, process.env.GUMROAD_PRODUCT_SHORT_ID_YEAR) ||
-    idMatches(payload.product_id, process.env.GUMROAD_PRODUCT_ID_YEAR)) {
-    planId = 'pro_yearly';
-  }
-
-  user.subscription.plan = planId;
-  user.subscription.status = 'active';
-  user.subscription.cancelAtPeriodEnd = false;
-  user.subscription.gumroadSubscriptionId = subscriptionId;
-
-  await user.save();
-  console.log(`✅ Subscription restarted for user ${user.email}`);
-}
-
-/**
- * Handle subscription updated (renewal)
- */
-async function handleSubscriptionUpdated(payload) {
-  const subscriptionId = payload.subscription_id;
-  const email = payload.email?.toLowerCase();
-
-  const user = await User.findOne({
-    $or: [
-      { 'subscription.gumroadSubscriptionId': subscriptionId },
-      { email: email }
-    ]
-  });
-
-  if (!user) return;
-
-  // Update renewal date
-  const now = new Date();
-  let renewsAt = new Date(now);
-  if (user.subscription.plan === 'pro_yearly') {
-    renewsAt.setFullYear(renewsAt.getFullYear() + 1);
-  } else {
-    renewsAt.setMonth(renewsAt.getMonth() + 1);
-  }
-  user.subscription.renewsAt = renewsAt;
-
-  // Reset monthly usage on renewal
-  user.subscription.reportsUsedThisMonth = 0;
-  user.subscription.lastReportReset = now;
-  user.subscription.status = 'active';
-
-  await user.save();
-  console.log(`✅ Subscription renewed for user ${user.email}`);
-}
 
 /**
  * POST /api/payments/verify-purchase
@@ -656,90 +424,45 @@ async function handleSubscriptionUpdated(payload) {
 router.post('/verify-purchase', authMiddleware, async (req, res) => {
   try {
     const { licenseKey } = req.body;
-    const user = await User.findById(req.user.id);
 
+    if (typeof licenseKey !== 'string' || !licenseKey.trim()) {
+      return res.status(400).json({ error: 'License key required' });
+    }
+
+    if (!GUMROAD_ACCESS_TOKEN) {
+      return res.status(503).json({ error: 'Purchase verification is not configured' });
+    }
+
+    const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    if (!licenseKey) {
-      return res.status(400).json({ error: 'License key required' });
+    const purchase = await findLicensePurchase(licenseKey.trim());
+    if (!purchase?.sale_id) {
+      return res.status(400).json({ error: 'Invalid or expired license key' });
     }
 
-    // Try to verify license with both product IDs (monthly and yearly)
-    let response = null;
-    let productType = null;
+    const sale = await fetchSale(purchase.sale_id);
+    const planId = paidPlan(sale);
+    if (!planId) {
+      return res.status(400).json({ error: 'This purchase has been refunded, disputed or has ended' });
+    }
 
-    // Try monthly product first
     try {
-      response = await gumroadRequest('/licenses/verify', 'POST', {
-        product_id: process.env.GUMROAD_PRODUCT_ID_MONTH,
-        license_key: licenseKey
-      });
-      if (response.success && response.purchase) {
-        productType = 'monthly';
-      }
+      await applySale(user, sale, planId);
     } catch (err) {
-      console.log('Not a monthly product license');
+      if (err.code === 11000) {
+        return res.status(409).json({ error: 'This purchase is already linked to another account' });
+      }
+      throw err;
     }
 
-    // If not monthly, try yearly
-    if (!response || !response.success) {
-      try {
-        response = await gumroadRequest('/licenses/verify', 'POST', {
-          product_id: process.env.GUMROAD_PRODUCT_ID_YEAR,
-          license_key: licenseKey
-        });
-        if (response.success && response.purchase) {
-          productType = 'yearly';
-        }
-      } catch (err) {
-        console.log('Not a yearly product license');
-      }
-    }
-
-    if (response && response.success && response.purchase) {
-      const purchase = response.purchase;
-
-      // Determine plan based on product type or permalink
-      let planId = 'pro_monthly';
-      if (productType === 'yearly' ||
-        purchase.short_product_id === process.env.GUMROAD_PRO_YEARLY_PERMALINK ||
-        purchase.product_id === process.env.GUMROAD_PRODUCT_ID_YEAR) {
-        planId = 'pro_yearly';
-      }
-
-      // Calculate renewal
-      const now = new Date();
-      let renewsAt = new Date(now);
-      if (planId === 'pro_yearly') {
-        renewsAt.setFullYear(renewsAt.getFullYear() + 1);
-      } else {
-        renewsAt.setMonth(renewsAt.getMonth() + 1);
-      }
-
-      user.subscription = {
-        plan: planId,
-        status: 'active',
-        gumroadSaleId: purchase.sale_id,
-        gumroadSubscriberId: purchase.purchaser_id,
-        currentPeriodStart: new Date(purchase.created_at),
-        renewsAt: renewsAt,
-        reportsUsedThisMonth: 0,
-        lastReportReset: now,
-        cancelAtPeriodEnd: false
-      };
-
-      await user.save();
-
-      res.json({
-        success: true,
-        message: 'Purchase verified! Your Pro subscription is now active.',
-        plan: planId
-      });
-    } else {
-      res.status(400).json({ error: 'Invalid or expired license key' });
-    }
+    res.json({
+      success: true,
+      message: 'Purchase verified! Your Pro subscription is now active.',
+      plan: planId
+    });
 
   } catch (error) {
     console.error('Verify purchase error:', error);
@@ -761,12 +484,12 @@ router.get('/verify-payment', authMiddleware, async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const currentPlan = user.subscription?.plan || 'free';
+    const currentPlan = effectivePlan(user.subscription);
     const planDetails = PLANS[currentPlan];
 
     // Check if the subscription was updated to the expected plan
     const isUpdated = expectedPlan
-      ? (currentPlan === expectedPlan || (expectedPlan.startsWith('pro') && currentPlan.startsWith('pro')))
+      ?(currentPlan === expectedPlan || (expectedPlan.startsWith('pro') && currentPlan.startsWith('pro')))
       : currentPlan !== 'free';
 
     res.json({
@@ -774,9 +497,9 @@ router.get('/verify-payment', authMiddleware, async (req, res) => {
       isUpdated,
       subscription: {
         plan: currentPlan,
-        planName: planDetails?.name || 'Free',
+        planName: planDetails.name,
         status: user.subscription?.status || 'active',
-        features: planDetails?.features || PLANS.free.features,
+        features: planDetails.features,
         renewsAt: user.subscription?.renewsAt
       }
     });

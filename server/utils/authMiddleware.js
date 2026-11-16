@@ -6,35 +6,30 @@ const authMiddleware = async (req, res, next) => {
     const token = req.headers.authorization?.replace('Bearer ', '');
 
     if (!token) {
-      return res.status(401).json({ 
-        error: 'Access denied. No token provided.' 
+      return res.status(401).json({
+        error: 'Access denied. No token provided.'
       });
     }
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // Get user data from MongoDB
     const user = await User.findById(decoded.userId);
 
-    if (!user || !user.isActive) {
-      return res.status(401).json({ 
-        error: 'Invalid token.' 
+    // Tokens issued before tokenVersion existed carry none and count as version 0
+    if (!user || !user.isActive || (decoded.tokenVersion ?? 0) !== user.tokenVersion) {
+      return res.status(401).json({
+        error: 'Invalid token.'
       });
     }
 
-    // Add user to request object
-    req.user = {
-      id: user._id.toString(),
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName
-    };
+    req.user = user.toSafeObject();
 
     next();
   } catch (error) {
     console.error('Auth middleware error:', error);
-    res.status(401).json({ 
-      error: 'Invalid token.' 
+    res.status(401).json({
+      error: 'Invalid token.'
     });
   }
 };
