@@ -141,5 +141,3 @@ dist
 
 # Bundle report (ANALYZE=true)
 client/stats.html
-
-tests/
